@@ -5,7 +5,7 @@
 <div class="container">
 	<button
 		class="card"
-		class:flipped={flipped}
+		class:flipped
 		onclick={() => flipped = !flipped}
 	>
 		<div class="front">
