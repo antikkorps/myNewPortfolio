@@ -1,21 +1,17 @@
 <script>
 	import { onMount } from 'svelte';
 
-	let isDark = false;
+	let isDark = $state(false);
 
 	onMount(() => {
-		// Vérifie d'abord le localStorage
 		const theme = localStorage.getItem('theme');
 
-		// Si un thème est stocké, on l'utilise
 		if (theme) {
 			isDark = theme === 'dark';
 		} else {
-			// Sinon on utilise la préférence système
 			isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 		}
 
-		// Application du thème initial
 		if (isDark) {
 			document.documentElement.classList.add('dark');
 		}
@@ -24,24 +20,20 @@
 	function toggleDarkMode() {
 		isDark = !isDark;
 
-		// On retire d'abord toutes les classes de thème
 		document.documentElement.classList.remove('dark');
 
-		// Puis on ajoute uniquement 'dark' si nécessaire
 		if (isDark) {
 			document.documentElement.classList.add('dark');
 		}
 
-		// Sauvegarde dans le localStorage
 		localStorage.setItem('theme', isDark ? 'dark' : 'light');
 	}
 </script>
 
-<!-- Notez que le mode sombre est appliqué via la classe 'dark' sur le html -->
 <div class="fixed bottom-6 right-6 z-50">
 	<button
 		class="relative h-12 w-12 transform rounded-full bg-gradient-to-br from-blue-100 to-blue-200 shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-400 dark:from-slate-700 dark:to-slate-800 dark:focus:ring-blue-600"
-		on:click={toggleDarkMode}
+		onclick={toggleDarkMode}
 		aria-label="Toggle dark mode"
 	>
 		<div class="absolute inset-0 flex items-center justify-center">

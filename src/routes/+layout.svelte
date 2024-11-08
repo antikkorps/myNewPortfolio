@@ -7,7 +7,8 @@
 </script>
 
 <Navbar />
-<div class="h-screen w-full bg-slate-300 dark:bg-neutral-800">
+<div class="flex h-screen w-full flex-col bg-slate-300 dark:bg-neutral-800">
 	{@render children()}
+
 	<DarkModeToggle />
 </div>
