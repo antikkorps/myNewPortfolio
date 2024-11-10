@@ -10,3 +10,73 @@ body {
     color-scheme: dark;
   }
 }
+
+/* Add your custom styles here */
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.glitch-text {
+  isolation: isolate;
+}
+
+.glitch-layer {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  transform-origin: center;
+  mix-blend-mode: hard-light;
+  pointer-events: none;
+}
+
+/* Animation de glitch au hover */
+.group:hover .glitch-layer:nth-of-type(2) {
+  animation: glitch-1 0.9s infinite linear alternate-reverse;
+}
+
+.group:hover .glitch-layer:nth-of-type(3) {
+  animation: glitch-2 1.1s infinite linear alternate-reverse;
+}
+
+/* Effet de distorsion magnétique */
+.magnetic-distortion {
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  filter: url("#magnetic-distort");
+}
+
+@keyframes glitch-1 {
+  0%,
+  100% {
+    transform: translate(0);
+    opacity: 0.5;
+  }
+  33% {
+    transform: translate(-5px, 2px);
+    opacity: 0.7;
+  }
+  66% {
+    transform: translate(5px, -2px);
+    opacity: 0.6;
+  }
+}
+
+@keyframes glitch-2 {
+  0%,
+  100% {
+    transform: translate(0);
+    opacity: 0.5;
+  }
+  33% {
+    transform: translate(5px, -2px);
+    opacity: 0.7;
+  }
+  66% {
+    transform: translate(-5px, 2px);
+    opacity: 0.6;
+  }
+}
