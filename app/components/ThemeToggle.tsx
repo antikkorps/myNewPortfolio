@@ -1,16 +1,14 @@
+// ThemeToggle.tsx
 import { Moon, Sun } from "lucide-react"
+import { useTheme } from "../contexts/ThemeContext"
 
-import { FC } from "react"
+const ThemeToggle = () => {
+  const { theme, setTheme } = useTheme()
+  const isDark = theme === "dark"
 
-interface ThemeToggleProps {
-  isDark: boolean
-  setIsDark: (value: boolean) => void
-}
-
-const ThemeToggle: FC<ThemeToggleProps> = ({ isDark, setIsDark }) => {
   return (
     <button
-      onClick={() => setIsDark(!isDark)}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
       className="relative p-2 rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 overflow-hidden group"
       aria-label={isDark ? "Activer le mode clair" : "Activer le mode sombre"}
     >

@@ -73,7 +73,7 @@ const About = () => {
       icon: <Brain className="w-6 h-6" />,
       title: "Ce qui me fascine",
       content:
-        "L'intersection entre le design et la technologie est mon terrain de jeu favori. Je suis captivé par la façon dont le code peut créer des expériences qui touchent les gens.",
+        "Le travail entre l'objectif et la réalisation. Je suis captivé par la façon dont le code peut créer des expériences uniques qui touchent les gens.",
       color:
         "bg-violet-100 hover:bg-violet-200 dark:bg-violet-900/30 dark:hover:bg-violet-800/40",
       iconColor: "text-violet-600 dark:text-violet-400",
@@ -83,7 +83,7 @@ const About = () => {
       icon: <Code className="w-6 h-6" />,
       title: "Mon approche",
       content:
-        "Je ne me contente pas de coder, je construis des solutions. Chaque projet est une nouvelle aventure qui me permet d'explorer des technologies émergentes et de repousser mes limites.",
+        "Je ne me contente pas de coder, je construis également des solutions. Chaque projet est une nouvelle aventure qui me permet d'explorer des technologies émergentes et de repousser mes limites.",
       color:
         "bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:hover:bg-emerald-800/40",
       iconColor: "text-emerald-600 dark:text-emerald-400",
@@ -103,7 +103,7 @@ const About = () => {
       icon: <Coffee className="w-6 h-6" />,
       title: "En dehors du code",
       content:
-        "Amateur de café de spécialité, je passe mon temps libre à explorer des cafés cachés. J'aime aussi la photographie urbaine et la musique électronique.",
+        "Amateur de thé, j'aime allier les deux. Je suis également un gros lecteur et j'aime la musique.",
       color:
         "bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/30 dark:hover:bg-amber-800/40",
       iconColor: "text-amber-600 dark:text-amber-400",
@@ -123,7 +123,7 @@ const About = () => {
       icon: <Music className="w-6 h-6" />,
       title: "Mon flow",
       content:
-        "Je code mieux avec de la musique lo-fi. Mon setup idéal : un bon casque, Visual Studio Code en mode zen, et une tasse de café bien chaude.",
+        "Je code mieux avec de la musique plutôt du rock. Mon setup idéal : un bon casque, Visual Studio Code en mode zen, et une tasse de thé bien chaude.",
       color:
         "bg-teal-100 hover:bg-teal-200 dark:bg-teal-900/30 dark:hover:bg-teal-800/40",
       iconColor: "text-teal-600 dark:text-teal-400",
@@ -139,11 +139,13 @@ const About = () => {
           <div className="relative z-10">
             <h1 className="text-5xl font-bold mb-4 animate-fade-in-down">Salut! 👋</h1>
             <p className="text-xl leading-relaxed animate-fade-in-up opacity-90">
-              Je transforme des idées en expériences numériques.
+              Je m&apos;appelle Franck et je transforme vos idées en expériences
+              numériques.
               <br />
-              Pas de pourcentages arbitraires ici - juste une passion
+              Pas de blablah ici - juste une passion pour le développement web
               <br />
-              authentique pour la création web et une curiosité sans fin.
+              et une curiosité sans fin de ce que les technologies peuvent apporter à
+              votre business.
             </p>
           </div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-white dark:bg-gray-200 opacity-10 rounded-full transform translate-x-1/2 -translate-y-1/2 animate-pulse" />
@@ -157,11 +159,11 @@ const About = () => {
               key={index}
               data-index={index}
               className={`${story.color} rounded-xl p-6 
-                transform transition-all duration-500 cursor-pointer
-                opacity-0 translate-y-8 group
-                ${visibleCards.includes(index) ? "opacity-100 translate-y-0" : ""}
-                ${activeStory === index ? "scale-102 shadow-lg" : "hover:shadow-md"}
-                `}
+              transform transition-all duration-500 cursor-pointer
+              opacity-0 translate-y-8 group relative
+              ${visibleCards.includes(index) ? "opacity-100 translate-y-0" : ""}
+              ${activeStory === index ? "scale-102 shadow-lg" : "hover:shadow-md"}
+              `}
               onClick={() => setActiveStory(activeStory === index ? null : index)}
               role="button"
               tabIndex={0}
@@ -178,19 +180,55 @@ const About = () => {
                   color={story.iconBg}
                 />
               </div>
-              <h3 className="text-xl font-semibold mb-2 dark:text-white text-gray-700">
+              <h3 className="text-xl font-semibold mb-2 dark:text-white text-gray-700 flex items-center gap-2">
                 {story.title}
+                {/* Indicateur d'expansion */}
+                <span
+                  className={`inline-flex items-center transition-transform duration-300 text-gray-400 dark:text-gray-500
+                  ${activeStory === index ? "rotate-180" : ""}`}
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </span>
               </h3>
-              <p
-                className={`text-gray-700 dark:text-gray-300 transition-all duration-300
+
+              {/* Contenu avec un dégradé au bas quand non-actif */}
+              <div className="relative">
+                <p
+                  className={`text-gray-700 dark:text-gray-300 transition-all duration-300
                   ${
                     activeStory === index
                       ? "h-auto opacity-100 translate-y-0"
                       : "h-12 overflow-hidden opacity-70 translate-y-2"
                   }`}
+                >
+                  {story.content}
+                </p>
+              </div>
+
+              {/* Indicateur textuel */}
+              <div
+                className={`mt-2 text-sm font-medium
+    bg-gradient-to-r from-purple-500 to-blue-500 
+    dark:from-purple-400 dark:to-blue-400
+    bg-clip-text text-transparent
+    transition-all duration-300 transform
+    hover:scale-105
+    ${activeStory === index ? "opacity-0 -translate-y-1" : "opacity-100 translate-y-0"}`}
               >
-                {story.content}
-              </p>
+                Cliquez pour en lire plus
+              </div>
             </div>
           ))}
         </div>

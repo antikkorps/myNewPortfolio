@@ -3,12 +3,7 @@ import { useState } from "react"
 
 import ThemeToggle from "./ThemeToggle"
 
-interface NavbarProps {
-  isDark: boolean
-  setIsDark: React.Dispatch<React.SetStateAction<boolean>>
-}
-
-const Navbar = ({ isDark, setIsDark }: NavbarProps) => {
+const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
 
   const menuItems = [
@@ -41,11 +36,11 @@ const Navbar = ({ isDark, setIsDark }: NavbarProps) => {
           <div className="flex items-center justify-between h-16 sm:h-20">
             <div className="flex-shrink-0">
               <span className="text-neutral-900 dark:text-neutral-100 text-lg sm:text-xl font-bold tracking-wider">
-                Portfolio
+                Dev2Go
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
+              <ThemeToggle />
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="group relative p-2 rounded-lg text-neutral-600 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-300"
