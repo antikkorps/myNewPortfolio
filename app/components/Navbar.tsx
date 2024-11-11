@@ -15,7 +15,7 @@ const Navbar = ({ isDark, setIsDark }: NavbarProps) => {
     { name: "Accueil", href: "/", icon: Home },
     { name: "Projets", href: "/projets", icon: AppWindowMac },
     { name: "Technologies", href: "/tech-stacks", icon: Blocks },
-    { name: "À propos", href: "/about", icon: User },
+    { name: "À propos", href: "/a-propos", icon: User },
     { name: "Contact", href: "/contact", icon: Mail },
   ]
 

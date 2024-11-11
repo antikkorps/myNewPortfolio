@@ -201,7 +201,7 @@ const VintageTechCards = () => {
 
   return (
     <div
-      className="min-h-screen w-full flex justify-center items-start bg-orange-100 dark:bg-slate-900 transition-colors duration-200"
+      className="min-h-screen w-full flex justify-center items-start bg-orange-100 dark:bg-neutral-900 transition-colors duration-200"
       style={{
         backgroundImage: `
              radial-gradient(#00000010 1px, transparent 1px),
