@@ -63,6 +63,23 @@ body {
   animation: fadeIn 1s ease-out 1s forwards;
 }
 
+/* About Header */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+.animate-twinkle {
+  animation: twinkle 3s infinite ease-in-out;
+}
+
 /* Profil image */
 @layer utilities {
   .animate-pulse-slow {

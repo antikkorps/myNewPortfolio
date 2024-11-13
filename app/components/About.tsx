@@ -1,5 +1,6 @@
 import { Brain, Code, Coffee, Heart, Lightbulb, Music } from "lucide-react"
 import { useEffect, useState } from "react"
+import ClassicHeader from "./ClassicHeader"
 
 const IconContainer = ({
   icon,
@@ -134,23 +135,8 @@ const About = () => {
   return (
     <div className="min-h-screen p-8 bg-gray-50 dark:bg-neutral-900 transition-colors duration-300">
       <div className="max-w-4xl mx-auto">
-        {/* En-tête créatif */}
-        <div className="mb-16 relative overflow-hidden rounded-xl p-8 bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-900 text-white">
-          <div className="relative z-10">
-            <h1 className="text-5xl font-bold mb-4 animate-fade-in-down">Salut! 👋</h1>
-            <p className="text-xl leading-relaxed animate-fade-in-up opacity-90">
-              Je m&apos;appelle Franck et je transforme vos idées en expériences
-              numériques.
-              <br />
-              Pas de blablah ici - juste une passion pour le développement web
-              <br />
-              et une curiosité sans fin de ce que les technologies peuvent apporter à
-              votre business.
-            </p>
-          </div>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white dark:bg-gray-200 opacity-10 rounded-full transform translate-x-1/2 -translate-y-1/2 animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white dark:bg-gray-200 opacity-10 rounded-full transform -translate-x-1/2 translate-y-1/2 animate-pulse delay-150" />
-        </div>
+        {/* Header */}
+        <ClassicHeader />
 
         {/* Grille interactive */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -237,7 +223,7 @@ const About = () => {
         <div className="mt-16 text-center">
           <blockquote className="text-2xl font-light italic text-gray-600 dark:text-gray-400">
             &quot;Je ne compte pas mes compétences en pourcentages, je les mesure en
-            problèmes résolus et en sourires créés.&quot;
+            problèmes résolus !&quot;
           </blockquote>
         </div>
       </div>

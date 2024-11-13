@@ -25,9 +25,9 @@ export default function ProjetsPage() {
   ]
 
   return (
-    <div className="p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="p-8 bg-gray-50 dark:bg-neutral-900 min-h-screen">
       <div className="relative top-6 sm:top-12 max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold my-4 text-gray-900 dark:text-white">
+        <h2 className="text-3xl font-bold my-4 text-neutral-900 dark:text-white">
           Mes Projets !
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
