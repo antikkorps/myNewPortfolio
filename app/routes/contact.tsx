@@ -1,6 +1,7 @@
 import { useLoaderData } from "@remix-run/react"
 import { Github, Linkedin, Mail, Phone } from "lucide-react"
 import { useState } from "react"
+import AnimatedProfile from "../components/AnimatedProfil"
 
 export async function loader() {
   return {
@@ -66,12 +67,11 @@ const ContactPage = () => {
 
         {/* Contenu Hero */}
         <div className="relative h-full flex flex-col justify-center items-center text-center px-4">
-          <img
-            src="https://picsum.photos/200"
-            alt="Franck Hu"
-            className="w-24 h-24 sm:w-48 sm:h-48 rounded-full object-cover border-2 border-purple-500/50 
-              shadow-lg shadow-purple-500/20 mb-6"
+          <AnimatedProfile
+            name="Franck Vienot"
+            imageUrl="../../public/images/profil/profil.webp"
           />
+
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">{name}</h1>
           <p className="text-neutral-300 text-sm sm:text-base max-w-md">
             Développeur Full Stack passionné par la création d&apos;expériences web
