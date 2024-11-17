@@ -5,12 +5,12 @@ export default function Header() {
     <div className="px-4 pt-6 pb-8">
       {/* Container principal - Commence simple sur mobile */}
       <div className="max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl">
-        {/* En-tête simple et efficace */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-8">
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
+            whileHover={{ scale: 1.15, originX: 0 }}
             className="text-sm text-indigo-400 font-medium mb-2"
           >
             Développeur Full Stack
