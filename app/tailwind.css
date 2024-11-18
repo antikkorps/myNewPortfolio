@@ -5,6 +5,7 @@
 html,
 body {
   @apply bg-white dark:bg-neutral-900;
+  --tw-bg-opacity: 0;
 
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
