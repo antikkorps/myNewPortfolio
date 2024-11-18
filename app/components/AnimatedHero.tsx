@@ -1,3 +1,4 @@
+import { Link } from "@remix-run/react"
 import { motion } from "motion/react"
 
 export default function Header() {
@@ -90,13 +91,15 @@ export default function Header() {
             Voir mes projets
           </motion.button>
 
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            className="w-full md:w-auto px-6 py-2.5 bg-gray-800 text-gray-300 
+          <Link to="/contact">
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              className="w-full md:w-auto px-6 py-2.5 bg-gray-800 text-gray-300 
                      font-medium rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            Contact
-          </motion.button>
+            >
+              Contact
+            </motion.button>
+          </Link>
         </motion.div>
 
         {/* Background subtil qui s'enrichit sur desktop */}

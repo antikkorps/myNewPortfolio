@@ -67,10 +67,7 @@ const ContactPage = () => {
 
         {/* Contenu Hero */}
         <div className="relative h-full flex flex-col justify-center items-center text-center px-4">
-          <AnimatedProfile
-            name="Franck Vienot"
-            imageUrl="../../public/images/profil/profil.webp"
-          />
+          <AnimatedProfile name="Franck Vienot" imageUrl="/images/profil/profil.webp" />
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">{name}</h1>
           <p className="text-neutral-300 text-sm sm:text-base max-w-md">
