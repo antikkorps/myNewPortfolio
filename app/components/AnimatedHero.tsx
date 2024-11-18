@@ -83,13 +83,15 @@ export default function Header() {
           transition={{ delay: 0.7 }}
           className="space-y-3 md:space-y-0 md:space-x-4 md:flex"
         >
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            className="w-full md:w-auto px-6 py-2.5 bg-indigo-600 text-white font-medium 
+          <Link to="/projets">
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              className="w-full md:w-auto px-6 py-2.5 bg-indigo-600 text-white font-medium 
                      rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            Voir mes projets
-          </motion.button>
+            >
+              Voir mes projets
+            </motion.button>
+          </Link>
 
           <Link to="/contact">
             <motion.button
