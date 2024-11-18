@@ -21,6 +21,18 @@ export default function ProjetsPage() {
       liveUrl: "https://monprojet.com",
       type: "featured",
     },
+    {
+      title: "Mon Super Projet",
+      description: "Une description captivante de mon projet...",
+      imageUrl: "/api/placeholder/800/600",
+      technologies: [
+        { name: "React", color: "bg-blue-400 dark:bg-blue-900/30" },
+        { name: "TypeScript", color: "bg-blue-400 dark:bg-blue-900/30" },
+      ],
+      githubUrl: "https://github.com/monprojet",
+      liveUrl: "https://monprojet.com",
+      type: "featured",
+    },
     // Ajoutez autant de projets que vous voulez
   ]
 

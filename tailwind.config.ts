@@ -5,6 +5,9 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+      },
       animation: {
         "slow-pulse": "slowPulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },

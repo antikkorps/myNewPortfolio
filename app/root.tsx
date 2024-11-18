@@ -1,6 +1,7 @@
 // App.tsx
 import type { LinksFunction } from "@remix-run/node"
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react"
+import CursorHalo from "./components/CursorHalo"
 import Navbar from "./components/Navbar"
 import { ThemeProvider, themeScript } from "./contexts/ThemeContext"
 
@@ -29,9 +30,10 @@ function App() {
         <Meta />
         <Links />
       </head>
-      <body className="bg-white dark:bg-neutral-900 transition-colors duration-300">
+      <body className="transition-colors duration-300">
         <ThemeProvider>
           <Navbar />
+          <CursorHalo />
           <Outlet />
         </ThemeProvider>
         <ScrollRestoration />
