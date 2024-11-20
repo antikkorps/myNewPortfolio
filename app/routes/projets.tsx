@@ -47,6 +47,73 @@ export default function ProjetsPage() {
       liveUrl: "https://dev2go.netlify.app",
       type: "featured",
     },
+    {
+      title: "Le Site de l'asso",
+      description: "Un site pour une association fictive",
+      imageUrl: "/images/projets/lesitedelasso.png",
+      technologies: [
+        { name: "Html", color: "bg-blue-400 dark:bg-blue-900/30" },
+        { name: "Bootstrap", color: "bg-blue-400 dark:bg-blue-900/30" },
+      ],
+      githubUrl: "https://github.com/antikkorps/leSiteDeLasso",
+      liveUrl: "https://lesitedelasso.netlify.app/",
+      type: "featured",
+    },
+    {
+      title: "MaFormationImmo",
+      description: "Un site autour de l'offre de formation en immobilier",
+      imageUrl: "/images/projets/maformationimmo.png",
+      technologies: [
+        { name: "Wordpress", color: "bg-blue-400 dark:bg-blue-900/30" },
+        { name: "php", color: "bg-blue-400 dark:bg-blue-900/30" },
+      ],
+      liveUrl: "https://maformationimmo.info/",
+      type: "featured",
+    },
+    {
+      title: "SaveUsLife",
+      description: "Un site pour un magazine sur la thématique de l'environnement",
+      imageUrl: "/images/projets/saveusLife.png",
+      technologies: [
+        { name: "Wordpress", color: "bg-blue-400 dark:bg-blue-900/30" },
+        { name: "Bootstrap", color: "bg-blue-400 dark:bg-blue-900/30" },
+      ],
+      liveUrl: "http://save-us.life",
+      type: "featured",
+    },
+    {
+      title: "Safety Case Solutions",
+      description: "Un site proposant des malettes de sécurité",
+      imageUrl: "/images/projets/safetyCaseSolutions.png",
+      technologies: [
+        { name: "woocommerce", color: "bg-blue-400 dark:bg-blue-900/30" },
+        { name: "php", color: "bg-blue-400 dark:bg-blue-900/30" },
+      ],
+      liveUrl: "https://safety-case-solutions.com/",
+      type: "featured",
+    },
+    {
+      title: "Nouvelles Donnes Formation",
+      description: "Site pour une entreprise de formation",
+      imageUrl: "/images/projets/nouvellesdonnesformation.png",
+      technologies: [
+        { name: "Wordpress", color: "bg-blue-400 dark:bg-blue-900/30" },
+        { name: "Bootstrap", color: "bg-blue-400 dark:bg-blue-900/30" },
+      ],
+      liveUrl: "https://nouvellesdonnesformation.ndcampus.fr/",
+      type: "featured",
+    },
+    {
+      title: "Nouvelles Donnes site corpo",
+      description: "Site corporate pour une entreprise de formation",
+      imageUrl: "/images/projets/nouvellesdonnes.png",
+      technologies: [
+        { name: "wix", color: "bg-blue-400 dark:bg-blue-900/30" },
+        { name: "velo", color: "bg-blue-400 dark:bg-blue-900/30" },
+      ],
+      liveUrl: "https://www.nouvellesdonnes.com/",
+      type: "featured",
+    },
   ]
 
   const leftColumnProjects = projects.filter((_, index) => index % 2 === 0)
