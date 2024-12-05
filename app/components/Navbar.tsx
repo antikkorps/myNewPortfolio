@@ -16,36 +16,59 @@ const Navbar = () => {
   ]
 
   const menuVariants = {
-    closed: {
+    initial: {
       opacity: 0,
+    },
+    animate: {
+      opacity: 1,
       transition: {
-        duration: 0.5,
-        when: "afterChildren",
+        duration: 0.3,
+        when: "beforeChildren",
         staggerChildren: 0.1,
       },
     },
-    open: {
-      opacity: 1,
+    exit: {
+      opacity: 0,
       transition: {
-        duration: 0.5,
-        when: "beforeChildren",
-        staggerChildren: 0.1,
+        duration: 0.3,
+        when: "afterChildren",
+        staggerChildren: 0.05,
+        staggerDirection: -1,
       },
     },
   }
 
   const itemVariants = {
-    closed: {
+    initial: {
       y: 50,
       opacity: 0,
       filter: "blur(10px)",
-      transition: { duration: 0.5 },
     },
-    open: {
+    animate: {
       y: 0,
       opacity: 1,
       filter: "blur(0px)",
-      transition: { duration: 0.5 },
+      transition: { duration: 0.3 },
+    },
+    exit: {
+      y: -50,
+      opacity: 0,
+      filter: "blur(10px)",
+      transition: { duration: 0.2 },
+    },
+  }
+
+  const bgVariants = {
+    initial: {
+      opacity: 0,
+    },
+    animate: {
+      opacity: 1,
+      transition: { duration: 0.2 },
+    },
+    exit: {
+      opacity: 0,
+      transition: { duration: 0.2, delay: 0.1 },
     },
   }
 
@@ -73,11 +96,11 @@ const Navbar = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Link to="/">
+              <a href="/" onClick={() => setIsOpen(false)}>
                 <span className="text-neutral-900 dark:text-neutral-100 text-lg sm:text-xl font-bold tracking-wider">
                   Dev2Go
                 </span>
-              </Link>
+              </a>
             </motion.div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
@@ -112,21 +135,20 @@ const Navbar = () => {
         </div>
       </nav>
 
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
-            initial="closed"
-            animate="open"
-            exit="closed"
+            initial="initial"
+            animate="animate"
+            exit="exit"
             variants={menuVariants}
             className="fixed inset-0 z-40"
           >
             <motion.div
+              variants={bgVariants}
               className="absolute inset-0 bg-white dark:bg-neutral-900 transition-colors duration-300"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
             >
-              <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0 opacity-10 overflow-hidden">
                 {[...Array(5)].map((_, i) => (
                   <motion.div
                     key={i}
