@@ -2,10 +2,12 @@ import { Link } from "@remix-run/react"
 import { AppWindowMac, Blocks, Home, Mail, User } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
+import { useTheme } from "../contexts/ThemeContext"
 import ThemeToggle from "./ThemeToggle"
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const { theme } = useTheme()
 
   const menuItems = [
     { name: "Accueil", href: "/", icon: Home },
@@ -30,7 +32,7 @@ const Navbar = () => {
     exit: {
       opacity: 0,
       transition: {
-        duration: 0.3,
+        duration: 0.2,
         when: "afterChildren",
         staggerChildren: 0.05,
         staggerDirection: -1,
@@ -38,56 +40,8 @@ const Navbar = () => {
     },
   }
 
-  const itemVariants = {
-    initial: {
-      y: 50,
-      opacity: 0,
-      filter: "blur(10px)",
-    },
-    animate: {
-      y: 0,
-      opacity: 1,
-      filter: "blur(0px)",
-      transition: { duration: 0.3 },
-    },
-    exit: {
-      y: -50,
-      opacity: 0,
-      filter: "blur(10px)",
-      transition: { duration: 0.2 },
-    },
-  }
-
-  const bgVariants = {
-    initial: {
-      opacity: 0,
-    },
-    animate: {
-      opacity: 1,
-      transition: { duration: 0.2 },
-    },
-    exit: {
-      opacity: 0,
-      transition: { duration: 0.2, delay: 0.1 },
-    },
-  }
-
   return (
     <>
-      <svg className="fixed w-0 h-0">
-        <defs>
-          <filter id="magnetic-distort">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.03"
-              numOctaves="3"
-              seed="0"
-            />
-            <feDisplacementMap in="SourceGraphic" scale="10" />
-          </filter>
-        </defs>
-      </svg>
-
       <nav className="fixed w-full z-50 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
@@ -128,7 +82,6 @@ const Navbar = () => {
                     }`}
                   />
                 </div>
-                <span className="absolute inset-0 w-full h-full bg-neutral-200 dark:bg-neutral-700 transform scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-20 transition-all duration-300 rounded-lg" />
               </motion.button>
             </div>
           </div>
@@ -137,50 +90,61 @@ const Navbar = () => {
 
       <AnimatePresence mode="wait">
         {isOpen && (
-          <motion.div
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            variants={menuVariants}
-            className="fixed inset-0 z-40"
-          >
-            <motion.div
-              variants={bgVariants}
-              className="absolute inset-0 bg-white dark:bg-neutral-900 transition-colors duration-300"
-            >
-              <div className="absolute inset-0 opacity-10 overflow-hidden">
-                {[...Array(5)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute w-32 sm:w-64 h-32 sm:h-64 bg-neutral-200 dark:bg-neutral-800 rounded-full mix-blend-multiply filter blur-xl"
-                    initial={{ scale: 0 }}
-                    animate={{
-                      scale: [1, 2, 1],
-                      x: [0, Math.random() * 100, 0],
-                      y: [0, Math.random() * 100, 0],
-                    }}
-                    transition={{
-                      duration: 8,
-                      repeat: Infinity,
-                      delay: i * 0.5,
-                    }}
-                  />
-                ))}
-              </div>
+          <>
+            {/* Background avec couleur fixée selon le thème */}
+            <div
+              className="fixed inset-0 z-40"
+              style={{
+                backgroundColor: theme === "dark" ? "#171717" : "#ffffff",
+                position: "fixed",
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0,
+              }}
+            />
 
-              <div className="h-full flex flex-col items-center justify-center relative z-10 p-4">
-                {menuItems.map((item) => (
+            {/* Overlay animé */}
+            <motion.div
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={menuVariants}
+              className="fixed inset-0 z-40"
+            >
+              <div className="h-screen flex flex-col items-center justify-center p-4">
+                {menuItems.map((item, index) => (
                   <motion.div
                     key={item.name}
-                    className="relative my-4 sm:my-6 w-full text-center"
-                    variants={itemVariants}
+                    variants={{
+                      initial: { opacity: 0, y: 50 },
+                      animate: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { delay: index * 0.1 },
+                      },
+                      exit: {
+                        opacity: 0,
+                        y: -50,
+                        transition: {
+                          duration: 0.2,
+                          delay: (menuItems.length - index - 1) * 0.05,
+                        },
+                      },
+                    }}
+                    className="my-4 sm:my-6 w-full text-center"
                   >
                     <Link
                       to={item.href}
                       onClick={() => setIsOpen(false)}
                       className="group relative inline-flex items-center text-4xl sm:text-6xl md:text-7xl font-bold"
                     >
-                      <span className="flex items-center text-neutral-900 dark:text-neutral-100">
+                      <span
+                        className="flex items-center"
+                        style={{
+                          color: theme === "dark" ? "#f5f5f5" : "#171717",
+                        }}
+                      >
                         <motion.span
                           className="inline-block -ml-16 opacity-0 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:-ml-24"
                           whileHover={{ scale: 1.2, rotate: 360 }}
@@ -199,7 +163,7 @@ const Navbar = () => {
                 ))}
               </div>
             </motion.div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
