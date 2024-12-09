@@ -12,9 +12,21 @@ export const meta: MetaFunction = () => {
 export default function ProjetsPage() {
   const projects: ProjectCardProps[] = [
     {
+      title: "Sascha Fait des vidéos",
+      description: "Portfolio pour un vidéaste en Remix et React et déployé sur Vercel",
+      imageUrl: "/images/projets/sascha.webp",
+      technologies: [
+        { name: "Remix", color: "bg-blue-400 dark:bg-blue-900/30" },
+        { name: "Taiwind", color: "bg-blue-400 dark:bg-blue-900/30" },
+      ],
+      githubUrl: "https://github.com/antikkorps/saschaFaitDesVideos_remix",
+      liveUrl: "https://saschafaitdesvideos.com/",
+      type: "featured",
+    },
+    {
       title: "Garage Parrot",
       description: "site pour un garage développé en VueJS et en NestJS",
-      imageUrl: "/images/projets/garage_parrot.png",
+      imageUrl: "/images/projets/garage_parrot.webp",
       technologies: [
         { name: "Nest", color: "bg-blue-400 dark:bg-blue-900/30" },
         { name: "VueJS", color: "bg-blue-400 dark:bg-blue-900/30" },
@@ -26,7 +38,7 @@ export default function ProjetsPage() {
     {
       title: "MyMemory-Nuxt",
       description: "Un mini Site de memory développé en NuxtJS",
-      imageUrl: "/images/projets/myMemory.png",
+      imageUrl: "/images/projets/myMemory.webp",
       technologies: [
         { name: "Nuxt", color: "bg-blue-400 dark:bg-blue-900/30" },
         { name: "VueJS", color: "bg-blue-400 dark:bg-blue-900/30" },
@@ -38,7 +50,7 @@ export default function ProjetsPage() {
     {
       title: "Mon ancien portfolio",
       description: "l'ancienne version de mon portfolio développé avec Astro",
-      imageUrl: "/images/projets/monPortfolio.png",
+      imageUrl: "/images/projets/monPortfolio.webp",
       technologies: [
         { name: "Astro", color: "bg-blue-400 dark:bg-blue-900/30" },
         { name: "TypeScript", color: "bg-blue-400 dark:bg-blue-900/30" },
@@ -50,7 +62,7 @@ export default function ProjetsPage() {
     {
       title: "Le Site de l'asso",
       description: "Un site pour une association fictive",
-      imageUrl: "/images/projets/lesitedelasso.png",
+      imageUrl: "/images/projets/lesitedelasso.webp",
       technologies: [
         { name: "Html", color: "bg-blue-400 dark:bg-blue-900/30" },
         { name: "Bootstrap", color: "bg-blue-400 dark:bg-blue-900/30" },
@@ -62,7 +74,7 @@ export default function ProjetsPage() {
     {
       title: "MaFormationImmo",
       description: "Un site autour de l'offre de formation en immobilier",
-      imageUrl: "/images/projets/maformationimmo.png",
+      imageUrl: "/images/projets/maformationimmo.webp",
       technologies: [
         { name: "Wordpress", color: "bg-blue-400 dark:bg-blue-900/30" },
         { name: "php", color: "bg-blue-400 dark:bg-blue-900/30" },
@@ -73,7 +85,7 @@ export default function ProjetsPage() {
     {
       title: "SaveUsLife",
       description: "Un site pour un magazine sur la thématique de l'environnement",
-      imageUrl: "/images/projets/saveusLife.png",
+      imageUrl: "/images/projets/saveusLife.webp",
       technologies: [
         { name: "Wordpress", color: "bg-blue-400 dark:bg-blue-900/30" },
         { name: "Bootstrap", color: "bg-blue-400 dark:bg-blue-900/30" },
@@ -84,7 +96,7 @@ export default function ProjetsPage() {
     {
       title: "Safety Case Solutions",
       description: "Un site proposant des malettes de sécurité",
-      imageUrl: "/images/projets/safetyCaseSolutions.png",
+      imageUrl: "/images/projets/safetyCaseSolutions.webp",
       technologies: [
         { name: "woocommerce", color: "bg-blue-400 dark:bg-blue-900/30" },
         { name: "php", color: "bg-blue-400 dark:bg-blue-900/30" },
@@ -95,7 +107,7 @@ export default function ProjetsPage() {
     {
       title: "Nouvelles Donnes Formation",
       description: "Site pour une entreprise de formation",
-      imageUrl: "/images/projets/nouvellesdonnesformation.png",
+      imageUrl: "/images/projets/nouvellesdonnesformation.webp",
       technologies: [
         { name: "Wordpress", color: "bg-blue-400 dark:bg-blue-900/30" },
         { name: "Bootstrap", color: "bg-blue-400 dark:bg-blue-900/30" },
@@ -106,7 +118,7 @@ export default function ProjetsPage() {
     {
       title: "Nouvelles Donnes site corpo",
       description: "Site corporate pour une entreprise de formation",
-      imageUrl: "/images/projets/nouvellesdonnes.png",
+      imageUrl: "/images/projets/nouvellesdonnes.webp",
       technologies: [
         { name: "wix", color: "bg-blue-400 dark:bg-blue-900/30" },
         { name: "velo", color: "bg-blue-400 dark:bg-blue-900/30" },
