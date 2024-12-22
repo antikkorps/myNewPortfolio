@@ -1,27 +1,30 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 const Terminal = () => {
   const [isMounted, setIsMounted] = useState(false)
 
   // Messages d'initialisation
-  const initMessages = [
-    { text: "> Initializing system...", delay: 0 },
-    { text: "> Loading dependencies...", delay: 800 },
-    { text: "> Setting up environment...", delay: 1600 },
-    { text: "> Starting portfolio services...", delay: 2400 },
-    { text: "> Checking assets...", delay: 3000 },
-    { text: "> Establishing connection...", delay: 3600 },
-    {
-      text: "> Loading complete. Welcome visitor !",
-      delay: 4200,
-      className: "text-green-400",
-    },
-    {
-      text: "> Pleased to have you on board with me !",
-      delay: 4800,
-      className: "text-green-400",
-    },
-  ]
+  const initMessages = useMemo(
+    () => [
+      { text: "> Initializing system...", delay: 0 },
+      { text: "> Loading dependencies...", delay: 800 },
+      { text: "> Setting up environment...", delay: 1600 },
+      { text: "> Starting portfolio services...", delay: 2400 },
+      { text: "> Checking assets...", delay: 3000 },
+      { text: "> Establishing connection...", delay: 3600 },
+      {
+        text: "> Loading complete. Welcome visitor !",
+        delay: 4200,
+        className: "text-green-400",
+      },
+      {
+        text: "> Pleased to have you on board with me !",
+        delay: 4800,
+        className: "text-green-400",
+      },
+    ],
+    []
+  )
 
   const [messages, setMessages] = useState<Array<{ text: string; className?: string }>>(
     []
@@ -71,7 +74,7 @@ const Terminal = () => {
 
     // Cleanup
     return () => timeouts.forEach(clearTimeout)
-  }, [isMounted])
+  }, [isMounted, initMessages])
 
   if (!isMounted) {
     return (
