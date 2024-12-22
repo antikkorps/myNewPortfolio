@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react"
 
 const Terminal = () => {
+  const [isMounted, setIsMounted] = useState(false)
+
   // Messages d'initialisation
   const initMessages = [
     { text: "> Initializing system...", delay: 0 },
@@ -29,6 +31,12 @@ const Terminal = () => {
   const terminalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isMounted) return
+
     // Effet de clignotement du curseur
     const cursorInterval = setInterval(() => {
       setCursor((prev) => !prev)
@@ -36,9 +44,11 @@ const Terminal = () => {
 
     // Cleanup
     return () => clearInterval(cursorInterval)
-  }, [])
+  }, [isMounted])
 
   useEffect(() => {
+    if (!isMounted) return
+
     // Ajouter progressivement les messages
     const timeouts: NodeJS.Timeout[] = []
 
@@ -61,11 +71,29 @@ const Terminal = () => {
 
     // Cleanup
     return () => timeouts.forEach(clearTimeout)
-  }, [])
+  }, [isMounted])
+
+  if (!isMounted) {
+    return (
+      <div className="terminal-window relative mx-auto w-full max-w-2xl rounded-lg bg-gray-900 p-1 shadow-2xl">
+        <div className="terminal-header flex items-center gap-2 rounded-t bg-gray-800 px-4 py-2">
+          <div className="h-3 w-3 rounded-full bg-red-500"></div>
+          <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
+          <div className="h-3 w-3 rounded-full bg-green-500"></div>
+          <span className="ml-2 text-sm text-gray-400">portfolio@user: ~</span>
+        </div>
+        <div className="terminal-content h-64 px-4 py-2 font-mono text-sm">
+          <p className="text-gray-300">
+            <span className="text-green-400">➜</span>{" "}
+            <span className="text-blue-400">~</span>█
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="terminal-window relative mx-auto w-full max-w-2xl rounded-lg bg-gray-900 p-1 shadow-2xl">
-      {/* Barre de titre du terminal */}
       <div className="terminal-header flex items-center gap-2 rounded-t bg-gray-800 px-4 py-2">
         <div className="h-3 w-3 rounded-full bg-red-500"></div>
         <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
@@ -73,7 +101,6 @@ const Terminal = () => {
         <span className="ml-2 text-sm text-gray-400">portfolio@user: ~</span>
       </div>
 
-      {/* Contenu du terminal */}
       <div
         ref={terminalRef}
         className="terminal-content h-64 overflow-y-auto px-4 py-2 font-mono text-sm scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10"
@@ -91,7 +118,6 @@ const Terminal = () => {
               {message.text}
             </p>
           ))}
-          {/* Ligne de curseur */}
           <p className="text-gray-300">
             <span className="text-green-400">➜</span>{" "}
             <span className="text-blue-400">~</span>
@@ -100,13 +126,11 @@ const Terminal = () => {
         </div>
       </div>
 
-      {/* Overlay de scan quand le terminal est prêt */}
       {terminalReady && (
         <div className="terminal-scan pointer-events-none absolute inset-0"></div>
       )}
 
       <style>{`
-        /* Animation d'écriture */
         .typewriter {
           overflow: hidden;
           white-space: nowrap;
@@ -118,7 +142,6 @@ const Terminal = () => {
           to { width: 100% }
         }
 
-        /* Effet de scan du terminal */
         .terminal-scan {
           background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.05) 50%);
           background-size: 100% 4px;
@@ -132,7 +155,6 @@ const Terminal = () => {
           100% { background-position: 0 100vh }
         }
 
-        /* Effet de glitch occasionnel */
         .terminal-content {
           position: relative;
         }

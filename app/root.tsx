@@ -30,7 +30,10 @@ function App() {
         <Meta />
         <Links />
       </head>
-      <body className="transition-colors duration-300 bg-gray-50 dark:bg-neutral-900">
+      <body
+        suppressHydrationWarning={true}
+        className="transition-colors duration-300 bg-gray-50 dark:bg-neutral-900"
+      >
         <ThemeProvider>
           <Navbar />
           <CursorHalo />

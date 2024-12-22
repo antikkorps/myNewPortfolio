@@ -1,5 +1,5 @@
 import { useLoaderData } from "@remix-run/react"
-import { Github, Linkedin, Mail, Phone } from "lucide-react"
+import { Github, LetterText, Linkedin, Mail, Phone } from "lucide-react"
 import { useState } from "react"
 import AnimatedProfile from "../components/AnimatedProfil"
 
@@ -47,12 +47,18 @@ const ContactPage = () => {
       description: "Pour un échange direct et rapide",
       details: phone,
     },
+    {
+      title: "Formulaire",
+      icon: LetterText,
+      href: `/sendmail`,
+      description: "Si vous préférez un formulaire de contact c'est par ici",
+    },
   ]
 
   return (
     <div className="min-h-screen relative top-10 sm:top-20  bg-neutral-900 text-white">
       {/* Hero Section */}
-      <div className="relative h-[40vh] overflow-hidden">
+      <div className="relative h-[40vh] sm:h-[60vh] overflow-hidden">
         {/* Image de fond avec effet parallaxe */}
         <div
           className="absolute inset-0 bg-cover bg-center transform scale-110"
