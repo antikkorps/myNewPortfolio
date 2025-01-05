@@ -124,7 +124,7 @@ const About = () => {
       icon: <Music className="w-6 h-6" />,
       title: "Mon flow",
       content:
-        "Je code mieux avec de la musique plutôt du rock. Mon setup idéal : un bon casque, Visual Studio Code en mode zen, et une tasse de thé bien chaude.",
+        "Je code mieux avec de la musique de tout type mais ma préférence va au rock. Mon setup idéal : un bon casque, Visual Studio Code en mode zen, et une tasse de thé bien chaude.",
       color:
         "bg-teal-100 hover:bg-teal-200 dark:bg-teal-900/30 dark:hover:bg-teal-800/40",
       iconColor: "text-teal-600 dark:text-teal-400",
