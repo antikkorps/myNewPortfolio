@@ -74,7 +74,8 @@ export default function Index() {
           >
             GoTK
           </Link>{" "}
-          (CLI Go pour agents LLM), un DAW en Rust, et l&apos;auto-hébergement.
+          (CLI Go pour agents LLM), un DAW en Rust, et une infra self-hébergée
+          (forge, photos, docs).
         </p>
 
         <ul className="mt-10 flex flex-wrap gap-2">
