@@ -80,7 +80,10 @@ export const meta: MetaFunction = () => {
   ]
 }
 
-function Layout({ children }: { children: React.ReactNode }) {
+// Layout is the document-level wrapper. React Router v7 automatically uses
+// it to wrap the default export AND the ErrorBoundary, which keeps styles +
+// fonts attached when navigating away from an error state.
+export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation()
   const isBlog = location.pathname.startsWith("/blog")
 
@@ -109,15 +112,9 @@ function Layout({ children }: { children: React.ReactNode }) {
   )
 }
 
-function App() {
-  return (
-    <Layout>
-      <Outlet />
-    </Layout>
-  )
+export default function App() {
+  return <Outlet />
 }
-
-export default App
 
 export function ErrorBoundary() {
   const error = useRouteError()
@@ -125,44 +122,42 @@ export function ErrorBoundary() {
   const status = isRouteErrorResponse(error) ? error.status : 500
 
   return (
-    <Layout>
-      <main className="min-h-screen pt-32 pb-24 bg-gray-50 dark:bg-neutral-900">
-        <div className="mx-auto max-w-xl px-6 text-center">
-          <p className="text-xs uppercase tracking-wider text-neutral-500">
-            Erreur {status}
-          </p>
-          <h1 className="mt-2 text-4xl sm:text-5xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
-            {is404 ? "Page introuvable" : "Une erreur est survenue"}
-          </h1>
-          <p className="mt-4 text-[15px] leading-relaxed text-neutral-600 dark:text-neutral-400">
-            {is404
-              ? "Cette page n'existe pas ou plus. Peut-être un lien obsolète, ou une faute de frappe dans l'URL."
-              : "Quelque chose s'est mal passé côté serveur. Réessayez dans un moment ou revenez à l'accueil."}
-          </p>
-          <div className="mt-10 flex justify-center gap-3">
-            <Link
-              to="/"
-              className="inline-flex items-center rounded-md bg-[#2563eb] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1d4ed8]"
-            >
-              Accueil
-            </Link>
-            <Link
-              to="/blog"
-              className="inline-flex items-center rounded-md border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-300 dark:border-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-700"
-            >
-              Voir le blog
-            </Link>
-          </div>
-          {!isRouteErrorResponse(error) && error instanceof Error ? (
-            <details className="mt-10 text-left text-xs text-neutral-500">
-              <summary className="cursor-pointer">Détails techniques</summary>
-              <pre className="mt-3 overflow-x-auto rounded-md bg-neutral-100 p-3 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
-                {error.message}
-              </pre>
-            </details>
-          ) : null}
+    <main className="min-h-screen pt-32 pb-24 bg-gray-50 dark:bg-neutral-900">
+      <div className="mx-auto max-w-xl px-6 text-center">
+        <p className="text-xs uppercase tracking-wider text-neutral-500">
+          Erreur {status}
+        </p>
+        <h1 className="mt-2 text-4xl sm:text-5xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+          {is404 ? "Page introuvable" : "Une erreur est survenue"}
+        </h1>
+        <p className="mt-4 text-[15px] leading-relaxed text-neutral-600 dark:text-neutral-400">
+          {is404
+            ? "Cette page n'existe pas ou plus. Peut-être un lien obsolète, ou une faute de frappe dans l'URL."
+            : "Quelque chose s'est mal passé côté serveur. Réessayez dans un moment ou revenez à l'accueil."}
+        </p>
+        <div className="mt-10 flex justify-center gap-3">
+          <Link
+            to="/"
+            className="inline-flex items-center rounded-md bg-[#2563eb] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1d4ed8]"
+          >
+            Accueil
+          </Link>
+          <Link
+            to="/blog"
+            className="inline-flex items-center rounded-md border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-300 dark:border-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-700"
+          >
+            Voir le blog
+          </Link>
         </div>
-      </main>
-    </Layout>
+        {!isRouteErrorResponse(error) && error instanceof Error ? (
+          <details className="mt-10 text-left text-xs text-neutral-500">
+            <summary className="cursor-pointer">Détails techniques</summary>
+            <pre className="mt-3 overflow-x-auto rounded-md bg-neutral-100 p-3 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+              {error.message}
+            </pre>
+          </details>
+        ) : null}
+      </div>
+    </main>
   )
 }

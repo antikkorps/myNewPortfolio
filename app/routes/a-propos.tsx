@@ -11,9 +11,5 @@ export const meta: MetaFunction = () =>
   })
 
 export default function AboutPage() {
-  return (
-    <div className="relative top-8 sm:top-24">
-      <About />
-    </div>
-  )
+  return <About />
 }

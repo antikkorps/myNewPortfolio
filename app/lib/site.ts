@@ -8,6 +8,8 @@ export const AUTHOR = {
   email: "franckvienot7@gmail.com",
   twitter: "",
   github: "antikkorps",
+  linkedin: "https://www.linkedin.com/in/franck-vienot/",
+  phone: "",
 }
 export const OG_IMAGE = "/og.png"
 export const ogImageForSlug = (slug: string) =>
