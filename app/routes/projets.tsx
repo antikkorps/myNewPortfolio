@@ -39,6 +39,7 @@ const projects: Project[] = [
     technologies: ["NestJS", "Vue.js"],
     status: "live",
     liveUrl: "https://garagefront.netlify.app/",
+    videoUrl: "https://youtu.be/bd1PGLu8U9s",
     githubUrl: "https://github.com/antikkorps/garage_front",
   },
   {
@@ -91,14 +92,14 @@ const projects: Project[] = [
     description: "Site vitrine pour une entreprise de formation.",
     technologies: ["WordPress", "Bootstrap"],
     status: "archived",
-    videoUrl: "",
+    videoUrl: "https://youtu.be/Iaf64QI1xPU",
   },
   {
     title: "Nouvelles Donnes corporate",
     description: "Site corporate Wix/Velo pour une entreprise de formation.",
     technologies: ["Wix", "Velo"],
     status: "archived",
-    videoUrl: "",
+    videoUrl: "https://youtu.be/_UzeCw7OJBA",
   },
 ]
 
