@@ -28,6 +28,23 @@ interface Project {
 
 const projects: Project[] = [
   {
+    title: "LogiBOP",
+    description:
+      "Application de préparation des interventions chirurgicales pour environnement hospitalier. Quasar / Express, déployée sur Azure.",
+    technologies: ["Quasar", "Express", "Azure", "Santé"],
+    status: "live",
+    videoUrl: "https://youtu.be/lM4MR00hEQo",
+  },
+  {
+    title: "GoTK",
+    description:
+      "Proxy CLI en Go pour optimiser les sorties de commandes envoyées aux agents LLM. Réduit le bruit (ANSI, dedup, stack traces) avant qu'il n'atteigne le contexte du modèle.",
+    technologies: ["Go", "CLI", "MCP"],
+    status: "live",
+    liveUrl: "https://antikkorps.github.io/GoTK/",
+    githubUrl: "https://github.com/antikkorps/GoTK",
+  },
+  {
     title: "Sascha Fait des vidéos",
     description: "Portfolio pour un vidéaste, Remix + Tailwind, déployé sur Vercel.",
     technologies: ["Remix", "Tailwind"],
