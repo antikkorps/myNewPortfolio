@@ -42,18 +42,16 @@ export function VideoDialog({ url, title, onClose }: Props) {
     if (!isOpen && dialog.open) dialog.close()
   }, [isOpen])
 
-  // Close when clicking the backdrop (the dialog element itself)
-  function handleClick(event: React.MouseEvent<HTMLDialogElement>) {
-    if (event.target === event.currentTarget) onClose()
-  }
-
   const embed = url ? toEmbedUrl(url) : null
 
   return (
     <dialog
       ref={dialogRef}
       onClose={onClose}
-      onClick={handleClick}
+      // Any click that bubbles up to <dialog> closes it. The inner content
+      // calls stopPropagation, so only clicks outside the video card reach
+      // this handler — including clicks on the surrounding flex wrapper.
+      onClick={onClose}
       aria-labelledby="video-dialog-title"
       className="m-0 max-h-none max-w-none w-full h-full bg-transparent p-4 backdrop:bg-black/70 backdrop:backdrop-blur-sm"
     >
