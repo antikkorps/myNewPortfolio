@@ -2,7 +2,6 @@
 import type { LinksFunction, MetaFunction } from "react-router"
 import {
   isRouteErrorResponse,
-  Link,
   Links,
   Meta,
   Outlet,
@@ -136,18 +135,22 @@ export function ErrorBoundary() {
             : "Quelque chose s'est mal passé côté serveur. Réessayez dans un moment ou revenez à l'accueil."}
         </p>
         <div className="mt-10 flex justify-center gap-3">
-          <Link
-            to="/"
+          {/* Plain <a> instead of <Link> on the error page: forces a full reload,
+              which guarantees a clean route + style state. Client-side nav
+              from React Router v7 ErrorBoundary can leave the document in an
+              inconsistent CSS state on some transitions. */}
+          <a
+            href="/"
             className="inline-flex items-center rounded-md bg-[#2563eb] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1d4ed8]"
           >
             Accueil
-          </Link>
-          <Link
-            to="/blog"
+          </a>
+          <a
+            href="/blog"
             className="inline-flex items-center rounded-md border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-300 dark:border-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-700"
           >
             Voir le blog
-          </Link>
+          </a>
         </div>
         {!isRouteErrorResponse(error) && error instanceof Error ? (
           <details className="mt-10 text-left text-xs text-neutral-500">
