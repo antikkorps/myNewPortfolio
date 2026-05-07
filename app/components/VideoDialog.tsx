@@ -1,34 +1,11 @@
 import { X } from "lucide-react"
 import { useEffect, useRef } from "react"
+import { toEmbedUrl } from "~/lib/youtube"
 
 interface Props {
   url: string | null
   title: string
   onClose: () => void
-}
-
-// Convert "https://youtu.be/<id>" or "https://www.youtube.com/watch?v=<id>"
-// (or already-embedded URLs) into a safe embed URL.
-function toEmbedUrl(url: string): string | null {
-  try {
-    const u = new URL(url)
-    if (u.hostname === "youtu.be") {
-      const id = u.pathname.replace(/^\//, "")
-      return id ? `https://www.youtube-nocookie.com/embed/${id}` : null
-    }
-    if (u.hostname.endsWith("youtube.com")) {
-      if (u.pathname === "/watch") {
-        const id = u.searchParams.get("v")
-        return id ? `https://www.youtube-nocookie.com/embed/${id}` : null
-      }
-      if (u.pathname.startsWith("/embed/")) {
-        return `https://www.youtube-nocookie.com${u.pathname}`
-      }
-    }
-    return null
-  } catch {
-    return null
-  }
 }
 
 export function VideoDialog({ url, title, onClose }: Props) {
