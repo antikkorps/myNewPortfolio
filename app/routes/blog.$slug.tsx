@@ -76,13 +76,8 @@ export default function BlogPost() {
 
   return (
     <main className="blog-surface min-h-screen pt-24 sm:pt-28 pb-24">
-      <div className="relative mx-auto max-w-2xl px-6">
-        <aside
-          aria-hidden="false"
-          className="absolute left-full top-0 ml-12 hidden w-56 xl:block"
-        >
-          <TableOfContents />
-        </aside>
+      <TableOfContents />
+      <div className="mx-auto max-w-2xl px-6">
         <Link
           to="/blog"
           prefetch="intent"

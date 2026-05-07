@@ -4,7 +4,32 @@ Sujets identifiés à traiter dans des sessions ultérieures, par ordre de prior
 
 ---
 
-## 1. Migration React Router v7
+## ✅ Faits dans la branche `feat/react-router-v7`
+
+- Migration React Router v7 (npm audit : 0 vulnérabilité)
+- OG image dynamique (`/og.png` + `/og.png?slug=...`)
+- RSS feed (`/blog/rss.xml`)
+- Heading anchors + TOC sur articles longs
+- Tags clickables (`/blog/tags/$tag`)
+- Prev/next article navigation
+- Fixes : dotenv loading, TOC fixed, scroll-padding-top, table styling
+- Refonte page `/tech-stacks` (nouvelles techs, design minimaliste)
+
+---
+
+## 1. Favicon Dicebear
+
+Remplacer l'icône `/favicon.ico` par le même thumbs Dicebear que celui en pied
+d'article. Approche : route `/favicon.ico` qui renvoie un PNG 32×32 (ou ICO)
+généré via `createAvatar(thumbs, ...)` + resvg, avec cache HTTP long. Et un
+`<link rel="icon" sizes="any">` + `<link rel="apple-touch-icon" sizes="180x180">`
+dans `root.tsx` `links()` pointant vers la même route.
+
+---
+
+## 2. ~~Migration React Router v7~~ (✅ fait — voir au-dessus)
+<details>
+<summary>Recette conservée pour mémoire</summary>
 
 **Pourquoi.** Remix v2 ne reçoit plus que des fixes de sécurité — la roadmap est mergée dans React Router v7. Migrer débloque : versions récentes de Vite/esbuild (résout 12 des 15 vulnérabilités `npm audit`), fonctionnalités à venir (typed routes, prerender), maintenance long-terme.
 
@@ -75,7 +100,9 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3458/sitemap.xml
 
 ---
 
-## 2. Tests : Vitest + Playwright + sécurité
+</details>
+
+## 3. Tests : Vitest + Playwright + sécurité
 
 **Pourquoi.** TDD pour les futures features (notamment le blog quand il grossira) + preuve que le filet sécurité tient.
 

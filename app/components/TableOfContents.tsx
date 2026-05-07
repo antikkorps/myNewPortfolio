@@ -50,7 +50,7 @@ export function TableOfContents({
   return (
     <nav
       aria-label="Table des matières"
-      className="blog-ui sticky top-24 hidden xl:block"
+      className="blog-ui fixed right-8 top-32 hidden w-56 max-h-[calc(100vh-10rem)] overflow-y-auto pr-2 xl:block 2xl:right-[max(2rem,calc((100vw-65rem)/2-15rem))]"
     >
       <p className="mb-3 text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-500">
         Sommaire

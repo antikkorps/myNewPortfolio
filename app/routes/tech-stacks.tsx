@@ -6,14 +6,10 @@ export const meta: MetaFunction = () =>
   pageMeta({
     title: "Technologies",
     description:
-      "Stack technique de Franck Vienot : Remix, React, Vue, Node, NestJS, TypeScript, Tailwind et l'écosystème JS moderne.",
+      "Stack technique de Franck Vienot : React Router, Vue/Nuxt, Astro, Fastify, Go, Rust, Python, PostgreSQL, Docker et l'écosystème dev moderne.",
     path: "/tech-stacks",
   })
 
 export default function TechStackPage() {
-  return (
-    <div>
-      <TechStack />
-    </div>
-  )
+  return <TechStack />
 }

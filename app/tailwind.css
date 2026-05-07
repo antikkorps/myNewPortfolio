@@ -12,6 +12,18 @@ body {
   }
 }
 
+/* Fixed Navbar (h-16 sm:h-20) compensation for in-page anchor scrolling */
+html {
+  scroll-padding-top: 5.5rem;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* Add your custom styles here */
 
 .perspective-1000 {
@@ -296,6 +308,54 @@ html.dark .prose-blog a:hover {
   color: #60a5fa;
 }
 
+/* Tables in articles : scroll horizontal sur petits écrans, bordures sobres */
+.prose-blog table {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  margin: 1.5em 0;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.prose-blog thead {
+  border-bottom: 2px solid #d4d4d4;
+}
+
+html.dark .prose-blog thead {
+  border-bottom-color: #404040;
+}
+
+.prose-blog th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.6em 1em 0.6em 0;
+  color: #0a0a0a;
+}
+
+html.dark .prose-blog th {
+  color: #fafafa;
+}
+
+.prose-blog td {
+  padding: 0.6em 1em 0.6em 0;
+  border-bottom: 1px solid #e5e5e5;
+  vertical-align: top;
+}
+
+html.dark .prose-blog td {
+  border-bottom-color: #262626;
+}
+
+.prose-blog tr:last-child td {
+  border-bottom: none;
+}
+
+.prose-blog th:last-child,
+.prose-blog td:last-child {
+  padding-right: 0;
+}
+
 /* Heading permalink anchors (rehype-autolink-headings) */
 .prose-blog .heading-anchor {
   margin-left: 0.5ch;
@@ -325,8 +385,3 @@ html.dark .prose-blog .heading-anchor:hover {
   color: #60a5fa;
 }
 
-.prose-blog h2,
-.prose-blog h3,
-.prose-blog h4 {
-  scroll-margin-top: 5rem;
-}
