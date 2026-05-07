@@ -32,6 +32,17 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const title = `#${data.tag} — Blog`
   const description = `Articles tagués ${data.tag} sur le blog de Franck Vienot.`
   const url = `${SITE_URL}/blog/tags/${encodeURIComponent(data.tag)}`
+
+  const breadcrumbs = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
+      { "@type": "ListItem", position: 3, name: `#${data.tag}`, item: url },
+    ],
+  }
+
   return [
     { title: `${title} — ${SITE_NAME}` },
     { name: "description", content: description },
@@ -39,6 +50,8 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     { property: "og:title", content: title },
     { property: "og:description", content: description },
     { property: "og:url", content: url },
+    { property: "og:type", content: "website" },
+    { "script:ld+json": breadcrumbs },
   ]
 }
 

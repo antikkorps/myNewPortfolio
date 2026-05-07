@@ -46,37 +46,68 @@ export const links: LinksFunction = () => [
   },
 ]
 
+// Per-route meta (title / description / canonical / OG / Twitter / JSON-LD
+// for the page itself). Anything that should appear on EVERY page, regardless
+// of route, lives in Layout below as static tags — RR7 child meta exports
+// override the parent's by default, so we cannot rely on this function for
+// site-wide tags.
 export const meta: MetaFunction = () => {
-  const personJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: AUTHOR.name,
-    url: SITE_URL,
-    email: `mailto:${AUTHOR.email}`,
-    sameAs: [`https://github.com/${AUTHOR.github}`],
-    jobTitle: "Développeur web full-stack",
-  }
-  const siteJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: SITE_NAME,
-    url: SITE_URL,
-    inLanguage: "fr-FR",
-  }
+  const ogImageUrl = `${SITE_URL}${OG_IMAGE}`
   return [
     { title: SITE_NAME },
     { name: "description", content: SITE_DESCRIPTION },
-    { name: "author", content: AUTHOR.name },
-    { property: "og:site_name", content: SITE_NAME },
-    { property: "og:locale", content: "fr_FR" },
+    { tagName: "link", rel: "canonical", href: SITE_URL },
+    { property: "og:title", content: SITE_NAME },
+    { property: "og:description", content: SITE_DESCRIPTION },
+    { property: "og:url", content: SITE_URL },
     { property: "og:type", content: "website" },
-    { property: "og:image", content: `${SITE_URL}${OG_IMAGE}` },
+    { property: "og:image", content: ogImageUrl },
+    { property: "og:image:secure_url", content: ogImageUrl },
+    { property: "og:image:type", content: "image/png" },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { property: "og:image:alt", content: `${SITE_NAME} — illustration` },
     { name: "twitter:card", content: "summary_large_image" },
-    { name: "twitter:image", content: `${SITE_URL}${OG_IMAGE}` },
-    { name: "theme-color", content: "#0d0d0d" },
-    { "script:ld+json": personJsonLd },
-    { "script:ld+json": siteJsonLd },
+    { name: "twitter:title", content: SITE_NAME },
+    { name: "twitter:description", content: SITE_DESCRIPTION },
+    { name: "twitter:image", content: ogImageUrl },
+    { name: "twitter:image:alt", content: `${SITE_NAME} — illustration` },
   ]
+}
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: AUTHOR.name,
+  url: SITE_URL,
+  email: `mailto:${AUTHOR.email}`,
+  image: `${SITE_URL}/favicon.png`,
+  jobTitle: "Architecte cloud, développeur web full-stack",
+  sameAs: [
+    `https://github.com/${AUTHOR.github}`,
+    ...(AUTHOR.linkedin ? [AUTHOR.linkedin] : []),
+  ],
+  knowsAbout: [
+    "Architecture cloud",
+    "Logiciel santé",
+    "TypeScript",
+    "React Router",
+    "Vue.js",
+    "Go",
+    "Rust",
+    "Self-hosting",
+    "Security by design",
+  ],
+}
+
+const siteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_NAME,
+  alternateName: "Dev2Go",
+  url: SITE_URL,
+  inLanguage: "fr-FR",
+  author: { "@type": "Person", name: AUTHOR.name, url: SITE_URL },
 }
 
 // Layout is the document-level wrapper. React Router v7 automatically uses
@@ -91,7 +122,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Site-wide meta — these appear on EVERY page regardless of route,
+            because RR7 child meta exports replace the parent's by default. */}
+        <meta name="author" content={AUTHOR.name} />
+        <meta
+          name="robots"
+          content="index,follow,max-image-preview:large,max-snippet:-1"
+        />
+        <meta name="theme-color" content="#0d0d0d" />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta property="og:locale" content="fr_FR" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+        />
         <Meta />
         <Links />
       </head>
@@ -119,6 +168,11 @@ export function ErrorBoundary() {
   const error = useRouteError()
   const is404 = isRouteErrorResponse(error) && error.status === 404
   const status = isRouteErrorResponse(error) ? error.status : 500
+
+  // The thrown Response carries its own HTTP status (404 / 500), which is the
+  // canonical signal Google uses to skip indexing. We do NOT emit a noindex
+  // meta because RR7 doesn't allow children to inject head tags here, and
+  // the status code is already authoritative for SEO purposes.
 
   return (
     <main className="min-h-screen pt-32 pb-24 bg-gray-50 dark:bg-neutral-900">

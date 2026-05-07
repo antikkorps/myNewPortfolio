@@ -33,21 +33,64 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const url = `${SITE_URL}/blog/${data.slug}`
   const title = `${data.title} — ${SITE_NAME}`
   const ogImage = `${SITE_URL}${ogImageForSlug(data.slug)}`
-  const jsonLd = {
+  const isoDate = new Date(data.date).toISOString()
+
+  const blogPosting = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: data.title,
     description: data.description,
-    datePublished: data.date,
-    image: ogImage,
+    datePublished: isoDate,
+    dateModified: isoDate,
+    image: {
+      "@type": "ImageObject",
+      url: ogImage,
+      width: 1200,
+      height: 630,
+    },
     author: {
       "@type": "Person",
       name: AUTHOR.name,
       url: AUTHOR.url,
     },
+    publisher: {
+      "@type": "Person",
+      name: AUTHOR.name,
+      url: AUTHOR.url,
+    },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    inLanguage: "fr-FR",
+    articleSection: data.tags[0] ?? "Blog",
     keywords: data.tags.join(", "),
+    wordCount: Math.round(data.readingTime * 200),
+    timeRequired: `PT${data.readingTime}M`,
   }
+
+  const breadcrumbs = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Accueil",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${SITE_URL}/blog`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: data.title,
+        item: url,
+      },
+    ],
+  }
+
   return [
     { title },
     { name: "description", content: data.description },
@@ -57,16 +100,22 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     { property: "og:description", content: data.description },
     { property: "og:url", content: url },
     { property: "og:image", content: ogImage },
-    { property: "article:published_time", content: data.date },
+    { property: "og:image:secure_url", content: ogImage },
+    { property: "og:image:type", content: "image/png" },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { property: "og:image:alt", content: `${data.title} — illustration` },
+    { property: "article:published_time", content: isoDate },
+    { property: "article:modified_time", content: isoDate },
     { property: "article:author", content: AUTHOR.name },
     ...data.tags.map((tag) => ({ property: "article:tag", content: tag })),
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: data.title },
     { name: "twitter:description", content: data.description },
     { name: "twitter:image", content: ogImage },
-    {
-      "script:ld+json": jsonLd,
-    },
+    { name: "twitter:image:alt", content: `${data.title} — illustration` },
+    { "script:ld+json": blogPosting },
+    { "script:ld+json": breadcrumbs },
   ]
 }
 

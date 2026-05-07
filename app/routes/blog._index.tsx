@@ -50,11 +50,37 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return { items, page: safePage, totalPages, total, q }
 }
 
-export const meta: MetaFunction = () => {
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const title = `Blog — ${SITE_NAME}`
   const description =
     "Notes techniques, réflexions métier et carnet de bord d'un développeur web full-stack."
   const url = `${SITE_URL}/blog`
+
+  const itemList = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: title,
+    description,
+    url,
+    inLanguage: "fr-FR",
+    blogPost: (data?.items ?? []).map((p) => ({
+      "@type": "BlogPosting",
+      headline: p.title,
+      description: p.description,
+      url: `${SITE_URL}/blog/${p.slug}`,
+      datePublished: p.date ? new Date(p.date).toISOString() : undefined,
+    })),
+  }
+
+  const breadcrumbs = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Blog", item: url },
+    ],
+  }
+
   return [
     { title },
     { name: "description", content: description },
@@ -66,6 +92,8 @@ export const meta: MetaFunction = () => {
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
+    { "script:ld+json": itemList },
+    { "script:ld+json": breadcrumbs },
   ]
 }
 
