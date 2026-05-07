@@ -1,6 +1,8 @@
 import type { MetaFunction } from "react-router"
 import { ExternalLink, Github, Play } from "lucide-react"
 import { motion } from "motion/react"
+import { useState } from "react"
+import { VideoDialog } from "~/components/VideoDialog"
 import { pageMeta } from "~/lib/seo"
 
 export const meta: MetaFunction = () =>
@@ -138,7 +140,13 @@ function StatusBadge({ status }: { status: Status }) {
   )
 }
 
-function ProjectRow({ project }: { project: Project }) {
+function ProjectRow({
+  project,
+  onPlayVideo,
+}: {
+  project: Project
+  onPlayVideo: (project: Project) => void
+}) {
   return (
     <motion.article
       variants={itemVariants}
@@ -185,14 +193,13 @@ function ProjectRow({ project }: { project: Project }) {
             </a>
           ) : null}
           {project.videoUrl ? (
-            <a
-              href={project.videoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => onPlayVideo(project)}
               className="inline-flex items-center gap-1.5 text-neutral-700 transition-colors hover:text-[#2563eb] dark:text-neutral-300 dark:hover:text-[#60a5fa]"
             >
               <Play size={14} aria-hidden /> Démo vidéo
-            </a>
+            </button>
           ) : null}
           {project.githubUrl ? (
             <a
@@ -216,11 +223,17 @@ function ProjectRow({ project }: { project: Project }) {
 }
 
 export default function ProjetsPage() {
+  const [activeVideo, setActiveVideo] = useState<Project | null>(null)
   const live = projects.filter((p) => p.status === "live")
   const archived = projects.filter((p) => p.status === "archived")
 
   return (
     <main className="min-h-screen bg-gray-50 pt-24 sm:pt-28 pb-24 dark:bg-neutral-900">
+      <VideoDialog
+        url={activeVideo?.videoUrl ?? null}
+        title={activeVideo?.title ?? ""}
+        onClose={() => setActiveVideo(null)}
+      />
       <div className="mx-auto max-w-3xl px-6">
         <header className="mb-12">
           <p className="text-xs uppercase tracking-wider text-neutral-500">
@@ -250,7 +263,7 @@ export default function ProjetsPage() {
             variants={containerVariants}
           >
             {live.map((p) => (
-              <ProjectRow key={p.title} project={p} />
+              <ProjectRow key={p.title} project={p} onPlayVideo={setActiveVideo} />
             ))}
           </motion.div>
         </section>
@@ -270,7 +283,7 @@ export default function ProjetsPage() {
             variants={containerVariants}
           >
             {archived.map((p) => (
-              <ProjectRow key={p.title} project={p} />
+              <ProjectRow key={p.title} project={p} onPlayVideo={setActiveVideo} />
             ))}
           </motion.div>
         </section>
