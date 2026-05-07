@@ -1,7 +1,8 @@
 import type { LoaderFunctionArgs, MetaFunction } from "react-router"
 import { Link, useLoaderData } from "react-router"
 import { ArrowLeft } from "lucide-react"
-import { formatDate, posts } from "~/lib/posts"
+import { formatDate } from "~/lib/format"
+import { postsMeta } from "~/lib/posts-meta.server"
 import { SITE_NAME, SITE_URL } from "~/lib/site"
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -9,7 +10,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
   if (!tag) {
     throw new Response("Tag manquant", { status: 404 })
   }
-  const items = posts
+  const items = postsMeta
     .filter((p) => (p.tags ?? []).map((t) => t.toLowerCase()).includes(tag))
     .map((p) => ({
       slug: p.slug,

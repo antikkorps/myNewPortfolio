@@ -1,4 +1,4 @@
-import { posts } from "~/lib/posts"
+import { postsMeta as posts } from "~/lib/posts-meta.server"
 import { AUTHOR, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "~/lib/site"
 
 function escape(s: string): string {

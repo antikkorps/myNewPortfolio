@@ -3,22 +3,24 @@ import { Link, useLoaderData } from "react-router"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { BlogAvatar } from "~/components/BlogAvatar"
 import { TableOfContents } from "~/components/TableOfContents"
-import { formatDate, getNeighbors, getPost, posts } from "~/lib/posts"
+import { formatDate } from "~/lib/format"
+import { componentForSlug } from "~/lib/posts"
+import { getNeighborsMeta, getPostMeta } from "~/lib/posts-meta.server"
 import { AUTHOR, ogImageForSlug, SITE_NAME, SITE_URL } from "~/lib/site"
 
 export async function loader({ params }: LoaderFunctionArgs) {
-  const post = getPost(params.slug ?? "")
-  if (!post) {
+  const meta = getPostMeta(params.slug ?? "")
+  if (!meta) {
     throw new Response("Article introuvable", { status: 404 })
   }
-  const { prev, next } = getNeighbors(post.slug)
+  const { prev, next } = getNeighborsMeta(meta.slug)
   return {
-    slug: post.slug,
-    title: post.title,
-    description: post.description,
-    date: post.date,
-    tags: post.tags ?? [],
-    readingTime: post.readingTime,
+    slug: meta.slug,
+    title: meta.title,
+    description: meta.description,
+    date: meta.date,
+    tags: meta.tags ?? [],
+    readingTime: meta.readingTime,
     prev: prev ? { slug: prev.slug, title: prev.title } : null,
     next: next ? { slug: next.slug, title: next.title } : null,
   }
@@ -70,9 +72,8 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 
 export default function BlogPost() {
   const data = useLoaderData<typeof loader>()
-  const post = posts.find((p) => p.slug === data.slug)
-  if (!post) return null
-  const Component = post.Component
+  const Component = componentForSlug(data.slug)
+  if (!Component) return null
 
   return (
     <main className="blog-surface min-h-screen pt-24 sm:pt-28 pb-24">

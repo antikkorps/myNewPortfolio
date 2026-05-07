@@ -8,8 +8,9 @@ import {
   useSubmit,
 } from "react-router"
 import { Search } from "lucide-react"
-import { useEffect, useRef } from "react"
-import { formatDate, posts } from "~/lib/posts"
+import { Fragment, useEffect, useRef } from "react"
+import { formatDate } from "~/lib/format"
+import { postsMeta } from "~/lib/posts-meta.server"
 import { SITE_NAME, SITE_URL } from "~/lib/site"
 
 const PER_PAGE = 3
@@ -21,7 +22,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1
 
   const filtered = q
-    ? posts.filter((p) => {
+    ? postsMeta.filter((p) => {
         const haystack = [
           p.title,
           p.description,
@@ -31,7 +32,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           .toLowerCase()
         return haystack.includes(q)
       })
-    : posts
+    : postsMeta
 
   const total = filtered.length
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE))
@@ -66,6 +67,26 @@ export const meta: MetaFunction = () => {
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
   ]
+}
+
+function highlight(text: string, q: string) {
+  if (!q) return text
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  const regex = new RegExp(`(${escaped})`, "gi")
+  const parts = text.split(regex)
+  const lower = q.toLowerCase()
+  return parts.map((part, i) =>
+    part.toLowerCase() === lower ? (
+      <mark
+        key={i}
+        className="rounded-sm bg-[#2563eb]/10 px-0.5 text-[#2563eb] dark:bg-[#60a5fa]/15 dark:text-[#60a5fa]"
+      >
+        {part}
+      </mark>
+    ) : (
+      <Fragment key={i}>{part}</Fragment>
+    )
+  )
 }
 
 function buildPageHref(searchParams: URLSearchParams, page: number): string {
@@ -175,10 +196,10 @@ export default function BlogIndex() {
                     <span>{post.readingTime} min de lecture</span>
                   </div>
                   <h2 className="blog-ui mt-2 text-xl font-semibold text-[#0a0a0a] transition-colors group-hover:text-[#2563eb] dark:text-[#fafafa] dark:group-hover:text-[#60a5fa]">
-                    {post.title}
+                    {highlight(post.title, q)}
                   </h2>
                   <p className="mt-2 leading-relaxed text-neutral-700 dark:text-neutral-300">
-                    {post.description}
+                    {highlight(post.description, q)}
                   </p>
                 </Link>
               </article>

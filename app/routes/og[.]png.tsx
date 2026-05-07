@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from "react-router"
 import { renderOgPng } from "~/lib/og.server"
-import { posts } from "~/lib/posts"
+import { postsMeta as posts } from "~/lib/posts-meta.server"
 import { SITE_DESCRIPTION, SITE_NAME } from "~/lib/site"
 
 export async function loader({ request }: LoaderFunctionArgs) {

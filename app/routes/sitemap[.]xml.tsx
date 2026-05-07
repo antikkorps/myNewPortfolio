@@ -1,4 +1,4 @@
-import { posts } from "~/lib/posts"
+import { postsMeta as posts } from "~/lib/posts-meta.server"
 import { SITE_URL } from "~/lib/site"
 
 const STATIC_PATHS = [
