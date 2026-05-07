@@ -9,7 +9,7 @@ export const meta: MetaFunction = () =>
   pageMeta({
     title: "Accueil",
     description:
-      "Portfolio de Franck Vienot, développeur full-stack basé en France. LogiBOP (logiciel santé), GoTK (CLI Go pour LLMs), DAW en Rust, articles et projets.",
+      "Portfolio de Franck Vienot, architecte cloud et développeur basé en France. LogiBOP (logiciel santé), GoTK (CLI Go pour LLMs), DAW en Rust, articles et projets.",
     path: "/",
   })
 
@@ -49,43 +49,33 @@ export default function Index() {
             Franck Vienot
           </p>
           <h1 className="mt-2 text-3xl sm:text-5xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
-            Développeur fullstack,{" "}
+            Architecte cloud, solutions web et{" "}
             <span className="text-[#2563eb] dark:text-[#60a5fa]">
-              logiciel santé
-            </span>{" "}
-            et outillage dev.
+              outillage dev
+            </span>
+            .
           </h1>
         </header>
 
-        <div className="space-y-5 text-[17px] leading-relaxed text-neutral-700 dark:text-neutral-300">
-          <p>
-            Je développe{" "}
-            <Link
-              to="/a-propos"
-              prefetch="intent"
-              className="border-b border-current text-[#2563eb] transition-colors hover:text-[#1d4ed8] dark:text-[#60a5fa] dark:hover:text-[#93c5fd]"
-            >
-              LogiBOP
-            </Link>
-            , une application de préparation des interventions chirurgicales
-            utilisée en environnement hospitalier. Souveraineté du code,
-            traçabilité, security by design — les contraintes du domaine santé
-            poussent à de bonnes habitudes.
-          </p>
-          <p>
-            En perso, je code{" "}
-            <Link
-              to="/blog/gotk-proxy-cli-llm"
-              prefetch="intent"
-              className="border-b border-current text-[#2563eb] transition-colors hover:text-[#1d4ed8] dark:text-[#60a5fa] dark:hover:text-[#93c5fd]"
-            >
-              GoTK
-            </Link>{" "}
-            (proxy CLI en Go pour les agents LLM), un DAW en Rust avec support
-            CLAP, et j&apos;auto-héberge la majorité de mes services. J&apos;écris
-            ici quand un sujet vaut le détour.
-          </p>
-        </div>
+        <p className="text-[17px] leading-relaxed text-neutral-700 dark:text-neutral-300">
+          En pro :{" "}
+          <Link
+            to="/a-propos"
+            prefetch="intent"
+            className="border-b border-current text-[#2563eb] transition-colors hover:text-[#1d4ed8] dark:text-[#60a5fa] dark:hover:text-[#93c5fd]"
+          >
+            LogiBOP
+          </Link>
+          , logiciel santé en milieu hospitalier. En perso :{" "}
+          <Link
+            to="/blog/gotk-proxy-cli-llm"
+            prefetch="intent"
+            className="border-b border-current text-[#2563eb] transition-colors hover:text-[#1d4ed8] dark:text-[#60a5fa] dark:hover:text-[#93c5fd]"
+          >
+            GoTK
+          </Link>{" "}
+          (CLI Go pour agents LLM), un DAW en Rust, et l&apos;auto-hébergement.
+        </p>
 
         <ul className="mt-10 flex flex-wrap gap-2">
           {technologies.map((tech) => (
