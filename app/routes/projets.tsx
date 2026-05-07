@@ -79,8 +79,8 @@ const projects: Project[] = [
     title: "SaveUsLife",
     description: "Magazine en ligne sur la thématique environnement.",
     technologies: ["WordPress", "Bootstrap"],
-    status: "archived",
-    videoUrl: "",
+    status: "live",
+    liveUrl: "https://save-us.life/",
   },
   {
     title: "Safety Case Solutions",
