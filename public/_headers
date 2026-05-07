@@ -1,0 +1,18 @@
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+
+# Cache OG images and favicon aggressively
+/og.png
+  Cache-Control: public, max-age=86400, s-maxage=604800
+
+/favicon.png
+  Cache-Control: public, max-age=2592000, immutable
+
+# Hashed assets are content-addressable; they can be cached forever.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -3,3 +3,12 @@ node_modules
 /.cache
 /build
 .env
+
+# React Router typegen output
+.react-router/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

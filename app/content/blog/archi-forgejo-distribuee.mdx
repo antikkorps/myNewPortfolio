@@ -1,0 +1,191 @@
+---
+title: "Mon archi Forgejo distribuée : Hetzner pour la prod, maison pour les runners, R2 pour les backups"
+description: "Retour d'expérience sur une architecture self-hosted qui sépare les services critiques des services d'analyse, en exploitant les forces de chaque infrastructure."
+date: "2026-05-22"
+tags: ["self-hosting", "forgejo", "architecture", "hetzner", "cloudflare", "devops"]
+readingTime: 9
+draft: false
+---
+
+Dans [mon précédent article](/blog/github-2026-alternatives), j'ai expliqué pourquoi je commence à regarder ailleurs que GitHub et pourquoi je monte une instance Forgejo en perso pour me faire la main. Je voulais revenir sur l'architecture concrète que j'ai retenue, parce que je trouve qu'elle illustre bien un principe que j'aime en self-hosting : utiliser chaque infrastructure pour ce qu'elle fait le mieux, plutôt que de tout empiler au même endroit.
+
+## Le contexte et les contraintes
+
+J'ai deux infrastructures à disposition :
+
+**Un VPS [Hetzner](https://www.hetzner.com/)** (CX22, 4 Go RAM, 2 vCPU, ~4€/mois). IP fixe, datacenter en Allemagne, bande passante symétrique, fiabilité de niveau commercial. C'est ce qui se rapproche le plus d'un service "professionnel" tout en restant économique.
+
+**Un serveur à la maison** (64 Go de RAM, CPU costaud, plusieurs To de stockage). Beaucoup plus puissant, mais avec les contraintes habituelles d'un setup résidentiel : IP dynamique, coupures électriques possibles, upload limité par mon abonnement fibre, et le fait que si la box redémarre, tout est down pendant quelques minutes.
+
+À côté de ça, j'ai du **[Cloudflare R2](https://www.cloudflare.com/developer-platform/products/r2/)** que j'utilise déjà pour mes backups [Immich](https://immich.app/), [Paperless-ngx](https://docs.paperless-ngx.com/) et [Seafile](https://www.seafile.com/), et un **[tunnel Cloudflare](https://www.cloudflare.com/products/tunnel/)** déjà en place pour exposer mes services maison sans IP publique.
+
+Mon objectif : monter une stack [Forgejo](https://forgejo.org/) + [SonarQube](https://www.sonarsource.com/products/sonarqube/) + runners CI/CD + scans sécurité, qui me serve à la fois pour mes side projects et comme terrain d'apprentissage pour une éventuelle migration de LogiBOP plus tard.
+
+## Le piège du "tout au même endroit"
+
+L'erreur que je voulais éviter, c'est de mettre toute la stack sur une seule machine. Deux variantes possibles, deux problèmes différents :
+
+**Tout sur le Hetzner** : il faudrait passer à un CX32 (8 Go RAM, ~10€/mois) pour faire tenir SonarQube confortablement à côté de Forgejo. C'est faisable, mais on paie pour de la RAM qu'on a déjà à la maison. Et les builds CI lourds (compilation Rust, tests intégrés, scans ZAP) feraient ramer le serveur principal pendant qu'ils tournent.
+
+**Tout à la maison** : on a la puissance, mais on perd la disponibilité. Si la box redémarre pendant qu'un client teste mon Forgejo, ou si je dois faire un kernel upgrade un soir où je veux push depuis l'extérieur, je suis bloqué.
+
+La bonne approche, c'est de **séparer ce qui doit être disponible 24/7 de ce qui peut être en best-effort**.
+
+## Le découpage qui fait sens
+
+J'ai distingué deux catégories de services :
+
+**Le chemin critique** (doit être up tout le temps, parce que si c'est down je ne peux pas bosser) : Forgejo lui-même, qui héberge les repos, les issues, les PRs, l'auth.
+
+**Les services d'analyse** (peuvent être down sans bloquer le développement) : runners CI, SonarQube, scans [ZAP](https://www.zaproxy.org/), etc. Si ces services sont temporairement indisponibles, les workflows attendent ou échouent, mais je peux toujours coder en local et committer.
+
+Ce découpage donne une attribution naturelle :
+
+```
+┌─ Hetzner CX22 (4€/mois) ──────────┐
+│                                     │
+│  ▸ Forgejo + SQLite                 │
+│  ▸ Caddy (reverse proxy + SSL)*     │
+│  ▸ Un runner léger pour les tâches  │
+│    rapides (lint, tests unitaires)  │
+│                                     │
+│  Toujours up, IP fixe, accessible   │
+│  depuis n'importe où                 │
+└─────────────────────────────────────┘
+              ▲
+              │ Push, clone, API
+              │
+┌─ Maison (64 Go RAM) ────────────────┐
+│                                     │
+│  ▸ Cloudflare Tunnel (existant)     │
+│  ▸ Forgejo Runner "heavy"           │
+│    (s'enregistre vers le Hetzner)   │
+│  ▸ SonarQube + Postgres             │
+│  ▸ ZAP (à la demande)               │
+│                                     │
+│  Best-effort, exploite la RAM dispo │
+└─────────────────────────────────────┘
+              │
+              │ Backups quotidiens
+              ▼
+┌─ Cloudflare R2 ─────────────────────┐
+│                                     │
+│  ▸ Snapshots Forgejo (data + DB)    │
+│  ▸ Dumps Postgres SonarQube         │
+│  ▸ Chiffrés côté client (rclone)    │
+│  ▸ Lifecycle 30/365 jours           │
+│                                     │
+│  Egress gratuit pour restauration   │
+└─────────────────────────────────────┘
+```
+
+\* [Caddy](https://caddyserver.com/) gère TLS automatiquement via Let's Encrypt.
+
+## Pourquoi cette répartition fonctionne bien
+
+**Le runner maison s'enregistre vers le Forgejo Hetzner** via une connexion sortante. C'est important : ma machine maison ne reçoit aucune connexion entrante venant du Hetzner. Le runner ouvre un canal vers Forgejo, attend des jobs, les exécute, renvoie les résultats. C'est un pattern "agent" classique qui simplifie énormément la sécurité.
+
+Concrètement, dans le `docker-compose.yml` côté maison :
+
+```yaml
+services:
+  runner:
+    image: code.forgejo.org/forgejo/runner:6
+    container_name: forgejo-runner
+    restart: unless-stopped
+    volumes:
+      - ./runner-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - FORGEJO_INSTANCE_URL=https://git.mondomaine.fr
+      - FORGEJO_RUNNER_REGISTRATION_TOKEN=<token>
+      - FORGEJO_RUNNER_NAME=runner-maison-heavy
+      - FORGEJO_RUNNER_LABELS=docker,heavy,security
+```
+
+Les **labels du runner** sont la clé pour orchestrer la répartition. Côté workflows, je distingue ce qui peut tourner n'importe où de ce qui doit absolument tourner sur la machine maison :
+
+```yaml
+jobs:
+  lint:
+    runs-on: docker  # peut tomber sur le runner Hetzner
+
+  unit-tests:
+    runs-on: docker  # idem, c'est rapide et léger
+
+  sonarqube-scan:
+    runs-on: heavy   # forcera le runner maison
+
+  zap-baseline:
+    runs-on: security  # idem
+```
+
+Si la machine maison est down, les jobs `heavy` et `security` attendent qu'un runner approprié soit dispo. Les jobs légers continuent de tourner sur le Hetzner. Je peux toujours push, ouvrir des PRs, faire des reviews — l'analyse poussée se fait juste plus tard quand ma machine remonte. C'est exactement le compromis que je voulais.
+
+## Le SonarQube qui ne s'expose pas
+
+Vu que SonarQube est seulement consommé par mes runners locaux, il n'a pas besoin d'être accessible depuis Internet. Je le laisse écouter sur `127.0.0.1:9000`, accessible uniquement depuis localhost. Pour consulter le dashboard, j'utilise un tunnel SSH ponctuel :
+
+```bash
+ssh -L 9000:localhost:9000 user@maison
+# puis http://localhost:9000 dans le browser
+```
+
+Ou, comme j'ai déjà du Cloudflare Tunnel en place, je peux exposer `sonar.mondomaine.fr` derrière [Cloudflare Access](https://www.cloudflare.com/products/zero-trust/access/) avec une policy email-only, qui bloque tout sauf moi avant même que la requête atteigne mon réseau. Au choix selon mon humeur, mais je préfère le tunnel SSH parce que ça réduit la surface d'exposition au strict minimum.
+
+## Les backups : R2 comme point neutre
+
+Cloudflare R2 a une caractéristique qui le rend idéal pour des backups : **pas de frais d'egress**. Les autres providers cloud te facturent quand tu sors les données, ce qui rend la restauration potentiellement coûteuse, surtout en panique. Avec R2, tu peux pull 50 Go en urgence sans réfléchir au coût.
+
+Mon script de backup, lancé en cron quotidien sur le Hetzner :
+
+```bash
+#!/bin/bash
+set -euo pipefail
+DATE=$(date +%Y%m%d)
+BACKUP_DIR=/tmp/forgejo-backup
+mkdir -p $BACKUP_DIR
+
+# 1. Dump SQLite consistant (Forgejo continue à tourner)
+docker exec forgejo sqlite3 /data/gitea/gitea.db \
+  ".backup '/data/gitea/backup-$DATE.db'"
+docker cp forgejo:/data/gitea/backup-$DATE.db $BACKUP_DIR/
+
+# 2. Tarball du data Forgejo (repos, avatars, attachments)
+tar czf $BACKUP_DIR/forgejo-data-$DATE.tar.gz \
+  -C /home/forgejo data/
+
+# 3. Upload vers R2 (chiffré côté client via remote crypt)
+# rclone : https://rclone.org/
+rclone copy $BACKUP_DIR r2-encrypted:forgejo-backups/$DATE/ \
+  --progress
+
+# 4. Cleanup local
+find $BACKUP_DIR -mtime +1 -delete
+```
+
+Le remote `r2-encrypted` est un wrapper rclone autour du bucket R2 brut, qui chiffre tous les fichiers avant upload. Même si Cloudflare avait un incident interne, mes backups restent illisibles sans ma clé. Pour du code santé, c'est une couche que je trouve indispensable.
+
+La rétention est gérée côté R2 directement via une lifecycle rule : suppression auto après 30 jours pour les snapshots quotidiens, conservation 365 jours pour les snapshots mensuels (le 1er du mois est copié dans un préfixe `monthly/`). Pas de logique compliquée à maintenir dans le script.
+
+## Le coût final
+
+Pour ce setup complet :
+
+- **Hetzner CX22** : ~4€/mois
+- **R2** : moins de 1€/mois pour ~10 Go de backups (en grande partie dans le tier gratuit)
+- **Maison** : 0€ marginal (le serveur tourne déjà 24/7 pour [Jellyfin](https://jellyfin.org/), Immich, Paperless)
+- **Cloudflare Tunnel** : gratuit
+- **Domaine** : déjà payé
+
+**Total : ~5€/mois** pour une stack auto-hébergée complète, avec analyse de sécurité, CI distribuée et backups chiffrés en cloud. À titre de comparaison, GitHub Team pour deux personnes coûte ~7€/mois et n'inclut ni SonarQube, ni ZAP, ni le contrôle sur l'infra.
+
+Évidemment, le coût en temps n'est pas comptabilisé — il faut compter une demi-journée pour le setup initial et 1-2h par mois de maintenance courante. Mais pour quelqu'un qui voit le self-hosting comme une compétence à entretenir, c'est du temps qui vaut largement son équivalent monétaire.
+
+## Ce que cette archi m'apprend (au-delà de Forgejo)
+
+Plus j'avance dans le self-hosting, plus je vois que **les bonnes architectures naissent rarement de "j'ai trouvé l'outil parfait" et beaucoup plus souvent de "j'ai compris ce qui doit être où"**. La même stack mise au mauvais endroit peut être une catastrophe ; bien répartie, elle devient élégante.
+
+La séparation chemin critique / services d'analyse est un pattern que je vais réutiliser ailleurs. Pour LogiBOP en pro, par exemple, on pourrait imaginer le code et l'API sur [Azure](https://azure.microsoft.com/) (parce que les exigences santé l'imposent), les services d'observabilité et les analyses asynchrones sur une infra moins coûteuse, et les sauvegardes sur R2 ou [Scaleway](https://www.scaleway.com/). Le principe reste : chaque infrastructure pour ce qu'elle fait le mieux.
+
+Le prochain article sera probablement un retour d'expérience après quelques semaines de fonctionnement réel — ce qui a marché du premier coup, ce qui a cassé, et ce que j'ai dû ajuster. Restez branchés.

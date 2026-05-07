@@ -1,15 +1,29 @@
-import { useLoaderData } from "@remix-run/react"
+import type { MetaFunction } from "react-router"
+import { useLoaderData } from "react-router"
 import { Github, LetterText, Linkedin, Mail, Phone } from "lucide-react"
 import { useState } from "react"
 import AnimatedProfile from "../components/AnimatedProfil"
+import { pageMeta } from "~/lib/seo"
+
+export const meta: MetaFunction = () =>
+  pageMeta({
+    title: "Contact",
+    description:
+      "Contactez Franck Vienot pour discuter d'un projet, d'une mission freelance ou d'une opportunité.",
+    path: "/contact",
+  })
+
+import { AUTHOR } from "~/lib/site"
 
 export async function loader() {
+  // .env wins when set, otherwise fall back to AUTHOR (site.ts) so the page
+  // is never rendered with literal "undefined" strings.
   return {
-    githubUsername: process.env.GITHUB_USERNAME,
-    linkedinUrl: process.env.LINKEDIN_URL,
-    email: process.env.EMAIL,
-    phone: process.env.PHONE,
-    name: process.env.NAME,
+    githubUsername: process.env.GITHUB_USERNAME || AUTHOR.github,
+    linkedinUrl: process.env.LINKEDIN_URL || AUTHOR.linkedin,
+    email: process.env.EMAIL || AUTHOR.email,
+    phone: process.env.PHONE || AUTHOR.phone,
+    name: process.env.NAME || AUTHOR.name,
   }
 }
 
@@ -18,42 +32,54 @@ const ContactPage = () => {
     useLoaderData<typeof loader>()
   const [activeSection, setActiveSection] = useState<number | null>(null)
 
-  const contactLinks = [
-    {
-      title: "Github",
-      icon: Github,
-      href: `https://github.com/${githubUsername}`,
-      description: "Explorer mes projets open source et contributions",
-      details: `@${githubUsername}`,
-    },
-    {
-      title: "LinkedIn",
-      icon: Linkedin,
-      href: linkedinUrl,
-      description: "Mon parcours professionnel et mes compétences",
-      details: name,
-    },
-    {
-      title: "Email",
-      icon: Mail,
-      href: `mailto:${email}`,
-      description: "Me contacter directement par email",
-      details: `mailto:${email}`,
-    },
-    {
-      title: "Téléphone",
-      icon: Phone,
-      href: `tel:${phone}`,
-      description: "Pour un échange direct et rapide",
-      details: phone,
-    },
+  const allContactLinks = [
+    githubUsername
+      ? {
+          title: "Github",
+          icon: Github,
+          href: `https://github.com/${githubUsername}`,
+          description: "Explorer mes projets open source et contributions",
+          details: `@${githubUsername}`,
+        }
+      : null,
+    linkedinUrl
+      ? {
+          title: "LinkedIn",
+          icon: Linkedin,
+          href: linkedinUrl,
+          description: "Mon parcours professionnel et mes compétences",
+          details: name,
+        }
+      : null,
+    email
+      ? {
+          title: "Email",
+          icon: Mail,
+          href: `mailto:${email}`,
+          description: "Me contacter directement par email",
+          details: email,
+        }
+      : null,
+    phone
+      ? {
+          title: "Téléphone",
+          icon: Phone,
+          href: `tel:${phone}`,
+          description: "Pour un échange direct et rapide",
+          details: phone,
+        }
+      : null,
     {
       title: "Formulaire",
       icon: LetterText,
       href: `/sendmail`,
       description: "Si vous préférez un formulaire de contact c'est par ici",
+      details: "Envoyer un message",
     },
   ]
+  const contactLinks = allContactLinks.filter(
+    (link): link is NonNullable<typeof link> => link !== null
+  )
 
   return (
     <div className="min-h-screen relative top-10 sm:top-20  bg-neutral-900 text-white">

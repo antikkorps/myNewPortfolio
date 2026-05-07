@@ -1,0 +1,88 @@
+---
+title: "GitHub en 2026 : pourquoi je commence à regarder ailleurs"
+description: "Retour d'expérience honnête sur l'évaluation des alternatives à GitHub pour un dev fullstack qui bosse sur du code santé en France."
+date: "2026-05-08"
+tags: ["self-hosting", "forgejo", "github", "souveraineté", "devops"]
+readingTime: 7
+draft: false
+---
+
+[GitHub](https://github.com/) a été ma forge de cœur pendant des années. C'est là que j'ai appris Git en regardant les diffs colorés, là que j'ai poussé mes premiers projets timides en pensant que personne ne les verrait, là que j'ai découvert qu'on pouvait collaborer avec des inconnus sur du code et que c'était plutôt génial. Aujourd'hui, je commence sérieusement à regarder ailleurs. Voici pourquoi, et ce que j'envisage à la place.
+
+## Le ressenti d'abord : la fiabilité s'effrite
+
+Le déclencheur, c'est pas un moment précis. C'est l'accumulation. Au cours de ces derniers mois, j'ai eu plusieurs fois cette expérience : j'ouvre GitHub pour push une feature ou ouvrir une PR, et la page rame, ou affiche une erreur 500, ou les Actions ne se déclenchent pas. Pas de catastrophe, juste de la friction qui s'ajoute à un workflow censé être fluide.
+
+Je n'invente pas. Le CTO de GitHub lui-même, Vlad Fedorov, a publié fin avril 2026 un post de mea culpa public reconnaissant que les coupures s'enchaînent à cause d'une croissance rapide, d'un couplage architectural qui propage les pannes locales aux services critiques, et d'une incapacité du système à absorber les surcharges. Quand le CTO d'une plateforme reconnaît ça publiquement, c'est qu'on n'est pas dans un creux temporaire.
+
+Plus parlant encore : Mitchell Hashimoto, ex-fondateur de [HashiCorp](https://www.hashicorp.com/), a sorti son projet [Ghostty](https://ghostty.org/) de GitHub après 18 ans en disant que la plateforme « n'est plus un endroit pour du travail sérieux ». Avant lui, l'équipe [Zig](https://ziglang.org/) était partie vers [Codeberg](https://codeberg.org/). Quand des projets de cette envergure prennent la peine de migrer, c'est rarement gratuit.
+
+## Ce qui me dérange au-delà des outages
+
+Si c'était juste une question de fiabilité technique, je serais resté en mode "patience, ils vont corriger". Mais il y a une couche au-dessus qui me titille de plus en plus.
+
+**Le code que je manipule au quotidien est du code santé.** Je développe LogiBOP, un outil de préparation des interventions chirurgicales pour environnements hospitaliers. Quand je réfléchis à où vit le code source d'une telle application, la réponse "sur des serveurs Microsoft aux États-Unis" devient de moins en moins évidente. Pas par anti-américanisme primaire, mais parce que les exigences réglementaires européennes en santé montent, parce que les clients hospitaliers commencent à poser la question, et parce que c'est cohérent avec la philosophie générale de souveraineté logicielle qui me parle.
+
+**L'écosystème est de plus en plus vendeur de [Copilot](https://github.com/features/copilot).** À chaque update, GitHub pousse plus loin l'intégration de l'IA générative dans l'interface. Je ne suis pas anti-IA — j'utilise Claude Code au quotidien et je ne reviendrai pas en arrière. Mais je préfère choisir mes outils IA, plutôt qu'avoir une plateforme qui décide pour moi quel agent doit s'imposer dans mon workflow.
+
+**Le verrouillage progressif.** Plus je passe d'années sur GitHub, plus mes issues, mes PRs, mes Actions, mes intégrations sont enfouies dans la plateforme. Le code lui-même est portable (c'est du Git), mais tout le contexte autour ne l'est pas vraiment. Et ça me met mal à l'aise.
+
+## Les alternatives que j'ai regardées
+
+J'ai pris le temps d'évaluer sérieusement les options. Voilà ce que j'ai trouvé.
+
+### Forgejo
+
+C'est mon préféré sur le papier. Fork communautaire de [Gitea](https://about.gitea.com/), gouverné par une association à but non lucratif allemande (Codeberg e.V.), 100% FOSS, vraiment léger (~170 Mo de RAM en fonctionnement), interface très proche de GitHub donc courbe d'apprentissage minimale. Le système d'Actions parse la même syntaxe que GitHub Actions, donc migrer des workflows existants est presque trivial.
+
+Site officiel : [forgejo.org](https://forgejo.org/).
+
+Avantage majeur dans mon contexte : self-hostable sur n'importe quel VPS européen ou serveur perso, ce qui résout d'un coup la question de la souveraineté.
+
+Inconvénient : c'est moi qui assure les sauvegardes et l'uptime. Et il manque certaines features avancées qu'on trouve sur GitHub (comme un secret scanning intégré, ou un équivalent CodeQL natif).
+
+### GitLab
+
+[GitLab](https://about.gitlab.com/) est l'alternative la plus mature et la plus complète. La CI/CD intégrée est probablement la meilleure du marché, le système de Merge Requests est mieux pensé que les Pull Requests GitHub, l'interface tout-en-un (registry Docker, environnements, monitoring) est puissante.
+
+L'option self-managed Free est réelle mais lourde (8 Go de RAM minimum). L'option SaaS Premium est très bien mais à 29$/user/mois, ça pique à plusieurs. Pour une équipe de deux, GitHub Team reste imbattable côté prix.
+
+### Tangled
+
+Une découverte récente. Boîte basée à Helsinki/Londres qui construit une forge de nouvelle génération basée sur le protocole AT (le même que Bluesky), avec un positionnement explicite d'alternative européenne souveraine. Très early stage, pas encore prête pour la prod, mais le projet à suivre. À garder dans le radar pour 2027.
+
+### Les vrais faux-amis
+
+Je vais être direct : Entire (par l'ex-CEO de GitHub Thomas Dohmke) est positionné comme "next developer platform" mais c'est en réalité un outil de capture de contexte d'agents IA qui se branche sur Git existant. Ils hostent leur propre code sur GitHub. Microsoft est dans leur tour de table. Ce n'est pas une alternative à GitHub, c'est un complément vendu avec une narrative disruptive.
+
+[GitButler](https://gitbutler.com/), par Scott Chacon (vrai co-fondateur historique de GitHub, lui), est un client Git nouvelle génération très intéressant — mais c'est un client, pas une forge. Ça reste compatible avec GitHub, GitLab, Forgejo, etc.
+
+## Mon plan, sans drame
+
+Je ne vais pas migrer LogiBOP demain. À deux développeurs sur GitHub Team, l'équation économique et pratique penche encore en faveur du statu quo. Le coût direct est faible, l'écosystème est riche, l'équipe ne veut pas porter une migration en plus de ses chantiers actuels. Migrer pour migrer serait juste créer du chaos sans bénéfice immédiat.
+
+Mais je fais deux choses concrètes dès maintenant :
+
+**1. Mettre en place des assurances minimales sur le setup actuel.**
+
+Un mirror Git automatique vers une infrastructure indépendante ([Azure Repos](https://azure.microsoft.com/en-us/products/devops/repos) dans notre cas, déjà disponible). Comme ça, si GitHub tombe ou fait une bêtise, le code reste accessible et on peut continuer à travailler localement et pousser ailleurs. Quelques lignes de configuration `git remote`, c'est tout.
+
+Un export régulier des issues et PRs via l'API GitHub, dans un blob storage. Cinq lignes de Bash et un cron. Couvre le risque "et si on perd l'historique des discussions".
+
+**2. Construire une expertise Forgejo en perso.**
+
+Je vais monter une instance Forgejo sur mon infra perso (VPS Hetzner ou serveur maison, j'arbitre encore), avec runners self-hosted, SonarQube pour le SAST, et un workflow security by design appliqué à mes side projects. C'est un terrain de jeu, mais c'est aussi une compétence opérationnelle qui me rend autonome.
+
+Dans 6 mois, si l'expérience est concluante, j'aurai des arguments solides pour proposer une migration progressive de LogiBOP. Ou pas, si je découvre que les inconvénients dépassent les bénéfices à mon échelle. Dans les deux cas, je serai au moins équipé pour ne pas subir.
+
+## Ce que je retiens pour l'instant
+
+L'erreur que je voulais éviter, c'était le tout-ou-rien. "GitHub a des outages, je quitte tout et je migre" est aussi naïf que "GitHub est le standard, on ne se pose pas de questions". La réalité c'est que les forges sont des infrastructures critiques, et qu'une décision d'infra critique demande de la nuance et du temps.
+
+À mon échelle (deux devs, projet santé naissant, side projects FOSS), la stratégie qui fait sens c'est : **rester sur GitHub pour la prod**, **mettre en place des filets de sécurité pour limiter la dépendance**, et **construire une option Forgejo en parallèle** qui pourra prendre le relais si nécessaire.
+
+C'est moins romanesque qu'une migration spectaculaire, mais c'est probablement la décision rationnelle pour 90% des équipes qui se posent la même question en ce moment.
+
+Si tu es dans la même situation, je serais curieux de connaître ta réflexion. Et dans quelques mois, je publierai un retour d'expérience sur ce que ça donne concrètement de faire tourner Forgejo + SonarQube + runners distribués pour des side projects sérieux.
+
+À suivre.

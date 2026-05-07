@@ -1,415 +1,283 @@
-import { AnimatePresence, motion } from "framer-motion"
+import { motion } from "framer-motion"
 import { useState } from "react"
 
-const VintageTechCards = () => {
-  const [selectedTech, setSelectedTech] = useState<{
-    id: number
-    name: string
-    bgColor: string
-    borderColor: string
-    accentColor: string
-    shadowColor: string
-    stripes: string
-    description: string
-    powers: string[]
-    talents: string[]
-  } | null>(null)
+interface Tech {
+  name: string
+  description: string
+  notes?: string[]
+  url?: string
+}
 
-  const techs = [
-    {
-      id: 1,
-      name: "Vue.js",
-      bgColor: "bg-emerald-200 dark:bg-emerald-900",
-      borderColor: "border-emerald-950 dark:border-emerald-400",
-      accentColor:
-        "from-emerald-950 to-emerald-900 dark:from-emerald-400 dark:to-emerald-500",
-      shadowColor: "shadow-emerald-950 dark:shadow-emerald-400",
-      stripes:
-        "from-emerald-300 to-emerald-200 dark:from-emerald-800 dark:to-emerald-900",
-      description: "Framework JavaScript progressif",
-      powers: [
-        "Réactivité instantanée",
-        "Composants réutilisables",
-        "Architecture flexible",
-      ],
-      talents: [
-        "Courbe d'apprentissage douce",
-        "Performances optimales",
-        "Écosystème riche",
-      ],
-    },
-    {
-      id: 2,
-      name: "Nuxt",
-      bgColor: "bg-green-200 dark:bg-green-900",
-      borderColor: "border-green-950 dark:border-green-400",
-      accentColor: "from-green-950 to-green-900 dark:from-green-400 dark:to-green-500",
-      shadowColor: "shadow-green-950 dark:shadow-green-400",
-      stripes: "from-green-300 to-green-200 dark:from-green-800 dark:to-green-900",
-      description: "Framework Vue.js pour applications universelles",
-      powers: ["Rendu hybride", "Auto-imports magiques", "SEO optimisé"],
-      talents: [
-        "Directory-based routing",
-        "Modes de rendu multiples",
-        "Developer experience +++",
-      ],
-    },
-    {
-      id: 3,
-      name: "Astro",
-      bgColor: "bg-orange-200 dark:bg-orange-900",
-      borderColor: "border-orange-950 dark:border-orange-400",
-      accentColor:
-        "from-orange-950 to-orange-900 dark:from-orange-400 dark:to-orange-500",
-      shadowColor: "shadow-orange-950 dark:shadow-orange-400",
-      stripes: "from-orange-300 to-orange-200 dark:from-orange-800 dark:to-orange-900",
-      description: "Framework web pour contenu statique",
-      powers: [
-        "Islands Architecture",
-        "Zéro JavaScript par défaut",
-        "Multi-framework support",
-      ],
-      talents: ["Performance maximale", "SEO parfait", "Content collections"],
-    },
-    {
-      id: 4,
-      name: "Remix",
-      bgColor: "bg-indigo-200 dark:bg-indigo-900",
-      borderColor: "border-indigo-950 dark:border-indigo-400",
-      accentColor:
-        "from-indigo-950 to-indigo-900 dark:from-indigo-400 dark:to-indigo-500",
-      shadowColor: "shadow-indigo-950 dark:shadow-indigo-400",
-      stripes: "from-indigo-300 to-indigo-200 dark:from-indigo-800 dark:to-indigo-900",
-      description: "Framework full-stack React",
-      powers: [
-        "Nested routing avancé",
-        "Gestion d'erreurs native",
-        "Chargement optimisé",
-      ],
-      talents: ["Server-side rendering", "Progressive enhancement", "Web standards"],
-    },
-    {
-      id: 5,
-      name: "Nest.js",
-      bgColor: "bg-red-200 dark:bg-red-900",
-      borderColor: "border-red-950 dark:border-red-400",
-      accentColor: "from-red-950 to-red-900 dark:from-red-400 dark:to-red-500",
-      shadowColor: "shadow-red-950 dark:shadow-red-400",
-      stripes: "from-red-300 to-red-200 dark:from-red-800 dark:to-red-900",
-      description: "Framework Node.js scalable et moderne",
-      powers: [
-        "Architecture modulaire",
-        "Injection de dépendances",
-        "Support TypeScript natif",
-      ],
-      talents: ["Scalabilité enterprise", "Patterns éprouvés", "Testing intégré"],
-    },
-    {
-      id: 6,
-      name: "Express",
-      bgColor: "bg-gray-200 dark:bg-gray-800",
-      borderColor: "border-gray-950 dark:border-gray-400",
-      accentColor: "from-gray-950 to-gray-900 dark:from-gray-400 dark:to-gray-500",
-      shadowColor: "shadow-gray-950 dark:shadow-gray-400",
-      stripes: "from-gray-300 to-gray-200 dark:from-gray-700 dark:to-gray-800",
-      description: "Framework web Node.js rapide et minimaliste",
-      powers: ["Routing flexible", "Middleware system", "Minimalisme efficace"],
-      talents: ["Performance brute", "Extensibilité totale", "Compatibilité universelle"],
-    },
-    {
-      id: 7,
-      name: "Tailwind",
-      bgColor: "bg-cyan-200 dark:bg-cyan-900",
-      borderColor: "border-cyan-950 dark:border-cyan-400",
-      accentColor: "from-cyan-950 to-cyan-900 dark:from-cyan-400 dark:to-cyan-500",
-      shadowColor: "shadow-cyan-950 dark:shadow-cyan-400",
-      stripes: "from-cyan-300 to-cyan-200 dark:from-cyan-800 dark:to-cyan-900",
-      description: "Framework CSS utility-first",
-      powers: ["Utility-first CSS", "JIT compilation", "Design system intégré"],
-      talents: [
-        "Productivité maximale",
-        "Bundle size optimisé",
-        "Personnalisation infinie",
-      ],
-    },
-    {
-      id: 8,
-      name: "PostgreSQL",
-      bgColor: "bg-blue-200 dark:bg-blue-900",
-      borderColor: "border-blue-950 dark:border-blue-400",
-      accentColor: "from-blue-950 to-blue-900 dark:from-blue-400 dark:to-blue-500",
-      shadowColor: "shadow-blue-950 dark:shadow-blue-400",
-      stripes: "from-blue-300 to-blue-200 dark:from-blue-800 dark:to-blue-900",
-      description: "Système de gestion de base de données",
-      powers: ["ACID compliance", "Requêtes complexes", "Extensions puissantes"],
-      talents: ["Scalabilité verticale", "JSON natif", "Intégrité des données"],
-    },
-    {
-      id: 9,
-      name: "MySQL",
-      bgColor: "bg-amber-200 dark:bg-amber-900",
-      borderColor: "border-amber-950 dark:border-amber-400",
-      accentColor: "from-amber-950 to-amber-900 dark:from-amber-400 dark:to-amber-500",
-      shadowColor: "shadow-amber-950 dark:shadow-amber-400",
-      stripes: "from-amber-300 to-amber-200 dark:from-amber-800 dark:to-amber-900",
-      description: "Base de données relationnelle open-source",
-      powers: [
-        "Performances rapides",
-        "Réplication maître-esclave",
-        "Clustering intégré",
-      ],
-      talents: ["Fiabilité éprouvée", "Support communautaire", "Compatibilité étendue"],
-    },
-    {
-      id: 10,
-      name: "Laravel",
-      bgColor: "bg-rose-200 dark:bg-rose-900",
-      borderColor: "border-rose-950 dark:border-rose-400",
-      accentColor: "from-rose-950 to-rose-900 dark:from-rose-400 dark:to-rose-500",
-      shadowColor: "shadow-rose-950 dark:shadow-rose-400",
-      stripes: "from-rose-300 to-rose-200 dark:from-rose-800 dark:to-rose-900",
-      description: "Framework PHP élégant et puissant",
-      powers: ["Eloquent ORM", "Artisan CLI", "Blade templating"],
-      talents: ["Sécurité robuste", "Queues & jobs", "Écosystème complet"],
-    },
-    {
-      id: 11,
-      name: "Docker",
-      bgColor: "bg-sky-200 dark:bg-sky-900",
-      borderColor: "border-sky-950 dark:border-sky-400",
-      accentColor: "from-sky-950 to-sky-900 dark:from-sky-400 dark:to-sky-500",
-      shadowColor: "shadow-sky-950 dark:shadow-sky-400",
-      stripes: "from-sky-300 to-sky-200 dark:from-sky-800 dark:to-sky-900",
-      description: "Plateforme de conteneurisation d'applications",
-      powers: ["Conteneurisation légère", "Isolation parfaite", "Déploiement cohérent"],
-      talents: ["Scalabilité horizontale", "DevOps friendly", "Configuration portable"],
-    },
-    {
-      id: 12,
-      name: "Git",
-      bgColor: "bg-purple-200 dark:bg-purple-900",
-      borderColor: "border-purple-950 dark:border-purple-400",
-      accentColor:
-        "from-purple-950 to-purple-900 dark:from-purple-400 dark:to-purple-500",
-      shadowColor: "shadow-purple-950 dark:shadow-purple-400",
-      stripes: "from-purple-300 to-purple-200 dark:from-purple-800 dark:to-purple-900",
-      description: "Système de contrôle de version distribué",
-      powers: ["Versioning distribué", "Branches & merging", "Histoire complète"],
-      talents: ["Collaboration efficace", "Gestion des conflits", "Workflow flexible"],
-    },
-  ]
+interface Category {
+  title: string
+  subtitle: string
+  items: Tech[]
+}
 
+const categories: Category[] = [
+  {
+    title: "Frontend",
+    subtitle: "Frameworks et outils côté client",
+    items: [
+      {
+        name: "Vue.js",
+        description: "Framework progressif, mon premier amour côté front.",
+        notes: ["Composition API", "Reactivité fine", "Pinia pour le state"],
+        url: "https://vuejs.org/",
+      },
+      {
+        name: "Nuxt",
+        description:
+          "Vue full-stack avec auto-imports, SSR/SSG/ISR, routing par fichiers.",
+        notes: ["Server routes", "Nitro", "Modules officiels"],
+        url: "https://nuxt.com/",
+      },
+      {
+        name: "React Router",
+        description:
+          "Le successeur de Remix v2 — loaders, actions, file-based routing, SSR.",
+        notes: ["v7 framework mode", "Type-safe routes", "Streaming SSR"],
+        url: "https://reactrouter.com/",
+      },
+      {
+        name: "Astro",
+        description:
+          "Statique par défaut avec islands hydratables. Idéal pour les sites de contenu.",
+        notes: ["Zero JS par défaut", "Multi-framework", "Content collections"],
+        url: "https://astro.build/",
+      },
+      {
+        name: "Tailwind CSS",
+        description:
+          "Utility-first, build avec JIT. Productivité élevée sans CSS-in-JS.",
+        notes: ["Plugin typography", "Design tokens", "Dark mode class"],
+        url: "https://tailwindcss.com/",
+      },
+    ],
+  },
+  {
+    title: "Backend",
+    subtitle: "Frameworks serveur et APIs",
+    items: [
+      {
+        name: "Fastify",
+        description:
+          "Node ultra-rapide avec validation JSON Schema native. Mon défaut sur les nouveaux projets.",
+        notes: ["Plugins, hooks, decorators", "TypeBox pour les schémas", "Logger Pino"],
+        url: "https://fastify.dev/",
+      },
+      {
+        name: "Express",
+        description:
+          "Toujours présent — middleware-based, simple, écosystème massif.",
+        notes: ["Compatibilité étendue", "Routes flexibles", "Maintenance long-terme"],
+        url: "https://expressjs.com/",
+      },
+      {
+        name: "Laravel",
+        description:
+          "PHP moderne — Eloquent, Blade, Artisan. Quand le contexte impose PHP.",
+        notes: ["Eloquent ORM", "Queues et jobs", "Auth intégré"],
+        url: "https://laravel.com/",
+      },
+    ],
+  },
+  {
+    title: "Langages",
+    subtitle: "Au-delà de TypeScript",
+    items: [
+      {
+        name: "TypeScript",
+        description: "Le pivot de tout le frontend et du Node moderne.",
+        notes: ["Types stricts", "Inférence avancée", "Type-only imports"],
+        url: "https://www.typescriptlang.org/",
+      },
+      {
+        name: "Go",
+        description:
+          "Compilation rapide, binaires statiques, concurrency simple. Mon choix pour les outils CLI comme GoTK.",
+        notes: ["Cross-compile facile", "GC court", "Standard library riche"],
+        url: "https://go.dev/",
+      },
+      {
+        name: "Rust",
+        description:
+          "Performance et safety mémoire. Je l'utilise pour mes projets exigeants côté audio.",
+        notes: ["Ownership system", "Cargo", "WASM-friendly"],
+        url: "https://www.rust-lang.org/",
+      },
+      {
+        name: "Python",
+        description:
+          "Scripts d'analyse, data, automatisation. Le couteau suisse hors web.",
+        notes: ["Type hints + mypy", "uv pour la vélocité", "FastAPI quand HTTP"],
+        url: "https://www.python.org/",
+      },
+    ],
+  },
+  {
+    title: "Données",
+    subtitle: "Persistance et requêtes",
+    items: [
+      {
+        name: "PostgreSQL",
+        description: "Mon SGBD de référence : ACID, JSONB, full-text, extensions.",
+        notes: ["pg_trgm", "Logical replication", "Partitioning natif"],
+        url: "https://www.postgresql.org/",
+      },
+      {
+        name: "MySQL",
+        description:
+          "Quand l'écosystème ou le client l'impose — performant, fiable, bien outillé.",
+        notes: ["InnoDB", "Réplication", "JSON columns"],
+        url: "https://www.mysql.com/",
+      },
+    ],
+  },
+  {
+    title: "Infra & DevOps",
+    subtitle: "Ce qui fait tourner le code",
+    items: [
+      {
+        name: "Docker",
+        description:
+          "Conteneurisation standard pour le dev et la prod. Compose pour l'orchestration locale.",
+        notes: ["Multi-stage builds", "Compose v2", "BuildKit"],
+        url: "https://www.docker.com/",
+      },
+      {
+        name: "Git",
+        description:
+          "Versioning, base de toute collaboration. Avec Forgejo en perso et GitHub en pro.",
+        notes: ["Rebase interactif", "Worktrees", "Hooks"],
+        url: "https://git-scm.com/",
+      },
+    ],
+  },
+]
+
+interface DetailProps {
+  tech: Tech
+  onClose: () => void
+}
+
+function TechDetail({ tech, onClose }: DetailProps) {
   return (
-    <div
-      className="min-h-screen w-full flex justify-center items-start bg-orange-100 dark:bg-neutral-900 transition-colors duration-200"
-      style={{
-        backgroundImage: `
-             radial-gradient(#00000010 1px, transparent 1px),
-             repeating-linear-gradient(-45deg, #00000005 0px, #00000005 1px, transparent 1px, transparent 6px)
-           `,
-        backgroundSize: "20px 20px, 10px 10px",
-      }}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      onClick={onClose}
     >
-      <div className="w-full max-w-6xl px-2 sm:px-4 relative top-32 py-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {techs.map((tech) => (
-            <motion.div
-              key={tech.id}
-              className="relative cursor-pointer"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedTech(selectedTech?.id === tech.id ? null : tech)}
-            >
-              {/* Ombre portée */}
-              <div
-                className={`
-                absolute inset-0 rounded-xl
-                ${tech.shadowColor}
-                transform translate-x-1 translate-y-1 sm:translate-x-2 sm:translate-y-2
-              `}
-              ></div>
-
-              {/* Carte principale */}
-              <motion.div
-                className={`
-                  relative z-10
-                  h-28 sm:h-36 rounded-xl 
-                  ${tech.bgColor}
-                  border-4 sm:border-[6px] ${tech.borderColor}
-                  flex items-center
-                  overflow-hidden
-                  p-3 sm:p-4
-                  hover:shadow-xl transition-all
-                  dark:shadow-lg dark:shadow-black/20
-                `}
-              >
-                {/* Rayures de fond */}
-                <div
-                  className={`
-                  absolute inset-0 
-                  bg-gradient-to-br ${tech.stripes}
-                  opacity-50
-                `}
-                  style={{
-                    backgroundImage:
-                      "repeating-linear-gradient(-45deg, transparent 0px, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px)",
-                  }}
+      <motion.div
+        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 12, scale: 0.98 }}
+        transition={{ duration: 0.2 }}
+        className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-neutral-900 dark:ring-1 dark:ring-neutral-800"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          aria-label="Fermer"
+          className="absolute right-4 top-4 text-neutral-400 transition-colors hover:text-neutral-900 dark:hover:text-neutral-100"
+        >
+          ✕
+        </button>
+        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+          {tech.name}
+        </h3>
+        <p className="mt-2 text-[15px] leading-relaxed text-neutral-600 dark:text-neutral-400">
+          {tech.description}
+        </p>
+        {tech.notes && tech.notes.length > 0 ? (
+          <ul className="mt-5 space-y-2 text-sm text-neutral-700 dark:text-neutral-300">
+            {tech.notes.map((note) => (
+              <li key={note} className="flex items-start gap-2">
+                <span
+                  aria-hidden
+                  className="mt-2 inline-block h-1 w-1 flex-shrink-0 rounded-full bg-[#2563eb]"
                 />
-
-                {/* Contenu */}
-                <div className="relative flex flex-col justify-between h-full w-full">
-                  <h3
-                    className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white"
-                    style={{
-                      fontFamily: '"Lilita One", cursive',
-                      textShadow: "1px 1px 0 rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    {tech.name}
-                  </h3>
-
-                  <div className="flex justify-between items-end w-full">
-                    <p className="text-xs sm:text-sm text-slate-800 dark:text-white dark:text-opacity-90 line-clamp-2 flex-1 mr-2 font-medium">
-                      {tech.description}
-                    </p>
-                    <div
-                      className={`
-                      w-8 h-8 sm:w-10 sm:h-10
-                      rounded-full flex-shrink-0
-                      bg-gradient-to-br ${tech.accentColor}
-                      border-2 sm:border-4 ${tech.borderColor}
-                      flex items-center justify-center
-                      text-white font-bold
-                      dark:border-opacity-90
-                    `}
-                    >
-                      ★
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          ))}
-        </div>
-
-        <AnimatePresence>
-          {selectedTech && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="fixed inset-0 z-50 p-4 flex items-center justify-center bg-black/50 dark:bg-black/80"
-              onClick={(e) => {
-                if (e.target === e.currentTarget) setSelectedTech(null)
-              }}
-            >
-              <motion.div
-                className={`
-                  w-full max-w-2xl
-                  rounded-xl
-                  ${selectedTech.bgColor}
-                  border-4 sm:border-[6px] ${selectedTech.borderColor}
-                  relative
-                  max-h-[90vh] overflow-y-auto
-                  dark:shadow-2xl dark:shadow-black/50
-                `}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Rayures de fond avec opacité réduite en mode sombre */}
-                <div
-                  className={`
-                  absolute inset-0 
-                  bg-gradient-to-br ${selectedTech.stripes}
-                  opacity-30 dark:opacity-20
-                `}
-                  style={{
-                    backgroundImage:
-                      "repeating-linear-gradient(-45deg, transparent 0px, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px)",
-                  }}
-                />
-
-                <div className="relative p-4 sm:p-6">
-                  <div className="flex justify-between items-start mb-6">
-                    <h2
-                      className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white"
-                      style={{
-                        fontFamily: '"Lilita One", cursive',
-                        textShadow: "2px 2px 0 rgba(0,0,0,0.1)",
-                      }}
-                    >
-                      {selectedTech.name}
-                    </h2>
-                    <button
-                      onClick={() => setSelectedTech(null)}
-                      className={`
-                        p-2 sm:p-3 rounded-xl
-                        bg-gradient-to-br ${selectedTech.accentColor}
-                        text-white font-bold
-                        border-2 sm:border-4 ${selectedTech.borderColor}
-                        hover:scale-105 active:scale-95
-                        transition-transform
-                        dark:border-opacity-90
-                      `}
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    {[
-                      { title: "Super-pouvoirs", items: selectedTech.powers },
-                      { title: "Talents spéciaux", items: selectedTech.talents },
-                    ].map((section) => (
-                      <div
-                        key={section.title}
-                        className={`
-                          p-4 rounded-xl
-                          bg-white/70 dark:bg-slate-900/90 backdrop-blur-sm
-                          border-2 sm:border-4 ${selectedTech.borderColor}
-                          relative
-                        `}
-                      >
-                        <h3
-                          className="font-bold text-xl sm:text-2xl mb-3 text-slate-900 dark:text-white"
-                          style={{ fontFamily: '"Lilita One", cursive' }}
-                        >
-                          {section.title}
-                        </h3>
-                        <ul className="space-y-2">
-                          {section.items.map((item, i) => (
-                            <li
-                              key={i}
-                              className="flex items-center gap-2 text-sm sm:text-base text-slate-800 dark:text-white dark:text-opacity-90"
-                            >
-                              <span
-                                className={`
-                                w-6 h-6 sm:w-8 sm:h-8
-                                flex items-center justify-center
-                                rounded-full flex-shrink-0
-                                bg-gradient-to-br ${selectedTech.accentColor}
-                                text-white border-2 ${selectedTech.borderColor}
-                                dark:border-opacity-90
-                              `}
-                              >
-                                ★
-                              </span>
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
+                {note}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {tech.url ? (
+          <a
+            href={tech.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-[#2563eb] transition-colors hover:text-[#1d4ed8] dark:text-[#60a5fa] dark:hover:text-[#93c5fd]"
+          >
+            Site officiel
+            <span aria-hidden>↗</span>
+          </a>
+        ) : null}
+      </motion.div>
+    </motion.div>
   )
 }
 
-export default VintageTechCards
+export default function TechStack() {
+  const [selected, setSelected] = useState<Tech | null>(null)
+
+  return (
+    <main className="min-h-screen bg-gray-50 pt-24 sm:pt-28 pb-24 dark:bg-neutral-900">
+      <div className="mx-auto max-w-4xl px-6">
+        <header className="mb-16">
+          <p className="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-500">
+            Stack
+          </p>
+          <h1 className="mt-1 text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+            Avec quoi je travaille
+          </h1>
+          <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-neutral-600 dark:text-neutral-400">
+            Outils que j&apos;utilise au quotidien — par familiarité, par confort, ou
+            parce qu&apos;ils résolvent vraiment bien un problème. Cliquez sur un
+            élément pour les détails.
+          </p>
+        </header>
+
+        <div className="space-y-16">
+          {categories.map((cat) => (
+            <section key={cat.title}>
+              <div className="mb-6 flex items-baseline justify-between border-b border-neutral-200 pb-3 dark:border-neutral-800">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                  {cat.title}
+                </h2>
+                <p className="text-xs uppercase tracking-wider text-neutral-500">
+                  {cat.subtitle}
+                </p>
+              </div>
+              <ul className="grid grid-cols-1 gap-px overflow-hidden rounded-lg bg-neutral-200 sm:grid-cols-2 lg:grid-cols-3 dark:bg-neutral-800">
+                {cat.items.map((tech) => (
+                  <li key={tech.name}>
+                    <button
+                      type="button"
+                      onClick={() => setSelected(tech)}
+                      className="group flex h-full w-full flex-col items-start gap-1.5 bg-gray-50 px-5 py-4 text-left transition-colors hover:bg-white dark:bg-neutral-900 dark:hover:bg-neutral-800"
+                    >
+                      <span className="font-medium text-neutral-900 transition-colors group-hover:text-[#2563eb] dark:text-neutral-100 dark:group-hover:text-[#60a5fa]">
+                        {tech.name}
+                      </span>
+                      <span className="line-clamp-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                        {tech.description}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      </div>
+
+      {selected ? (
+        <TechDetail tech={selected} onClose={() => setSelected(null)} />
+      ) : null}
+    </main>
+  )
+}

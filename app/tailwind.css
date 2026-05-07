@@ -12,6 +12,18 @@ body {
   }
 }
 
+/* Fixed Navbar (h-16 sm:h-20) compensation for in-page anchor scrolling */
+html {
+  scroll-padding-top: 5.5rem;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* Add your custom styles here */
 
 .perspective-1000 {
@@ -180,3 +192,196 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/* ------------------------------------------------------------- */
+/* Blog : palette dédiée, typographie Charter/Lora, Shiki dual   */
+/* ------------------------------------------------------------- */
+
+.blog-surface {
+  background-color: #fafafa;
+  color: #1a1a1a;
+  font-family: Charter, Lora, "Iowan Old Style", "Apple Garamond", Baskerville,
+    "Times New Roman", serif;
+}
+
+html.dark .blog-surface {
+  background-color: #0d0d0d;
+  color: #e8e8e8;
+}
+
+.blog-ui {
+  font-family: -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui,
+    "Segoe UI", Roboto, sans-serif;
+}
+
+/* Shiki — rehype-pretty-code dual theme via CSS variables */
+.prose-blog pre,
+.prose-blog code {
+  font-family: "JetBrains Mono", "Fira Code", "IBM Plex Mono", ui-monospace,
+    SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.prose-blog pre {
+  background-color: #f4f4f5;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  line-height: 1.55;
+}
+
+html.dark .prose-blog pre {
+  background-color: #0a0a0a;
+  border-color: #1f1f1f;
+}
+
+.prose-blog pre > code {
+  background: transparent;
+  padding: 0;
+  font-weight: inherit;
+  color: inherit;
+  display: grid;
+}
+
+.prose-blog :not(pre) > code {
+  background-color: #f4f4f5;
+  color: #0a0a0a;
+  padding: 0.15em 0.35em;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+.prose-blog :not(pre) > code::before,
+.prose-blog :not(pre) > code::after {
+  content: none;
+}
+
+html.dark .prose-blog :not(pre) > code {
+  background-color: #1a1a1a;
+  color: #fafafa;
+}
+
+/* Shiki tokens : rehype-pretty-code injecte --shiki-light/--shiki-dark */
+.prose-blog code span {
+  color: var(--shiki-light);
+}
+
+html.dark .prose-blog code span {
+  color: var(--shiki-dark);
+}
+
+/* line numbers / highlighted lines (rehype-pretty-code) */
+.prose-blog code[data-line-numbers] {
+  counter-reset: line;
+}
+
+.prose-blog code[data-line-numbers] > [data-line]::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 1.25rem;
+  margin-right: 1rem;
+  text-align: right;
+  color: #a3a3a3;
+}
+
+.prose-blog [data-highlighted-line] {
+  background-color: rgba(37, 99, 235, 0.08);
+  border-left: 2px solid #2563eb;
+  padding-left: calc(1.25rem - 2px);
+  margin-left: -1.25rem;
+}
+
+/* Liens articles : underline subtle, accent on hover */
+.prose-blog a {
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  transition: color 150ms ease;
+}
+
+.prose-blog a:hover {
+  color: #2563eb;
+}
+
+html.dark .prose-blog a:hover {
+  color: #60a5fa;
+}
+
+/* Tables in articles : scroll horizontal sur petits écrans, bordures sobres */
+.prose-blog table {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  margin: 1.5em 0;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.prose-blog thead {
+  border-bottom: 2px solid #d4d4d4;
+}
+
+html.dark .prose-blog thead {
+  border-bottom-color: #404040;
+}
+
+.prose-blog th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.6em 1em 0.6em 0;
+  color: #0a0a0a;
+}
+
+html.dark .prose-blog th {
+  color: #fafafa;
+}
+
+.prose-blog td {
+  padding: 0.6em 1em 0.6em 0;
+  border-bottom: 1px solid #e5e5e5;
+  vertical-align: top;
+}
+
+html.dark .prose-blog td {
+  border-bottom-color: #262626;
+}
+
+.prose-blog tr:last-child td {
+  border-bottom: none;
+}
+
+.prose-blog th:last-child,
+.prose-blog td:last-child {
+  padding-right: 0;
+}
+
+/* Heading permalink anchors (rehype-autolink-headings) */
+.prose-blog .heading-anchor {
+  margin-left: 0.5ch;
+  border-bottom: none;
+  color: #d4d4d4;
+  opacity: 0;
+  transition: opacity 150ms ease, color 150ms ease;
+  text-decoration: none;
+}
+
+.prose-blog h2:hover .heading-anchor,
+.prose-blog h3:hover .heading-anchor,
+.prose-blog h4:hover .heading-anchor,
+.prose-blog .heading-anchor:focus {
+  opacity: 1;
+}
+
+.prose-blog .heading-anchor:hover {
+  color: #2563eb;
+}
+
+html.dark .prose-blog .heading-anchor {
+  color: #404040;
+}
+
+html.dark .prose-blog .heading-anchor:hover {
+  color: #60a5fa;
+}
+

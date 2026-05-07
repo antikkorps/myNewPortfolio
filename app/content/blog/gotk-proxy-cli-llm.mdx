@@ -1,0 +1,120 @@
+---
+title: "GoTK : pourquoi j'ai écrit un proxy CLI pour mes LLMs"
+description: "Quand on travaille avec Claude Code ou un autre agent en CLI, la qualité de la sortie de tes commandes impacte directement le coût et la pertinence des réponses. GoTK est un outil que j'ai écrit pour nettoyer ces sorties avant qu'elles atteignent le LLM."
+date: "2026-06-05"
+tags: ["go", "llm", "claude-code", "cli", "tooling", "open-source"]
+readingTime: 10
+draft: false
+---
+
+J'utilise [Claude Code](https://www.anthropic.com/claude-code) au quotidien. Et plus j'avance avec ce genre d'agents, plus je me rends compte qu'on parle énormément de prompting, d'agents, d'orchestration multi-modèles — et très peu de **ce qu'on envoie au modèle** quand un agent invoque des outils.
+
+Pourtant, dans un workflow agentique typique, voilà ce qui se passe : l'agent décide d'exécuter une commande, capture la sortie, et l'envoie dans son contexte. Si la sortie fait 5000 lignes de bruit (codes ANSI, séparateurs décoratifs, lignes dupliquées, stack traces verbeuses), c'est 5000 lignes de tokens consommés pour rien. Pire, c'est 5000 lignes qui diluent l'attention du modèle et dégradent sa réponse.
+
+J'ai écrit [GoTK](https://github.com/antikkorps/GoTK) pour résoudre ce problème. C'est un outil CLI en Go qui s'intercale entre les commandes shell et l'agent LLM, pour nettoyer la sortie avant qu'elle ne consomme du contexte.
+
+## Le problème que je n'arrivais plus à ignorer
+
+Tu lances `pnpm test` dans un projet réel : tu as 5601 lignes en sortie. Sur ces 5601 lignes, peut-être 50 te disent quelque chose d'utile (les tests qui ont échoué, les erreurs réelles). Le reste, c'est :
+
+- Des dizaines de lignes "PASS [path]" identiques à 90%
+- Les bannières du test runner avec des séparateurs ASCII
+- Des codes couleur ANSI partout (`\x1b[32m`, `\x1b[0m`, etc.)
+- Les arborescences répétées avec les mêmes préfixes de chemins
+- Les "watching for changes..." en boucle si tu es en mode watch
+- Des warnings de dépendances qui n'ont rien à voir avec ton bug
+
+Quand tu lis ça toi-même, ton cerveau fait le tri instantanément — tu sautes au passage rouge, tu identifies l'erreur, tu ignores le reste. Mais quand tu envoies ces 5601 lignes à un LLM, **tout est traité avec la même importance**. Et au prix actuel des tokens d'entrée (même Claude est à plusieurs dollars par million), tu paies pour du bruit, et tu réduis la fenêtre de contexte disponible pour les choses qui comptent vraiment.
+
+Sur les benchmarks que j'ai faits avec GoTK :
+
+| Commande | Réduction typique |
+|----------|-------------------|
+| `grep -rn` | **-95%** |
+| `git log` | **-90%** |
+| `find` | **-70%** |
+| `ls -la` | **-51%** |
+| `pnpm test` (5601 lignes réelles) | **-98%** |
+
+Ce ne sont pas des chiffres que j'invente pour faire joli. Ce sont des mesures sur de vrais outputs de mes propres projets. Et ces 98% sur le test runner, c'est pas une optimisation marginale : c'est une transformation qualitative de ce que ton agent reçoit.
+
+## Pourquoi j'ai écrit ça plutôt que d'utiliser autre chose
+
+J'ai cherché. Vraiment. Avant d'écrire la moindre ligne de Go, j'ai regardé ce qui existait : des wrappers shell custom, des scripts awk/sed bricolés, des projets npm qui filtrent des sortties spécifiques (genre `jest-silent-reporter`). Rien ne faisait le boulot dans la généralité dont j'avais besoin.
+
+Mes critères :
+
+**Couverture large** : pas juste les tests, mais aussi grep, find, git, go build, npm, et tous les outils qu'un agent peut invoquer dans une session. Ça veut dire détecter automatiquement la commande et appliquer les optimisations spécifiques.
+
+**Conservatisme par défaut** : ne jamais perdre une information qui pourrait être importante. Une stack trace tronquée au mauvais endroit peut cacher l'erreur réelle. Un `--max-lines` mal calibré peut sacrifier le test qui a échoué.
+
+**Composabilité** : les filtres doivent être chaînables, et chacun doit faire une seule chose. C'est l'esprit Unix appliqué au filtrage LLM.
+
+**Multi-mode** : direct (`gotk grep ...`), pipe (`grep ... | gotk`), watch, daemon (toute la session shell filtrée), MCP server pour les agents qui supportent ce protocole. Chaque workflow a ses préférences.
+
+**Sécurité** : les sorties peuvent contenir des secrets qui n'ont rien à faire dans le contexte du LLM. Détection et redaction automatique des API keys, tokens, mots de passe avant l'envoi.
+
+Aucun outil existant ne cochait toutes ces cases. Donc je l'ai écrit.
+
+## L'architecture en deux mots
+
+GoTK fonctionne sur le principe d'une **filter chain** : la sortie brute d'une commande passe à travers une série de filtres composables, chacun faisant une transformation simple, et ressort nettoyée à l'autre bout.
+
+```
+command output
+      |
+      v
+  [Capture] ---- stdout captured, stderr passed through
+      |
+      v
+  [Detect] ----- identify command type (by name or output patterns)
+      |
+      v
+  [Filter Chain]
+      |-- StripANSI ............. remove escape codes
+      |-- NormalizeWhitespace ... collapse blanks
+      |-- Dedup ................. collapse consecutive duplicates
+      |-- (command-specific) .... grep grouping, path compression, etc.
+      |-- CompressStackTraces ... condense Go/Python/Node.js traces
+      |-- RedactSecrets ......... API keys, tokens to [REDACTED]
+      |-- Truncate .............. cap at --max-lines (head + tail)
+      |
+      v
+  clean output (stdout)
+```
+
+Les filtres génériques tournent toujours. Les filtres spécifiques à une commande (par exemple le groupage intelligent des résultats `grep` par fichier) s'ajoutent quand la détection identifie le type de commande. La détection elle-même se fait soit sur le nom du binaire (mode direct), soit par pattern matching sur les premières lignes de sortie (mode pipe).
+
+Un point de design important : **stderr passe sans modification**. Les agents et les humains ont besoin de voir les erreurs telles quelles. GoTK ne nettoie que stdout, qui contient la sortie "métier" qu'on veut transmettre au LLM.
+
+## Quelques choix que j'ai défendus (et qui ont impliqué du recul)
+
+**Le mode "conservative" comme principe directeur.** Au début, j'étais tenté d'être agressif — supprimer tout ce qui ressemblait à du bruit. Mais après avoir perdu deux fois le message d'erreur réel à cause d'un filtrage trop zélé, j'ai inversé le défaut : on garde sauf si on est sûr que c'est inutile. Trois modes existent (`conservative`, `balanced`, `aggressive`) mais le défaut est "balanced" et privilégie la préservation de l'info.
+
+**Les `always_keep` regex.** Tu peux dire à GoTK "ces lignes-là, ne les touche jamais" via une config TOML. Pour mes projets, j'ai des patterns comme `^ERROR:`, `^FATAL:`, `panic:`, `Error:` qui sont garantis de remonter intacts. C'est une soupape de sûreté importante quand on automatise du filtrage.
+
+**Le pattern learning.** Une feature dont je suis content : tu peux dire à GoTK "regarde cette commande tourner plusieurs fois et apprends ce qui est du bruit récurrent dans MON projet". Après quelques sessions, il te suggère des regex à ajouter à ta config. C'est utile parce que chaque codebase a ses propres "noise patterns" (logs custom, prefixes de monitoring, headers de framework) que des règles génériques ne peuvent pas anticiper.
+
+**La redaction automatique des secrets.** GoTK détecte des patterns d'API keys (AWS, GitHub tokens, OAuth bearer, JWT, etc.) et les remplace par `[REDACTED]` avant que la sortie n'atteigne le LLM. C'est une couche de sécurité qui me semble essentielle quand on intègre des agents dans un workflow réel — tu ne veux jamais qu'une variable d'environnement leakée dans un log se retrouve envoyée à une API externe.
+
+**Pas de mode Windows pour le daemon.** Le mode daemon (qui filtre toute une session shell) repose sur des mécanismes Unix qui n'ont pas d'équivalent propre sous Windows. Plutôt que de bricoler un fallback médiocre, j'ai assumé : sous Windows, tu utilises le mode direct ou le hook Claude Code. La doc est claire là-dessus.
+
+## Ce que j'ai appris en l'écrivant
+
+**Go était le bon choix.** J'avais hésité entre [Rust](https://www.rust-lang.org/) (que j'utilise pour mon DAW) et [Go](https://go.dev/) pour ce projet. J'ai choisi Go pour deux raisons : la rapidité de développement sur du tooling CLI, et la facilité de cross-compilation pour fournir des binaires Linux/macOS/Windows sans douleur. Pour un outil qui doit être installable d'une commande sur n'importe quelle machine de dev, Go est imbattable. Rust m'aurait apporté plus de garanties de performance, mais sur du parsing de strings, la différence est invisible et le coût en temps de dev aurait été significatif.
+
+**Le filtrage est plus subtil qu'il n'y paraît.** Mon premier prototype était basique : strip ANSI, dedup, truncate. Il marchait à 60%. Les 40% restants (les vrais gains) sont venus en regardant attentivement chaque type de commande et en comprenant la **structure** de sa sortie. Un `grep -rn` n'a pas la même forme qu'un `git log`, qui n'a pas la même forme qu'un `find`. Chaque commande mérite un filtre dédié pour exploiter sa structure.
+
+**La mesure est essentielle.** GoTK a un mode `--measure` qui log chaque invocation et génère des rapports périodiques. Sans ça, je ne saurais pas si mes filtres font vraiment ce que je crois. Avec ça, je peux dire à n'importe qui "sur ma dernière semaine de travail, j'ai économisé X tokens, soit Y% de ce que j'aurais consommé sans GoTK". C'est ce qui transforme l'outil d'un truc bricolé en un truc défendable.
+
+## Le constat plus large
+
+GoTK est un outil très spécifique qui résout un problème très spécifique. Mais il pointe vers une question plus large : **les workflows agentiques actuels ont une dette de plomberie**. On parle beaucoup des modèles, des agents, des prompts, mais infiniment moins de tout l'écosystème d'outils CLI qu'un agent invoque et qui n'ont pas été conçus pour ça.
+
+Les sorties verbeuses, les codes ANSI, les warnings dépréciés, les bannières marketing en haut des outputs — tout ça était acceptable quand un humain les lisait. Ça ne l'est plus quand un agent les digère et que tu paies pour chaque token. Les outils CLI doivent évoluer, soit nativement (un `--llm-friendly` flag par exemple), soit via des proxies comme GoTK.
+
+Je serais surpris qu'il n'y ait pas, dans les 12-18 prochains mois, plein d'autres outils dans cette niche. Et tant mieux. La sobriété token, c'est de l'écologie numérique appliquée — moins de tokens c'est moins de calcul, moins d'énergie, moins de coût pour tout le monde.
+
+En attendant, GoTK est sur GitHub sous licence MIT. Les contributions sont bienvenues, et si tu utilises Claude Code ou un autre agent CLI au quotidien, je serais curieux de connaître ton retour.
+
+[GitHub : antikkorps/GoTK](https://github.com/antikkorps/GoTK)
