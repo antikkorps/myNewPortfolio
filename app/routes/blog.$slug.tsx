@@ -1,15 +1,17 @@
 import type { LoaderFunctionArgs, MetaFunction } from "react-router"
 import { Link, useLoaderData } from "react-router"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 import { BlogAvatar } from "~/components/BlogAvatar"
-import { formatDate, getPost, posts } from "~/lib/posts"
-import { AUTHOR, SITE_NAME, SITE_URL } from "~/lib/site"
+import { TableOfContents } from "~/components/TableOfContents"
+import { formatDate, getNeighbors, getPost, posts } from "~/lib/posts"
+import { AUTHOR, ogImageForSlug, SITE_NAME, SITE_URL } from "~/lib/site"
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const post = getPost(params.slug ?? "")
   if (!post) {
     throw new Response("Article introuvable", { status: 404 })
   }
+  const { prev, next } = getNeighbors(post.slug)
   return {
     slug: post.slug,
     title: post.title,
@@ -17,6 +19,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
     date: post.date,
     tags: post.tags ?? [],
     readingTime: post.readingTime,
+    prev: prev ? { slug: prev.slug, title: prev.title } : null,
+    next: next ? { slug: next.slug, title: next.title } : null,
   }
 }
 
@@ -26,12 +30,14 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   }
   const url = `${SITE_URL}/blog/${data.slug}`
   const title = `${data.title} — ${SITE_NAME}`
+  const ogImage = `${SITE_URL}${ogImageForSlug(data.slug)}`
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: data.title,
     description: data.description,
     datePublished: data.date,
+    image: ogImage,
     author: {
       "@type": "Person",
       name: AUTHOR.name,
@@ -48,12 +54,14 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     { property: "og:title", content: data.title },
     { property: "og:description", content: data.description },
     { property: "og:url", content: url },
+    { property: "og:image", content: ogImage },
     { property: "article:published_time", content: data.date },
     { property: "article:author", content: AUTHOR.name },
     ...data.tags.map((tag) => ({ property: "article:tag", content: tag })),
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: data.title },
     { name: "twitter:description", content: data.description },
+    { name: "twitter:image", content: ogImage },
     {
       "script:ld+json": jsonLd,
     },
@@ -68,7 +76,13 @@ export default function BlogPost() {
 
   return (
     <main className="blog-surface min-h-screen pt-24 sm:pt-28 pb-24">
-      <div className="mx-auto max-w-2xl px-6">
+      <div className="relative mx-auto max-w-2xl px-6">
+        <aside
+          aria-hidden="false"
+          className="absolute left-full top-0 ml-12 hidden w-56 xl:block"
+        >
+          <TableOfContents />
+        </aside>
         <Link
           to="/blog"
           prefetch="intent"
@@ -109,15 +123,57 @@ export default function BlogPost() {
           </div>
         </footer>
 
+        {(data.prev || data.next) && (
+          <nav
+            className="blog-ui mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2"
+            aria-label="Articles adjacents"
+          >
+            {data.prev ? (
+              <Link
+                to={`/blog/${data.prev.slug}`}
+                prefetch="intent"
+                className="group block rounded-lg border border-neutral-200 p-4 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
+              >
+                <div className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-neutral-500">
+                  <ArrowLeft size={12} aria-hidden /> Article précédent
+                </div>
+                <p className="mt-1 text-sm font-medium text-[#0a0a0a] group-hover:text-[#2563eb] dark:text-[#fafafa] dark:group-hover:text-[#60a5fa]">
+                  {data.prev.title}
+                </p>
+              </Link>
+            ) : (
+              <div />
+            )}
+            {data.next ? (
+              <Link
+                to={`/blog/${data.next.slug}`}
+                prefetch="intent"
+                className="group block rounded-lg border border-neutral-200 p-4 text-right transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
+              >
+                <div className="flex items-center justify-end gap-1.5 text-xs uppercase tracking-wider text-neutral-500">
+                  Article suivant <ArrowRight size={12} aria-hidden />
+                </div>
+                <p className="mt-1 text-sm font-medium text-[#0a0a0a] group-hover:text-[#2563eb] dark:text-[#fafafa] dark:group-hover:text-[#60a5fa]">
+                  {data.next.title}
+                </p>
+              </Link>
+            ) : (
+              <div />
+            )}
+          </nav>
+        )}
+
         {data.tags.length > 0 ? (
           <div className="blog-ui mt-8 flex flex-wrap gap-2">
             {data.tags.map((tag) => (
-              <span
+              <Link
                 key={tag}
-                className="rounded-full border border-neutral-200 px-2.5 py-0.5 text-xs text-neutral-600 dark:border-neutral-800 dark:text-neutral-400"
+                to={`/blog/tags/${encodeURIComponent(tag.toLowerCase())}`}
+                prefetch="intent"
+                className="rounded-full border border-neutral-200 px-2.5 py-0.5 text-xs text-neutral-600 transition-colors hover:border-[#2563eb] hover:text-[#2563eb] dark:border-neutral-800 dark:text-neutral-400 dark:hover:border-[#60a5fa] dark:hover:text-[#60a5fa]"
               >
                 #{tag}
-              </span>
+              </Link>
             ))}
           </div>
         ) : null}

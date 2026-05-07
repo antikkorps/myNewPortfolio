@@ -295,3 +295,38 @@ html.dark .prose-blog code span {
 html.dark .prose-blog a:hover {
   color: #60a5fa;
 }
+
+/* Heading permalink anchors (rehype-autolink-headings) */
+.prose-blog .heading-anchor {
+  margin-left: 0.5ch;
+  border-bottom: none;
+  color: #d4d4d4;
+  opacity: 0;
+  transition: opacity 150ms ease, color 150ms ease;
+  text-decoration: none;
+}
+
+.prose-blog h2:hover .heading-anchor,
+.prose-blog h3:hover .heading-anchor,
+.prose-blog h4:hover .heading-anchor,
+.prose-blog .heading-anchor:focus {
+  opacity: 1;
+}
+
+.prose-blog .heading-anchor:hover {
+  color: #2563eb;
+}
+
+html.dark .prose-blog .heading-anchor {
+  color: #404040;
+}
+
+html.dark .prose-blog .heading-anchor:hover {
+  color: #60a5fa;
+}
+
+.prose-blog h2,
+.prose-blog h3,
+.prose-blog h4 {
+  scroll-margin-top: 5rem;
+}

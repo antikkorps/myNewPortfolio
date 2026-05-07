@@ -9,4 +9,6 @@ export const AUTHOR = {
   twitter: "",
   github: "antikkorps",
 }
-export const OG_IMAGE = "/images/og-default.png"
+export const OG_IMAGE = "/og.png"
+export const ogImageForSlug = (slug: string) =>
+  `/og.png?slug=${encodeURIComponent(slug)}`

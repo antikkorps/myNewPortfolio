@@ -1,0 +1,52 @@
+import { posts } from "~/lib/posts"
+import { AUTHOR, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "~/lib/site"
+
+function escape(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;")
+}
+
+export async function loader() {
+  const items = posts
+    .map((p) => {
+      const url = `${SITE_URL}/blog/${p.slug}`
+      const pubDate = new Date(p.date).toUTCString()
+      const categories = (p.tags ?? [])
+        .map((t) => `<category>${escape(t)}</category>`)
+        .join("")
+      return `<item>
+  <title>${escape(p.title)}</title>
+  <link>${url}</link>
+  <guid isPermaLink="true">${url}</guid>
+  <pubDate>${pubDate}</pubDate>
+  <description>${escape(p.description)}</description>
+  ${categories}
+</item>`
+    })
+    .join("\n")
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>${escape(SITE_NAME)}</title>
+<link>${SITE_URL}/blog</link>
+<atom:link href="${SITE_URL}/blog/rss.xml" rel="self" type="application/rss+xml" />
+<description>${escape(SITE_DESCRIPTION)}</description>
+<language>fr-FR</language>
+<copyright>${escape(AUTHOR.name)}</copyright>
+<lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+${items}
+</channel>
+</rss>`
+
+  return new Response(xml, {
+    headers: {
+      "Content-Type": "application/rss+xml; charset=utf-8",
+      "Cache-Control": "public, max-age=3600",
+    },
+  })
+}

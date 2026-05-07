@@ -46,6 +46,20 @@ export function getPost(slug: string): Post | undefined {
   return posts.find((p) => p.slug === slug)
 }
 
+export function getNeighbors(slug: string): {
+  prev: Post | null
+  next: Post | null
+} {
+  const idx = posts.findIndex((p) => p.slug === slug)
+  if (idx === -1) return { prev: null, next: null }
+  // posts are sorted DESC by date: index 0 = most recent
+  // "next" article (newer) is idx-1, "prev" (older) is idx+1
+  return {
+    next: idx > 0 ? posts[idx - 1] : null,
+    prev: idx < posts.length - 1 ? posts[idx + 1] : null,
+  }
+}
+
 export function formatDate(iso: string, locale = "fr-FR"): string {
   const d = new Date(iso)
   return d.toLocaleDateString(locale, {
