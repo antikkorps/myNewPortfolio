@@ -1,4 +1,4 @@
-import type { MetaFunction } from "@remix-run/node"
+import type { MetaFunction } from "react-router"
 import AnimatedHero from "~/components/AnimatedHero"
 import Terminal from "~/components/Terminal"
 import { pageMeta } from "~/lib/seo"

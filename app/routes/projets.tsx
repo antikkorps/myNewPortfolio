@@ -1,4 +1,4 @@
-import type { MetaFunction } from "@remix-run/node"
+import type { MetaFunction } from "react-router"
 import { motion } from "motion/react"
 import { ProjectCard, ProjectCardProps } from "~/components/ProjectCard"
 import { pageMeta } from "~/lib/seo"

@@ -1,5 +1,5 @@
 // App.tsx
-import type { LinksFunction, MetaFunction } from "@remix-run/node"
+import type { LinksFunction, MetaFunction } from "react-router"
 import {
   Links,
   Meta,
@@ -7,7 +7,7 @@ import {
   Scripts,
   ScrollRestoration,
   useLocation,
-} from "@remix-run/react"
+} from "react-router"
 import CursorHalo from "./components/CursorHalo"
 import Navbar from "./components/Navbar"
 import { ThemeProvider, themeScript } from "./contexts/ThemeContext"

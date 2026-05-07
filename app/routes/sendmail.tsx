@@ -1,5 +1,5 @@
-import { type ActionFunction } from "@remix-run/node"
-import { Form, useActionData, useLoaderData, useNavigation } from "@remix-run/react"
+import { type ActionFunction } from "react-router"
+import { Form, useActionData, useLoaderData, useNavigation } from "react-router"
 import { motion } from "framer-motion"
 import { Linkedin, Mail, MapPin, Phone, Send } from "lucide-react"
 import nodemailer from "nodemailer"

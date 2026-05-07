@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node"
+import type { LoaderFunctionArgs, MetaFunction } from "react-router"
 import {
   Form,
   Link,
@@ -6,7 +6,7 @@ import {
   useNavigation,
   useSearchParams,
   useSubmit,
-} from "@remix-run/react"
+} from "react-router"
 import { Search } from "lucide-react"
 import { useEffect, useRef } from "react"
 import { formatDate, posts } from "~/lib/posts"

@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react"
+import { Link } from "react-router"
 import { AppWindowMac, Blocks, BookOpen, Home, Mail, User } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"

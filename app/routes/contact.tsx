@@ -1,5 +1,5 @@
-import type { MetaFunction } from "@remix-run/node"
-import { useLoaderData } from "@remix-run/react"
+import type { MetaFunction } from "react-router"
+import { useLoaderData } from "react-router"
 import { Github, LetterText, Linkedin, Mail, Phone } from "lucide-react"
 import { useState } from "react"
 import AnimatedProfile from "../components/AnimatedProfil"
