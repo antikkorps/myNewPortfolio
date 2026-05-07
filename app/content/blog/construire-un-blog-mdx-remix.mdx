@@ -1,0 +1,104 @@
+---
+title: "Construire un blog MDX dans Remix"
+date: "2026-04-28"
+description: "Retour d'expérience sur l'intégration de MDX, Shiki et @tailwindcss/typography dans une app Remix v2 + Vite."
+tags: ["remix", "mdx", "vite"]
+readingTime: 3
+---
+
+import { Note } from "../../components/mdx/Note"
+import { Warning } from "../../components/mdx/Warning"
+import { Aside } from "../../components/mdx/Aside"
+
+Construire un blog dans une app existante, c'est rarement la priorité — jusqu'au
+jour où on en a besoin. Voici comment j'ai branché [MDX](https://mdxjs.com/),
+[Shiki](https://shiki.style/) et un système de typographie soigné dans
+[Remix](https://remix.run/) v2 sans renverser l'architecture.
+
+## Le pipeline en trois plugins
+
+Tout part de [Vite](https://vite.dev/) (`vite.config.ts`). L'ordre des plugins
+compte : MDX **avant** Remix, sinon Remix ne voit pas les `.mdx` comme des
+routes potentielles.
+
+```ts
+import mdx from "@mdx-js/rollup"
+import remarkFrontmatter from "remark-frontmatter"
+import remarkMdxFrontmatter from "remark-mdx-frontmatter"
+import rehypePrettyCode from "rehype-pretty-code"
+
+export default defineConfig({
+  plugins: [
+    mdx({
+      remarkPlugins: [
+        remarkFrontmatter,
+        [remarkMdxFrontmatter, { name: "frontmatter" }],
+      ],
+      rehypePlugins: [
+        [rehypePrettyCode, {
+          theme: { light: "github-light", dark: "github-dark" },
+          keepBackground: false,
+        }],
+      ],
+    }),
+    remix({ /* ... */ }),
+    tsconfigPaths(),
+  ],
+})
+```
+
+<Note>
+  `keepBackground: false` est important si vous voulez piloter le fond des blocs
+  de code via Tailwind/CSS plutôt que via le thème Shiki.
+</Note>
+
+## Lister les articles sans loader serveur
+
+Avec Vite, `import.meta.glob` permet de charger tous les `.mdx` d'un coup :
+
+```ts
+const modules = import.meta.glob<MdxModule>(
+  "../content/blog/*.mdx",
+  { eager: true }
+)
+```
+
+Chaque module expose `default` (le composant React) et `frontmatter` (l'objet
+parsé). Pour la liste, on extrait juste le frontmatter. Pour la page article,
+on rend le composant.
+
+<Warning>
+  L'eager glob met **tout** dans le bundle. Pour 5-10 articles c'est négligeable,
+  au-delà passez en lazy (`{ eager: false }`) et lazy-loadez avec `React.lazy`.
+</Warning>
+
+## Le piège du dual theme Shiki
+
+[`rehype-pretty-code`](https://rehype-pretty.pages.dev/) peut générer un thème
+clair **et** sombre dans le même HTML, en utilisant des CSS variables. Chaque token reçoit `--shiki-light` et
+`--shiki-dark`. À nous de les piloter en CSS :
+
+```css
+.prose code span {
+  color: var(--shiki-light);
+}
+html.dark .prose code span {
+  color: var(--shiki-dark);
+}
+```
+
+<Aside>
+  Attention si vous utilisez `prefers-color-scheme` côté CSS et un toggle JS qui
+  ajoute/retire `.dark` : les deux peuvent se contredire. Restez sur une seule
+  source de vérité (la classe), comme le fait Tailwind avec `darkMode: "class"`.
+</Aside>
+
+## Et la typographie ?
+
+[`@tailwindcss/typography`](https://github.com/tailwindlabs/tailwindcss-typography)
+fait le gros du travail avec sa classe `prose`. Pour override les couleurs sans
+toucher au plugin, on définit une variante custom dans
+[`tailwind.config.ts`](https://tailwindcss.com/) (`typography.blog`) avec les
+bonnes CSS variables (`--tw-prose-body`, `--tw-prose-links`, etc).
+
+Résultat : un article qui ressemble à un article, pas à un dashboard.

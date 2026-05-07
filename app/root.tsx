@@ -1,9 +1,17 @@
 // App.tsx
-import type { LinksFunction } from "@remix-run/node"
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react"
+import type { LinksFunction, MetaFunction } from "@remix-run/node"
+import {
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useLocation,
+} from "@remix-run/react"
 import CursorHalo from "./components/CursorHalo"
 import Navbar from "./components/Navbar"
 import { ThemeProvider, themeScript } from "./contexts/ThemeContext"
+import { AUTHOR, OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "./lib/site"
 
 import "./tailwind.css"
 
@@ -16,13 +24,50 @@ export const links: LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap",
   },
+  { rel: "icon", href: "/favicon.ico" },
 ]
 
+export const meta: MetaFunction = () => {
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: AUTHOR.name,
+    url: SITE_URL,
+    email: `mailto:${AUTHOR.email}`,
+    sameAs: [`https://github.com/${AUTHOR.github}`],
+    jobTitle: "Développeur web full-stack",
+  }
+  const siteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    inLanguage: "fr-FR",
+  }
+  return [
+    { title: SITE_NAME },
+    { name: "description", content: SITE_DESCRIPTION },
+    { name: "author", content: AUTHOR.name },
+    { property: "og:site_name", content: SITE_NAME },
+    { property: "og:locale", content: "fr_FR" },
+    { property: "og:type", content: "website" },
+    { property: "og:image", content: `${SITE_URL}${OG_IMAGE}` },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:image", content: `${SITE_URL}${OG_IMAGE}` },
+    { name: "theme-color", content: "#0d0d0d" },
+    { "script:ld+json": personJsonLd },
+    { "script:ld+json": siteJsonLd },
+  ]
+}
+
 function App() {
+  const location = useLocation()
+  const isBlog = location.pathname.startsWith("/blog")
+
   return (
-    <html lang="en">
+    <html lang="fr">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -36,7 +81,7 @@ function App() {
       >
         <ThemeProvider>
           <Navbar />
-          <CursorHalo />
+          {!isBlog && <CursorHalo />}
           <Outlet />
         </ThemeProvider>
         <ScrollRestoration />

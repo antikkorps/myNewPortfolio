@@ -1,13 +1,15 @@
 import type { MetaFunction } from "@remix-run/node"
 import { motion } from "motion/react"
 import { ProjectCard, ProjectCardProps } from "~/components/ProjectCard"
+import { pageMeta } from "~/lib/seo"
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Mes projets" },
-    { name: "description", content: "Vous trouverez ici mes différents projets" },
-  ]
-}
+export const meta: MetaFunction = () =>
+  pageMeta({
+    title: "Projets",
+    description:
+      "Sélection de projets web réalisés par Franck Vienot : sites Remix, Vue/Nuxt, NestJS, WordPress et autres expérimentations.",
+    path: "/projets",
+  })
 
 export default function ProjetsPage() {
   const projects: ProjectCardProps[] = [

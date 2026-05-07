@@ -1,13 +1,15 @@
 import type { MetaFunction } from "@remix-run/node"
 import AnimatedHero from "~/components/AnimatedHero"
 import Terminal from "~/components/Terminal"
+import { pageMeta } from "~/lib/seo"
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
-  ]
-}
+export const meta: MetaFunction = () =>
+  pageMeta({
+    title: "Accueil",
+    description:
+      "Portfolio de Franck Vienot, développeur web full-stack. Découvrez mes projets, mes technologies et mes articles.",
+    path: "/",
+  })
 
 export default function Index() {
   return (

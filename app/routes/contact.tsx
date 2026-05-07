@@ -1,7 +1,17 @@
+import type { MetaFunction } from "@remix-run/node"
 import { useLoaderData } from "@remix-run/react"
 import { Github, LetterText, Linkedin, Mail, Phone } from "lucide-react"
 import { useState } from "react"
 import AnimatedProfile from "../components/AnimatedProfil"
+import { pageMeta } from "~/lib/seo"
+
+export const meta: MetaFunction = () =>
+  pageMeta({
+    title: "Contact",
+    description:
+      "Contactez Franck Vienot pour discuter d'un projet, d'une mission freelance ou d'une opportunité.",
+    path: "/contact",
+  })
 
 export async function loader() {
   return {

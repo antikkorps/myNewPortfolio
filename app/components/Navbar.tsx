@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react"
-import { AppWindowMac, Blocks, Home, Mail, User } from "lucide-react"
+import { AppWindowMac, Blocks, BookOpen, Home, Mail, User } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 import { useTheme } from "../contexts/ThemeContext"
@@ -13,6 +13,7 @@ const Navbar = () => {
     { name: "Accueil", href: "/", icon: Home },
     { name: "Projets", href: "/projets", icon: AppWindowMac },
     { name: "Technologies", href: "/tech-stacks", icon: Blocks },
+    { name: "Blog", href: "/blog", icon: BookOpen },
     { name: "À propos", href: "/a-propos", icon: User },
     { name: "Contact", href: "/contact", icon: Mail },
   ]
