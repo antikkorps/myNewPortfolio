@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dev2go.netlify.app/sitemap.xml
+Sitemap: https://dev2go.vercel.app/sitemap.xml

@@ -1,4 +1,4 @@
-export const SITE_URL = "https://dev2go.netlify.app"
+export const SITE_URL = "https://dev2go.vercel.app"
 export const SITE_NAME = "Dev2Go — Franck Vienot"
 export const SITE_DESCRIPTION =
   "Portfolio de Franck Vienot, développeur web full-stack. Projets, technologies, articles et contact."
