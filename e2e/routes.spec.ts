@@ -15,8 +15,8 @@ const ROUTES_200 = [
   "/sitemap.xml",
   "/blog/rss.xml",
   "/robots.txt",
-  "/og.png",
-  "/og.png?slug=archi-forgejo-distribuee",
+  "/og/default.png",
+  "/og/archi-forgejo-distribuee.png",
   "/favicon.png",
 ]
 
@@ -93,7 +93,7 @@ test.describe("SEO basics", () => {
     const og = await page
       .locator('meta[property="og:image"]')
       .getAttribute("content")
-    expect(og).toMatch(/^https:\/\/.+og\.png/)
+    expect(og).toMatch(/^https:\/\/.+\/og\/.+\.png$/)
   })
 
   test("robots meta allows indexing site-wide", async ({ page }) => {

@@ -27,7 +27,7 @@ priorité.
 
 ### SEO
 - `<html lang="fr">`, méta site-wide (`author`, `robots:max-image-preview`, `theme-color`, `og:site_name`, `og:locale`, JSON-LD Person + WebSite) statiques dans `<Layout>` (RR7 override les méta parent par défaut)
-- **Open Graph dynamique** : `/og.png` + `/og.png?slug=...` (1200×630 PNG via satori + resvg, font Inter via `@fontsource`)
+- **Open Graph pré-générés au build** : `scripts/build-og.ts` (tsx) génère `public/og/<slug>.png` + `default.png` (1200×630 PNG via satori + resvg). `npm run build` chaîne `build:og && react-router build`. Plus de Vercel Function pour les OG → 0 cold start, servi depuis le CDN edge. La route runtime `app/routes/og[.]png.tsx` est supprimée.
 - **JSON-LD complet** : Person + WebSite site-wide ; Blog + BreadcrumbList sur `/blog` ; **BlogPosting** enrichi (ImageObject avec dimensions, publisher, articleSection, wordCount, timeRequired, dateModified) + BreadcrumbList sur articles ; BreadcrumbList sur tag pages
 - Sitemap.xml : ISO-8601 lastmod, priority/changefreq différenciés, namespace image avec `<image:image>` par article, tag pages incluses
 - Favicon Dicebear PNG dynamique (`/favicon.png`, cache 30j)
@@ -53,29 +53,19 @@ priorité.
 
 ## 🚧 À faire — par priorité
 
-### 1. Pré-générer les OG au build (recommandé maintenant qu'on est sur Vercel)
-
-Actuel : `/og.png?slug=...` est généré **runtime** par une Vercel Function. Sur Vercel, chaque génération = 1 invocation (et coût + cold start).
-
-**Plan :**
-- `scripts/build-og.ts` qui itère `postsMeta` + l'OG par défaut, appelle `renderOgPng` et écrit dans `public/og/<slug>.png` + `public/og/default.png`.
-- `npm run build` enchaîne `npm run build:og && react-router build`.
-- Mettre à jour `app/lib/site.ts` `ogImageForSlug(slug)` → `/og/<slug>.png` (chemin statique servi par le CDN, plus de Function).
-- Garder `/og.png` runtime pour les cas non couverts (e.g. tag pages) ou supprimer carrément la route runtime.
-
-### 2. Vue draft en dev
+### 1. Vue draft en dev
 
 Afficher les articles `draft: true` quand `process.env.NODE_ENV === "development"`. Actuellement filtré partout, ce qui empêche d'écrire en local sans publier.
 
-### 3. Lighthouse CI
+### 2. Lighthouse CI
 
 GitHub Action qui run Lighthouse sur chaque PR. Budget : perf ≥ 90, SEO ≥ 95, a11y ≥ 95. Bloque les régressions silencieuses sur les Core Web Vitals.
 
-### 4. Lazy MDX (full split — quand `posts.length > ~10`)
+### 3. Lazy MDX (full split — quand `posts.length > ~10`)
 
-`/blog/$slug` reste à ~109 KB car eager glob de tous les MDX. À convertir en `import.meta.glob({ eager: false })` + `React.lazy` + Suspense quand le nombre d'articles dépasse ~10. Aujourd'hui non urgent.
+`/blog/$slug` reste à ~110 KB car eager glob de tous les MDX. À convertir en `import.meta.glob({ eager: false })` + `React.lazy` + Suspense quand le nombre d'articles dépasse ~10. Aujourd'hui non urgent.
 
-### 5. Préfetch agressif
+### 4. Préfetch agressif
 
 Passer de `prefetch="intent"` à `prefetch="render"` sur les liens vers la prochaine page de pagination — déjà visible donc bon candidat à charger en avance.
 
@@ -85,7 +75,6 @@ Passer de `prefetch="intent"` à `prefetch="render"` sur les liens vers la proch
 
 - **3 vulns moderate** dans `@vercel/static-config` → `ajv` (transitives de `@vercel/react-router`). **Pas fixable** sans upstream. Acceptable car Vercel-side et build-time only.
 - **`vercel.json`** force `framework: "react-router"`. Si Vercel renomme/retire ce slug, redeploy en échec — fallback : passer le Framework Preset à "Other" depuis le dashboard.
-- **Vercel function cold start** sur `/og.png` la première fois après idle → fix par le point 1 ci-dessus.
 - Le hack `<a href>` dans `ErrorBoundary` (au lieu de `<Link>`) est un workaround pour un comportement RR7 buggué. À retester quand RR7 sort une release qui patche.
 
 ---

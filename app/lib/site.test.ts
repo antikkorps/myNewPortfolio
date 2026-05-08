@@ -28,12 +28,13 @@ describe("site constants", () => {
 })
 
 describe("ogImageForSlug", () => {
-  it("returns the OG path with an encoded slug query", () => {
-    expect(ogImageForSlug("hello")).toBe("/og.png?slug=hello")
+  it("returns the static OG path for a slug", () => {
+    expect(ogImageForSlug("hello")).toBe("/og/hello.png")
   })
 
-  it("encodes special characters in the slug", () => {
-    expect(ogImageForSlug("hello world")).toBe("/og.png?slug=hello%20world")
-    expect(ogImageForSlug("été")).toBe("/og.png?slug=%C3%A9t%C3%A9")
+  it("returns the static OG path even for slugs with hyphens", () => {
+    expect(ogImageForSlug("archi-forgejo-distribuee")).toBe(
+      "/og/archi-forgejo-distribuee.png"
+    )
   })
 })

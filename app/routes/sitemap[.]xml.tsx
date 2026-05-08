@@ -1,5 +1,5 @@
 import { postsMeta } from "~/lib/posts-meta.server"
-import { SITE_URL } from "~/lib/site"
+import { ogImageForSlug, SITE_URL } from "~/lib/site"
 
 interface SitemapEntry {
   loc: string
@@ -40,7 +40,7 @@ export async function loader() {
   const postUrls = postsMeta
     .map((p) => {
       const url = `${SITE_URL}/blog/${p.slug}`
-      const ogImage = `${SITE_URL}/og.png?slug=${p.slug}`
+      const ogImage = `${SITE_URL}${ogImageForSlug(p.slug)}`
       return `<url>
   <loc>${url}</loc>
   <lastmod>${toIso(p.date)}</lastmod>

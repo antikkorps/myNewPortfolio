@@ -15,3 +15,6 @@ node_modules
 
 # Vercel CLI
 .vercel/
+
+# Generated OG images (rebuilt each deploy by scripts/build-og.ts)
+/public/og/

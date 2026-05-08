@@ -11,6 +11,5 @@ export const AUTHOR = {
   linkedin: "https://www.linkedin.com/in/franck-vienot/",
   phone: "",
 }
-export const OG_IMAGE = "/og.png"
-export const ogImageForSlug = (slug: string) =>
-  `/og.png?slug=${encodeURIComponent(slug)}`
+export const OG_IMAGE = "/og/default.png"
+export const ogImageForSlug = (slug: string) => `/og/${slug}.png`
