@@ -1,7 +1,7 @@
 import { reactRouter } from "@react-router/dev/vite"
 import mdx from "@mdx-js/rollup"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
-import rehypePrettyCode from "rehype-pretty-code"
+import { rehypePrettyCode } from "rehype-pretty-code"
 import rehypeSlug from "rehype-slug"
 import remarkFrontmatter from "remark-frontmatter"
 import remarkMdxFrontmatter from "remark-mdx-frontmatter"

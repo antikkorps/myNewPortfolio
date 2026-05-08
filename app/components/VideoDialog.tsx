@@ -19,24 +19,33 @@ export function VideoDialog({ url, title, onClose }: Props) {
     if (!isOpen && dialog.open) dialog.close()
   }, [isOpen])
 
+  // Backdrop click closes the dialog. We register the handler imperatively
+  // (not as an onClick prop) because eslint-jsx-a11y rejects click handlers
+  // on <dialog> — it doesn't account for the implicit role="dialog" — and
+  // the modal's keyboard interactions (Escape) are already handled natively
+  // by the browser via the cancel/close events.
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+    const handleClick = (e: MouseEvent) => {
+      if (e.target === dialog) onClose()
+    }
+    dialog.addEventListener("click", handleClick)
+    return () => dialog.removeEventListener("click", handleClick)
+  }, [onClose])
+
   const embed = url ? toEmbedUrl(url) : null
 
   return (
     <dialog
       ref={dialogRef}
       onClose={onClose}
-      // Any click that bubbles up to <dialog> closes it. The inner content
-      // calls stopPropagation, so only clicks outside the video card reach
-      // this handler — including clicks on the surrounding flex wrapper.
-      onClick={onClose}
       aria-labelledby="video-dialog-title"
+      aria-modal="true"
       className="m-0 max-h-none max-w-none w-full h-full bg-transparent p-4 backdrop:bg-black/70 backdrop:backdrop-blur-sm"
     >
-      <div className="mx-auto flex h-full max-w-5xl items-center justify-center">
-        <div
-          className="relative w-full overflow-hidden rounded-xl bg-black shadow-2xl"
-          onClick={(e) => e.stopPropagation()}
-        >
+      <div className="pointer-events-none mx-auto flex h-full max-w-5xl items-center justify-center">
+        <div className="pointer-events-auto relative w-full overflow-hidden rounded-xl bg-black shadow-2xl">
           <div className="flex items-center justify-between gap-4 px-4 py-3 text-sm text-white">
             <h2 id="video-dialog-title" className="truncate font-medium">
               {title}
