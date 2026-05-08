@@ -13,7 +13,7 @@ export const meta: MetaFunction = () =>
     path: "/projets",
   })
 
-type Status = "live" | "archived"
+type Status = "live" | "archived" | "tool" | "wip"
 
 interface Project {
   title: string
@@ -43,6 +43,56 @@ const projects: Project[] = [
     status: "live",
     liveUrl: "https://antikkorps.github.io/GoTK/",
     githubUrl: "https://github.com/antikkorps/GoTK",
+  },
+  {
+    title: "LMS Monorepo",
+    description:
+      "Plateforme LMS dockerisée en monorepo Nx (TypeScript, Vue, Astro). En ligne en pré-prod, pas encore basculée en production.",
+    technologies: ["Nx", "TypeScript", "Vue.js", "Astro", "Docker"],
+    status: "live",
+    liveUrl: "https://iqon-ia.com/",
+    githubUrl: "https://github.com/antikkorps/lms_monorepo",
+  },
+  {
+    title: "simpleClone",
+    description:
+      "Outil de synchronisation unidirectionnelle de dossiers pour Windows. Surveille un dossier source et réplique automatiquement les changements vers une destination (clé USB, etc.).",
+    technologies: ["Python", "Windows"],
+    status: "tool",
+    githubUrl: "https://github.com/antikkorps/simpleClone",
+  },
+  {
+    title: "auto-ftp",
+    description:
+      "Serveur FTP local zero-config packagé en exécutable Windows unique, conçu pour recevoir des fichiers depuis EasyVIEW tournant dans une VM VirtualBox.",
+    technologies: ["Go", "Wails", "Windows"],
+    status: "tool",
+    githubUrl: "https://github.com/antikkorps/auto-ftp",
+  },
+  {
+    title: "Eli CMS",
+    description:
+      "Headless CMS avec Custom Post Types dynamiques stockés en JSON — zéro migration par nouveau type de contenu. Koa.js + Drizzle (Postgres), front Nuxt 3.",
+    technologies: ["Koa.js", "TypeScript", "PostgreSQL", "Drizzle", "Nuxt 3"],
+    status: "wip",
+    githubUrl: "https://github.com/antikkorps/eli-cms",
+  },
+  {
+    title: "OPEx CRM",
+    description:
+      "CRM pensé pour la gestion des relations avec des établissements médicaux (hôpitaux, cliniques). Monorepo Vue 3 / Vuetify + Koa.js + PostgreSQL.",
+    technologies: ["Vue.js", "Vuetify", "Koa.js", "PostgreSQL", "Socket.io"],
+    status: "wip",
+    githubUrl: "https://github.com/antikkorps/crm_monorepo",
+  },
+  {
+    title: "La Kokosphere",
+    description:
+      "Site pour une hypnothérapeute, Astro + Tailwind + Sanity CMS, déployé sur Netlify.",
+    technologies: ["Astro", "Tailwind", "Sanity CMS"],
+    status: "live",
+    liveUrl: "https://la-kokosphere.fr/",
+    githubUrl: "https://github.com/antikkorps/la_kokosphere",
   },
   {
     title: "Sascha Fait des vidéos",
@@ -100,13 +150,6 @@ const projects: Project[] = [
     liveUrl: "https://save-us.life/",
   },
   {
-    title: "Safety Case Solutions",
-    description: "E-commerce de mallettes de sécurité, intégration WooCommerce.",
-    technologies: ["WooCommerce", "PHP"],
-    status: "archived",
-    videoUrl: "",
-  },
-  {
     title: "Nouvelles Donnes Formation",
     description: "Site vitrine pour une entreprise de formation.",
     technologies: ["WordPress", "Bootstrap"],
@@ -139,20 +182,38 @@ const itemVariants = {
   },
 }
 
+const statusConfig: Record<Status, { label: string; dot: string; aria: string }> = {
+  live: {
+    label: "En ligne",
+    dot: "bg-emerald-500",
+    aria: "Site en ligne",
+  },
+  archived: {
+    label: "Archivé",
+    dot: "bg-neutral-400 dark:bg-neutral-600",
+    aria: "Site archivé",
+  },
+  tool: {
+    label: "Outil",
+    dot: "bg-sky-500",
+    aria: "Outil / utilitaire",
+  },
+  wip: {
+    label: "En développement",
+    dot: "bg-amber-500",
+    aria: "Projet en cours de développement",
+  },
+}
+
 function StatusBadge({ status }: { status: Status }) {
-  const isLive = status === "live"
+  const { label, dot, aria } = statusConfig[status]
   return (
     <span
       className="blog-ui flex items-center gap-1.5 text-xs uppercase tracking-wider text-neutral-500"
-      aria-label={isLive ? "Site en ligne" : "Site archivé"}
+      aria-label={aria}
     >
-      <span
-        aria-hidden
-        className={`inline-block h-1.5 w-1.5 rounded-full ${
-          isLive ? "bg-emerald-500" : "bg-neutral-400 dark:bg-neutral-600"
-        }`}
-      />
-      {isLive ? "En ligne" : "Archivé"}
+      <span aria-hidden className={`inline-block h-1.5 w-1.5 rounded-full ${dot}`} />
+      {label}
     </span>
   )
 }
@@ -242,6 +303,7 @@ function ProjectRow({
 export default function ProjetsPage() {
   const [activeVideo, setActiveVideo] = useState<Project | null>(null)
   const live = projects.filter((p) => p.status === "live")
+  const toolsAndWip = projects.filter((p) => p.status === "tool" || p.status === "wip")
   const archived = projects.filter((p) => p.status === "archived")
 
   return (
@@ -274,6 +336,22 @@ export default function ProjetsPage() {
           </div>
           <motion.div initial="hidden" animate="visible" variants={containerVariants}>
             {live.map((p) => (
+              <ProjectRow key={p.title} project={p} onPlayVideo={setActiveVideo} />
+            ))}
+          </motion.div>
+        </section>
+
+        <section className="mb-16">
+          <div className="mb-4 flex items-baseline justify-between border-b border-neutral-200 pb-3 dark:border-neutral-800">
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+              Outils & projets en cours
+            </h2>
+            <span className="text-xs uppercase tracking-wider text-neutral-500">
+              {toolsAndWip.length} projet{toolsAndWip.length > 1 ? "s" : ""}
+            </span>
+          </div>
+          <motion.div initial="hidden" animate="visible" variants={containerVariants}>
+            {toolsAndWip.map((p) => (
               <ProjectRow key={p.title} project={p} onPlayVideo={setActiveVideo} />
             ))}
           </motion.div>
