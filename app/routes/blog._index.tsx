@@ -229,7 +229,7 @@ export default function BlogIndex() {
             {page > 1 ? (
               <Link
                 to={buildPageHref(searchParams, page - 1)}
-                prefetch="intent"
+                prefetch="render"
                 className="text-neutral-600 hover:text-[#2563eb] dark:text-neutral-400 dark:hover:text-[#60a5fa]"
               >
                 ← Précédent
@@ -245,7 +245,7 @@ export default function BlogIndex() {
             {page < totalPages ? (
               <Link
                 to={buildPageHref(searchParams, page + 1)}
-                prefetch="intent"
+                prefetch="render"
                 className="text-neutral-600 hover:text-[#2563eb] dark:text-neutral-400 dark:hover:text-[#60a5fa]"
               >
                 Suivant →

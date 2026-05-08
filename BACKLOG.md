@@ -42,6 +42,7 @@ priorité.
 
 ### Pages
 
+- **Préfetch agressif sur la pagination** : `prefetch="render"` sur les liens prev/next de `/blog`, le chunk de la page voisine est chargé dès que l'index s'affiche.
 - **`/` (home)** éditoriale : hero "Architecte cloud, solutions web et outillage dev", derniers articles loadés server-side, quick-links
 - **`/a-propos`** : texte LogiBOP / DAW Rust / GoTK / security, liens externes
 - **`/projets`** : sections "En ligne" (incl. LogiBOP & GoTK en tête) / "Archives", embed YouTube en `<dialog>` natif (toEmbedUrl validé)
@@ -60,9 +61,7 @@ priorité.
 
 ## 🚧 À faire — par priorité
 
-### 1. Préfetch agressif
-
-Passer de `prefetch="intent"` à `prefetch="render"` sur les liens vers la prochaine page de pagination — déjà visible donc bon candidat à charger en avance.
+_Aucune tâche prioritaire en cours — voir « À envisager » plus bas._
 
 ---
 
