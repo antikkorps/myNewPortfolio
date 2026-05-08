@@ -15,11 +15,32 @@ import Navbar from "./components/Navbar"
 import { ThemeProvider, themeScript } from "./contexts/ThemeContext"
 import { AUTHOR, OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "./lib/site"
 
+// Preload only the latin subset of each variable font so LCP doesn't wait
+// for the 60KB CSS to parse before discovering the woff2. Other subsets
+// (cyrillic, greek, vietnamese…) stay declared in CSS but are fetched on
+// demand thanks to unicode-range.
+import interLatinUrl from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url"
+import loraLatinUrl from "@fontsource-variable/lora/files/lora-latin-wght-normal.woff2?url"
+
 import "./tailwind.css"
 
 export const links: LinksFunction = () => [
   // Fonts are self-hosted via @fontsource-variable/{inter,lora} imported in
   // tailwind.css — no Google Fonts preconnect, no third-party round-trip.
+  {
+    rel: "preload",
+    as: "font",
+    type: "font/woff2",
+    href: interLatinUrl,
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "preload",
+    as: "font",
+    type: "font/woff2",
+    href: loraLatinUrl,
+    crossOrigin: "anonymous",
+  },
   { rel: "icon", type: "image/png", href: "/favicon.png" },
   { rel: "apple-touch-icon", href: "/favicon.png" },
   {
