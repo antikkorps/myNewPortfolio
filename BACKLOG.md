@@ -48,6 +48,7 @@ priorité.
 - **`/projets`** : sections "En ligne" (incl. LogiBOP & GoTK en tête) / "Archives", embed YouTube en `<dialog>` natif (toEmbedUrl validé)
 - **`/tech-stacks`** : refonte sobre, catégorisée (Frontend/Backend/Langages/Données/Infra), Remix→RR, Nest→Fastify, ajout Go/Rust/Python/TypeScript
 - **`/contact`** unifié : page éditoriale (palette + ton du blog), liens directs (email, LinkedIn, GitHub, téléphone) puis formulaire dans la même page. `/sendmail` redirige en 301 vers `/contact`. Helpers anti-abus extraits dans `app/lib/contact.server.ts` (validation, sanitization, honeypot, rate-limit IP). Plus d'image Unsplash externe, plus d'`AnimatedProfile`.
+- **Mail via Resend + interface agnostique** : `app/lib/mailer.server.ts` expose un `sendMail()` provider-agnostique ; l'implémentation utilise le SDK Resend. Domaine d'envoi sur `fvienot.link` (DNS Cloudflare), token API Vercel-scoped. Plus de credentials Gmail SMTP en clair dans l'env. Pour swapper vers un autre provider plus tard, réécrire le corps de `sendMail()` — l'action `/contact` ne bouge pas.
 
 ### Tests & CI
 
@@ -61,9 +62,7 @@ priorité.
 
 ## 🚧 À faire — par priorité
 
-### 1. Migrer le mail vers Resend (ou équivalent à token)
-
-L'envoi est désormais derrière `sendMail()` dans `app/lib/mailer.server.ts`, agnostique du provider. L'action `/contact` ne sait rien du fournisseur. Aujourd'hui c'est nodemailer + Gmail SMTP avec `EMAIL_USER` / `EMAIL_PASS` ; pour migrer vers Resend, réécrire le corps de `sendMail()` (avec `Resend(process.env.RESEND_API_KEY).emails.send(...)`) et changer les env vars en prod. Domaine d'envoi recommandé : sous-domaine de `fvienot.link` (ex. `mail.fvienot.link`), records DKIM/SPF/DMARC poussés via l'intégration Cloudflare de Resend. Garder le honeypot, le délai 5 s, le rate-limit IP en place — ils restent utiles côté défense en profondeur.
+_Aucune tâche prioritaire en cours._
 
 ---
 

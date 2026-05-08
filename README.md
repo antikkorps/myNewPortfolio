@@ -75,14 +75,13 @@ test/                 # tests d'intégration (security scan)
 Pour le formulaire de contact (`/contact`), définir dans `.env` ou via Vercel :
 
 ```
+RESEND_API_KEY=…       # API key Resend (scope "Send only")
 EMAIL_FROM=…           # adresse "From:" complète, ex. "Franck <contact@mail.fvienot.link>"
 EMAIL_RECIPIENT=…      # adresse où arrivent les messages reçus
 EMAIL_BCC=…            # CCI optionnel
-EMAIL_USER=…           # SMTP user — utilisé par l'implémentation Gmail/nodemailer
-EMAIL_PASS=…           # SMTP pass — utilisé par l'implémentation Gmail/nodemailer
 ```
 
-L'envoi passe par `app/lib/mailer.server.ts` → `sendMail()`, derrière une interface `MailMessage` agnostique du provider. L'implémentation actuelle utilise nodemailer + SMTP Gmail. Pour swapper vers un autre provider (Resend, Postmark, Mailgun…), réécrire le corps de `sendMail()` et ajuster les env vars qu'il lit. L'action dans `app/routes/contact.tsx` ne change pas.
+L'envoi passe par `app/lib/mailer.server.ts` → `sendMail()`, derrière une interface `MailMessage` agnostique du provider. L'implémentation actuelle utilise le SDK Resend. Pour swapper vers un autre provider (Postmark, Mailgun, retour à SMTP…), réécrire le corps de `sendMail()` et ajuster les env vars qu'il lit. L'action dans `app/routes/contact.tsx` ne change pas.
 
 ## Déploiement
 
