@@ -2,10 +2,7 @@ import typography from "@tailwindcss/typography"
 import type { Config } from "tailwindcss"
 
 export default {
-  content: [
-    "./app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}",
-    "./app/content/**/*.{md,mdx}",
-  ],
+  content: ["./app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}", "./app/content/**/*.{md,mdx}"],
   darkMode: "class",
   theme: {
     extend: {
@@ -21,20 +18,9 @@ export default {
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
       },
-      animation: {
-        "slow-pulse": "slowPulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-      },
-      keyframes: {
-        slowPulse: {
-          "0%, 100%": { opacity: "0.1", transform: "scale(1.5)" },
-          "50%": { opacity: "0.15", transform: "scale(1.7)" },
-        },
-      },
-      scale: {
-        "102": "1.02",
-      },
       fontFamily: {
         sans: [
+          "Inter Variable",
           "Inter",
           "ui-sans-serif",
           "system-ui",
@@ -55,6 +41,7 @@ export default {
         ],
         serif: [
           "Charter",
+          "Lora Variable",
           "Lora",
           "Iowan Old Style",
           "Apple Garamond",

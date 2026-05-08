@@ -15,8 +15,8 @@ const ROUTES_200 = [
   "/sitemap.xml",
   "/blog/rss.xml",
   "/robots.txt",
-  "/og.png",
-  "/og.png?slug=archi-forgejo-distribuee",
+  "/og/default.png",
+  "/og/archi-forgejo-distribuee.png",
   "/favicon.png",
 ]
 
@@ -42,21 +42,15 @@ test.describe("SEO basics", () => {
   test("home has title, description, canonical", async ({ page }) => {
     await page.goto("/")
     await expect(page).toHaveTitle(/Dev2Go/)
-    const desc = await page
-      .locator('meta[name="description"]')
-      .getAttribute("content")
+    const desc = await page.locator('meta[name="description"]').getAttribute("content")
     expect(desc).toBeTruthy()
-    const canonical = await page
-      .locator('link[rel="canonical"]')
-      .getAttribute("href")
+    const canonical = await page.locator('link[rel="canonical"]').getAttribute("href")
     expect(canonical).toMatch(/^https:\/\//)
   })
 
   test("home has Person + WebSite JSON-LD", async ({ page }) => {
     await page.goto("/")
-    const ldScripts = await page
-      .locator('script[type="application/ld+json"]')
-      .allTextContents()
+    const ldScripts = await page.locator('script[type="application/ld+json"]').allTextContents()
     const types = ldScripts
       .map((s) => {
         try {
@@ -72,9 +66,7 @@ test.describe("SEO basics", () => {
 
   test("article has BlogPosting + BreadcrumbList JSON-LD", async ({ page }) => {
     await page.goto("/blog/gotk-proxy-cli-llm")
-    const ldScripts = await page
-      .locator('script[type="application/ld+json"]')
-      .allTextContents()
+    const ldScripts = await page.locator('script[type="application/ld+json"]').allTextContents()
     const types = ldScripts
       .map((s) => {
         try {
@@ -90,26 +82,20 @@ test.describe("SEO basics", () => {
 
   test("og:image meta is present and absolute", async ({ page }) => {
     await page.goto("/blog/gotk-proxy-cli-llm")
-    const og = await page
-      .locator('meta[property="og:image"]')
-      .getAttribute("content")
-    expect(og).toMatch(/^https:\/\/.+og\.png/)
+    const og = await page.locator('meta[property="og:image"]').getAttribute("content")
+    expect(og).toMatch(/^https:\/\/.+\/og\/.+\.png$/)
   })
 
   test("robots meta allows indexing site-wide", async ({ page }) => {
     await page.goto("/")
-    const robots = await page
-      .locator('meta[name="robots"]')
-      .getAttribute("content")
+    const robots = await page.locator('meta[name="robots"]').getAttribute("content")
     expect(robots).toContain("index")
     expect(robots).toContain("max-image-preview:large")
   })
 })
 
 test.describe("Sitemap content", () => {
-  test("sitemap is valid XML and lists every published article", async ({
-    request,
-  }) => {
+  test("sitemap is valid XML and lists every published article", async ({ request }) => {
     const res = await request.get("/sitemap.xml")
     expect(res.status()).toBe(200)
     const xml = await res.text()

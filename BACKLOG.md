@@ -5,148 +5,80 @@ priorité.
 
 ---
 
-## ✅ Faits dans la branche `feat/react-router-v7`
+## ✅ Faits (mergés sur `main`)
 
-### Migration & sécurité
-- Migration **React Router v7** (Remix v2 → RR7 + `@react-router/{dev,node,serve,fs-routes}`)
-- `npm audit` : **0 vulnérabilité** (de 15 high/moderate à 0 grâce à RR7 + bump
-  `@typescript-eslint/*` à v8)
-- Headers de sécurité Netlify (`public/_headers`) : HSTS, X-Content-Type-Options,
-  X-Frame-Options, Referrer-Policy, Permissions-Policy, COOP, cache long pour
-  assets/og/favicon
+### Stack & sécurité
+
+- Migration **Remix v2 → React Router v7** (`@react-router/{dev,node,serve,fs-routes}`)
+- `npm audit` ramené de 15 vulns (6 moderate / 9 high) à **0** côté projet
+- Headers de sécurité Netlify-style (`public/_headers`) : HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, COOP, cache long pour assets/og/favicon
+- **Déploiement Vercel SSR** via `@vercel/react-router` preset (conditionné à `VERCEL=1` pour ne pas casser `react-router-serve` local). `vercel.json` force `framework: "react-router"`.
+- **Fix CodeQL** : sanitization stricte des URLs YouTube via allowlist exact (plus d'`endsWith("youtube.com")`), helper extrait dans `app/lib/youtube.ts` avec 20 tests dédiés couvrant les look-alikes (`evilyoutube.com`, `youtu.be.evil.com`), schemes `javascript:`/`data:`, IDs invalides, traversal.
 
 ### Blog
-- Articles MDX avec **Shiki dual-theme** (`github-light` / `github-dark`) via
-  `rehype-pretty-code`
-- **Pagination** server-side (`?page=N`, 3 par page)
-- **Recherche** server-side (`?q=...`) avec **highlight** des matches
-- **RSS feed** `/blog/rss.xml` + autodiscovery dans le `<head>`
-- **Heading anchors** (`rehype-slug` + `rehype-autolink-headings`) avec liens
-  permanents au hover
-- **Table of contents** sticky côté droit (xl+) avec IntersectionObserver pour
-  highlight de la section active
-- **Tags clickables** → `/blog/tags/$tag` (route dédiée filtrée)
-- **Prev/next article** en bas de chaque article
-- **Frontmatter `draft: true`** filtré dans `posts-meta.server.ts` (preview en
-  ajoutant un build flag plus tard)
-- **Lazy frontmatter** : split `posts-meta.server.ts` (server-only,
-  `import.meta.glob({ import: 'frontmatter' })`) vs `posts.ts` (component
-  glob). `/blog` index passe de 73 KB à ~5 KB côté client.
+
+- Articles MDX avec **Shiki dual-theme** (`github-light` / `github-dark`)
+- Pagination, recherche server-side avec **highlight** des matches via `<mark>`
+- RSS feed `/blog/rss.xml` + autodiscovery `<link rel=alternate>`
+- Heading anchors (rehype-slug + rehype-autolink-headings)
+- Table of contents fixed (xl+) avec IntersectionObserver, ancres en simple-clic (handler manuel + `preventScrollReset` pour ne pas concurrencer `<ScrollRestoration>` de RR7)
+- Tags clickables → `/blog/tags/$tag`
+- Prev/next article au pied de chaque article
+- Frontmatter `draft: true` : filtré en prod, **visible en dev** (`NODE_ENV=development`) avec badge "Brouillon" sur l'index et l'article
+- **Lazy frontmatter** : split `posts-meta.server.ts` (server-only, frontmatter via `import.meta.glob({ import: 'frontmatter' })`) vs `posts.ts` (component glob). `/blog` index passe de 73 KB à ~5 KB côté client.
+- **Lazy MDX** : `posts.ts` utilise désormais un glob non-eager + `React.lazy` + `<Suspense>`. Chaque article devient son propre chunk Vite, `/blog/$slug` chute de **~110 KB → 35 KB**. La TOC utilise un MutationObserver pour récupérer les headings après que le chunk lazy soit hydraté côté client (le SSR streame déjà l'article complet, donc OK pour les bots et le first paint plein écran).
 
 ### SEO
-- `<html lang="fr">`, méta site-wide (`author`, `robots:max-image-preview`,
-  `theme-color`, `og:site_name`, `og:locale`) statiques dans `<Layout>` car RR7
-  override les méta parent par défaut
-- **Open Graph dynamique** : route `/og.png` + `/og.png?slug=...` (1200×630
-  PNG via satori + resvg, font Inter via @fontsource)
-- **JSON-LD** : Person + WebSite site-wide, Blog + BreadcrumbList sur
-  `/blog`, **BlogPosting** enrichi (ImageObject avec dimensions, publisher,
-  articleSection, wordCount, timeRequired, dateModified) + BreadcrumbList sur
-  articles, BreadcrumbList sur tag pages
-- **Sitemap.xml** : ISO-8601 lastmod, priority/changefreq différenciés,
-  `xmlns:image` avec `<image:image>` par article, tag pages incluses
-- **Favicon Dicebear** : route `/favicon.png` qui rend le thumbs en PNG 64×64
-  (cache 30j)
-- **Preload font Lora** dans `links()` (avoid FOUT sur articles)
-- **og:image:width/height/alt** + twitter:image:alt sur articles
-- **404 status** (canonical signal pour Google) via `throw new Response(...)`,
-  ErrorBoundary custom avec navigation par `<a href>` (force reload propre)
+
+- `<html lang="fr">`, méta site-wide (`author`, `robots:max-image-preview`, `theme-color`, `og:site_name`, `og:locale`, JSON-LD Person + WebSite) statiques dans `<Layout>` (RR7 override les méta parent par défaut)
+- **Open Graph pré-générés au build** : `scripts/build-og.ts` (tsx) génère `public/og/<slug>.png` + `default.png` (1200×630 PNG via satori + resvg). `npm run build` chaîne `build:og && react-router build`. Plus de Vercel Function pour les OG → 0 cold start, servi depuis le CDN edge. La route runtime `app/routes/og[.]png.tsx` est supprimée.
+- **JSON-LD complet** : Person + WebSite site-wide ; Blog + BreadcrumbList sur `/blog` ; **BlogPosting** enrichi (ImageObject avec dimensions, publisher, articleSection, wordCount, timeRequired, dateModified) + BreadcrumbList sur articles ; BreadcrumbList sur tag pages
+- Sitemap.xml : ISO-8601 lastmod, priority/changefreq différenciés, namespace image avec `<image:image>` par article, tag pages incluses
+- Favicon Dicebear PNG dynamique (`/favicon.png`, cache 30j)
+- Preload font Lora dans `links()` (anti-FOUT)
+- og:image:width/height/alt + twitter:image:alt sur articles
+- 404 status canonique (`throw new Response(..., { status: 404 })`), ErrorBoundary custom avec navigation `<a href>` (force reload propre)
+- `SITE_URL` → `https://dev2go.vercel.app` (production)
 
 ### Pages
-- **`/` (home)** : layout éditorial, hero "Architecte cloud, solutions web et
-  outillage dev", derniers articles loadés server-side, quick-links
-- **`/a-propos`** : texte LogiBOP/DAW Rust/GoTK/security, liens externes propres
-- **`/projets`** : refonte avec sections "En ligne" / "Archives", placeholders
-  YouTube `videoUrl` pour les sites archivés
-- **`/tech-stacks`** : refonte sobre, catégorisée (Frontend/Backend/Langages/
-  Données/Infra), Remix→RR, Nest→Fastify, ajout Go/Rust/Python/TypeScript
-- **`/contact`** : fallback `AUTHOR` quand `process.env.*` absent (plus de
-  "undefined"), filtre des cards sans data
 
-### Bugfixes
-- `dotenv/config` chargé au boot du server
-- TOC fixed → toujours visible au scroll
-- `scroll-padding-top: 5.5rem` sur `<html>` pour les anchors
-- Tables markdown stylées (overflow-x, borders sobres)
+- **Préfetch agressif sur la pagination** : `prefetch="render"` sur les liens prev/next de `/blog`, le chunk de la page voisine est chargé dès que l'index s'affiche.
+- **`/` (home)** éditoriale : hero "Architecte cloud, solutions web et outillage dev", derniers articles loadés server-side, quick-links
+- **`/a-propos`** : texte LogiBOP / DAW Rust / GoTK / security, liens externes
+- **`/projets`** : sections "En ligne" (incl. LogiBOP & GoTK en tête) / "Archives", embed YouTube en `<dialog>` natif (toEmbedUrl validé)
+- **`/tech-stacks`** : refonte sobre, catégorisée (Frontend/Backend/Langages/Données/Infra), Remix→RR, Nest→Fastify, ajout Go/Rust/Python/TypeScript
+- **`/contact`** unifié : page éditoriale (palette + ton du blog), liens directs (email, LinkedIn, GitHub, téléphone) puis formulaire dans la même page. `/sendmail` redirige en 301 vers `/contact`. Helpers anti-abus extraits dans `app/lib/contact.server.ts` (validation, sanitization, honeypot, rate-limit IP). Plus d'image Unsplash externe, plus d'`AnimatedProfile`.
+- **Mail via Resend + interface agnostique** : `app/lib/mailer.server.ts` expose un `sendMail()` provider-agnostique ; l'implémentation utilise le SDK Resend. Domaine d'envoi sur `fvienot.link` (DNS Cloudflare), token API Vercel-scoped. Plus de credentials Gmail SMTP en clair dans l'env. Pour swapper vers un autre provider plus tard, réécrire le corps de `sendMail()` — l'action `/contact` ne bouge pas.
+
+### Tests & CI
+
+- **Vitest** unit : `lib/{format,seo,site,posts-meta.server,youtube}` (~49 tests)
+- **Vitest** components : `mdx/{Note,Warning,Aside}`, `BlogAvatar`, `TableOfContents` (9 tests)
+- **Vitest** security scan : grep des secrets dans `build/client/assets/*.js` — `process.env.EMAIL_*`, dotenv, AWS/Google/GitHub key signatures (11 tests)
+- **Playwright** e2e : routes 200/404, JSON-LD Person/WebSite/BlogPosting/BreadcrumbList, sitemap valide, recherche/pagination, 404 page (29 tests)
+- **Lighthouse CI** sur chaque PR (`.github/workflows/lighthouse.yml` + `lighthouserc.json`) : 4 URLs, desktop preset, 3 runs avec median. Budgets : perf ≥ 0.9, a11y ≥ 0.95, SEO ≥ 0.95 (error), best-practices ≥ 0.9 (warn). Rapport HTML uploadé sur temporary-public-storage.
 
 ---
 
 ## 🚧 À faire — par priorité
 
-### 1. Tests (Vitest + Playwright + sécurité) — *en cours*
-
-**Pourquoi.** TDD pour les futures features + filet contre les régressions
-silencieuses à mesure que le site grandit.
-
-**Setup.**
-- **Vitest** sur le code "pur" : `lib/format.ts`, `lib/seo.ts`, `lib/site.ts`,
-  `lib/posts-meta.server.ts` (parsing frontmatter, tri, getPostMeta,
-  getNeighborsMeta, draft filter).
-- **`@testing-library/react`** sur les composants MDX (`<Note>`, `<Warning>`,
-  `<Aside>`), `<BlogAvatar>`, `<TableOfContents>`.
-- **Playwright** pour e2e :
-  - Toutes les routes 200 / 404 attendu
-  - `/sitemap.xml` valide + contient tous les slugs non-draft
-  - `/blog?q=cli` filtre, `/blog?page=2` pagine
-  - Chaque page : `<title>`, description, canonical, og:image qui résout
-  - JSON-LD parsable et conforme schema.org
-- **Tests sécurité** :
-  - Bundle client (`build/client/assets/*.js`) ne contient pas
-    `process.env.EMAIL_PASS`, `EMAIL_USER`, `EMAIL_BCC`, etc.
-  - Pas de mention de `dotenv` côté client
-  - Headers HTTP attendus présents
-- **Lighthouse CI** en GitHub Action : budget perf ≥ 90, SEO ≥ 95, a11y ≥ 95.
+_Aucune tâche prioritaire en cours._
 
 ---
 
-### 2. Améliorations blog (restant)
+## 🐞 Connu / à surveiller
 
-- **Vue draft en dev** : afficher les articles `draft: true` quand
-  `process.env.NODE_ENV === "development"`. Actuellement filtré partout.
-- **Préfetch agressif** : `prefetch="render"` (au lieu de `"intent"`) sur la
-  prochaine page de pagination, déjà cliquable.
-
----
-
-### 3. Lazy MDX (full split — quand nb d'articles > 10)
-
-Le `/blog/$slug` reste à 109 KB car eager glob de tous les MDX. À convertir en
-lazy + React.lazy + Suspense quand le nombre d'articles dépasse ~10.
-Aujourd'hui non urgent.
+- **3 vulns moderate** dans `@vercel/static-config` → `ajv` (transitives de `@vercel/react-router`). **Pas fixable** sans upstream. Acceptable car Vercel-side et build-time only.
+- **`vercel.json`** force `framework: "react-router"`. Si Vercel renomme/retire ce slug, redeploy en échec — fallback : passer le Framework Preset à "Other" depuis le dashboard.
+- Le hack `<a href>` dans `ErrorBoundary` (au lieu de `<Link>`) est un workaround pour un comportement RR7 buggué. À retester quand RR7 sort une release qui patche.
 
 ---
 
-### 4. Pré-générer les OG au build (au lieu du runtime)
-
-Actuel : `/og.png?slug=...` = generation runtime (satori + resvg). Cache HTTP
-mitige, mais sur Netlify chaque génération = 1 invocation function. Alternative
-: pré-générer au build (`scripts/build-og.ts`) et stocker dans
-`public/og/<slug>.png`. Robuste contre les pics de partage social.
-
----
-
-### 5. Réviser visuellement (browser test)
-
-Pas testé en navigateur dans la session actuelle :
-- Rendu Shiki dual-theme (light → dark sans rechargement)
-- Avatar Dicebear thumbs (visage visible)
-- Animations sur scroll absentes sur `/blog` (CursorHalo masqué)
-- TOC fixed sur articles longs (xl+)
-- Page 404 → click "Accueil" / "Voir le blog" (style préservé)
-
----
-
-### 6. Confirmer SITE_URL prod
-
-`app/lib/site.ts` : `SITE_URL = "https://dev2go.netlify.app"`. À confirmer ou
-remplacer par le domaine custom final.
-
----
-
-### 7. À envisager plus tard
+## 💡 À envisager plus tard
 
 - **Articles connexes** sous chaque article (par tags partagés)
-- **Stats / analytics** sobres (Plausible self-hosted ou Umami)
+- **Analytics sobres** (Plausible self-hosted ou Umami)
 - **PWA manifest** + service worker pour offline-first
 - **Tests visuels** (Percy / Chromatic) sur les composants MDX et la home
-- **i18n** si jamais une version EN devient pertinente
+- **i18n** si une version EN devient pertinente
+- **Pre-render les pages statiques** (`/`, `/a-propos`, `/tech-stacks`, `/projets`) via `prerender` dans `react-router.config.ts` pour servir du HTML statique sans toucher à la function

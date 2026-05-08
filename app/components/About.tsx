@@ -6,9 +6,7 @@ export default function About() {
     <main className="min-h-screen bg-gray-50 pt-24 sm:pt-28 pb-24 dark:bg-neutral-900">
       <div className="mx-auto max-w-2xl px-6">
         <header className="mb-12">
-          <p className="text-xs uppercase tracking-wider text-neutral-500">
-            À propos
-          </p>
+          <p className="text-xs uppercase tracking-wider text-neutral-500">À propos</p>
           <h1 className="mt-1 text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
             Salut, je suis Franck
           </h1>
@@ -20,11 +18,9 @@ export default function About() {
         <div className="space-y-6 text-[17px] leading-relaxed text-neutral-700 dark:text-neutral-300">
           <p>
             Je développe{" "}
-            <span className="font-medium text-neutral-900 dark:text-neutral-100">
-              LogiBOP
-            </span>
-            , une application de préparation des interventions chirurgicales
-            utilisée en environnement hospitalier (
+            <span className="font-medium text-neutral-900 dark:text-neutral-100">LogiBOP</span>, une
+            application de préparation des interventions chirurgicales utilisée en environnement
+            hospitalier (
             <a
               href="https://quasar.dev/"
               target="_blank"
@@ -42,16 +38,14 @@ export default function About() {
             >
               Azure
             </a>
-            ). Mon quotidien tourne autour des problématiques techniques propres
-            au logiciel santé : auth robuste, traçabilité, déploiements
-            maîtrisés, et plus largement la souveraineté du code et des données.
+            ). Mon quotidien tourne autour des problématiques techniques propres au logiciel santé :
+            auth robuste, traçabilité, déploiements maîtrisés, et plus largement la souveraineté du
+            code et des données.
           </p>
 
           <p>
             À côté du pro, je code des choses qui m&apos;intéressent. Un{" "}
-            <span className="font-medium text-neutral-900 dark:text-neutral-100">
-              DAW en Rust
-            </span>{" "}
+            <span className="font-medium text-neutral-900 dark:text-neutral-100">DAW en Rust</span>{" "}
             avec une architecture lock-free et support des plugins{" "}
             <a
               href="https://cleveraudio.org/"
@@ -61,8 +55,8 @@ export default function About() {
             >
               CLAP
             </a>
-            , parce que la programmation audio temps réel est un terrain
-            d&apos;apprentissage exigeant.{" "}
+            , parce que la programmation audio temps réel est un terrain d&apos;apprentissage
+            exigeant.{" "}
             <Link
               to="/blog/gotk-proxy-cli-llm"
               prefetch="intent"
@@ -70,8 +64,8 @@ export default function About() {
             >
               GoTK
             </Link>
-            , un proxy CLI en Go qui optimise les sorties de commandes envoyées
-            aux agents LLM (j&apos;utilise{" "}
+            , un proxy CLI en Go qui optimise les sorties de commandes envoyées aux agents LLM
+            (j&apos;utilise{" "}
             <a
               href="https://www.anthropic.com/claude-code"
               target="_blank"
@@ -80,14 +74,13 @@ export default function About() {
             >
               Claude Code
             </a>{" "}
-            au quotidien et la sobriété token me paraît un sujet sous-exploité).
-            Quelques outils utilitaires variés selon ce qui me manque.
+            au quotidien et la sobriété token me paraît un sujet sous-exploité). Quelques outils
+            utilitaires variés selon ce qui me manque.
           </p>
 
           <p>
-            Côté infra, j&apos;auto-héberge la majorité de mes services : forge
-            Git, photos, documents, médias, sync de fichiers. Je m&apos;astreins
-            à des pratiques de{" "}
+            Côté infra, j&apos;auto-héberge la majorité de mes services : forge Git, photos,
+            documents, médias, sync de fichiers. Je m&apos;astreins à des pratiques de{" "}
             <span className="font-medium text-neutral-900 dark:text-neutral-100">
               security by design
             </span>{" "}
@@ -118,9 +111,9 @@ export default function About() {
             >
               Renovate
             </a>
-            , scans de secrets dans les CI). Pas par paranoïa, mais parce que
-            c&apos;est plus simple d&apos;avoir des bonnes habitudes en perso
-            que de les improviser quand un client santé en aura besoin.
+            , scans de secrets dans les CI). Pas par paranoïa, mais parce que c&apos;est plus simple
+            d&apos;avoir des bonnes habitudes en perso que de les improviser quand un client santé
+            en aura besoin.
           </p>
 
           <p>
@@ -140,19 +133,14 @@ export default function About() {
           </p>
         </div>
 
-        <nav
-          className="mt-16 grid grid-cols-1 gap-3 sm:grid-cols-3"
-          aria-label="Liens rapides"
-        >
+        <nav className="mt-16 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Liens rapides">
           <Link
             to="/contact"
             prefetch="intent"
             className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
           >
             <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">
-                Discuter
-              </p>
+              <p className="text-xs uppercase tracking-wider text-neutral-500">Discuter</p>
               <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
                 Me contacter
               </p>
@@ -170,9 +158,7 @@ export default function About() {
             className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
           >
             <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">
-                Lire
-              </p>
+              <p className="text-xs uppercase tracking-wider text-neutral-500">Lire</p>
               <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
                 Articles & notes
               </p>
@@ -190,9 +176,7 @@ export default function About() {
             className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
           >
             <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">
-                Voir
-              </p>
+              <p className="text-xs uppercase tracking-wider text-neutral-500">Voir</p>
               <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
                 Mes projets
               </p>

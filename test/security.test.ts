@@ -9,8 +9,14 @@ const SECRET_PATTERNS: Array<{ name: string; pattern: RegExp }> = [
   { name: "EMAIL_PASS env var literal", pattern: /process\.env\.EMAIL_PASS/ },
   { name: "EMAIL_RECIPIENT env var literal", pattern: /process\.env\.EMAIL_RECIPIENT/ },
   { name: "EMAIL_BCC env var literal", pattern: /process\.env\.EMAIL_BCC/ },
-  { name: "raw nodemailer import in client bundle", pattern: /from"nodemailer"|require\("nodemailer"\)/ },
-  { name: "dotenv module in client bundle", pattern: /from"dotenv\/?config?"|require\("dotenv\/?config?"\)/ },
+  {
+    name: "raw nodemailer import in client bundle",
+    pattern: /from"nodemailer"|require\("nodemailer"\)/,
+  },
+  {
+    name: "dotenv module in client bundle",
+    pattern: /from"dotenv\/?config?"|require\("dotenv\/?config?"\)/,
+  },
   { name: "AWS access key signature", pattern: /AKIA[0-9A-Z]{16}/ },
   { name: "Google API key signature", pattern: /AIza[0-9A-Za-z\-_]{35}/ },
   { name: "GitHub PAT signature", pattern: /ghp_[A-Za-z0-9]{36}/ },
@@ -18,16 +24,21 @@ const SECRET_PATTERNS: Array<{ name: string; pattern: RegExp }> = [
 
 const BUILD_AVAILABLE = existsSync(CLIENT_BUILD_DIR)
 
-describe.runIf(BUILD_AVAILABLE)("client bundle does not leak secrets", () => {
-  const files = readdirSync(CLIENT_BUILD_DIR).filter((f) => f.endsWith(".js"))
+// Read at test time, not at collection time — describe.runIf still runs the
+// factory function in vitest, so readdirSync at the top would crash before
+// the suite is skipped when the build is missing (e.g. fresh CI checkout).
+function listClientAssets(): string[] {
+  return readdirSync(CLIENT_BUILD_DIR).filter((f) => f.endsWith(".js"))
+}
 
+describe.runIf(BUILD_AVAILABLE)("client bundle does not leak secrets", () => {
   it("at least one client asset bundle exists", () => {
-    expect(files.length).toBeGreaterThan(0)
+    expect(listClientAssets().length).toBeGreaterThan(0)
   })
 
   for (const { name, pattern } of SECRET_PATTERNS) {
     it(`no asset matches: ${name}`, () => {
-      const offenders = files.filter((f) => {
+      const offenders = listClientAssets().filter((f) => {
         const content = readFileSync(join(CLIENT_BUILD_DIR, f), "utf-8")
         return pattern.test(content)
       })
@@ -36,7 +47,7 @@ describe.runIf(BUILD_AVAILABLE)("client bundle does not leak secrets", () => {
   }
 
   it("no asset references the .env file path literally", () => {
-    const offenders = files.filter((f) => {
+    const offenders = listClientAssets().filter((f) => {
       const content = readFileSync(join(CLIENT_BUILD_DIR, f), "utf-8")
       return /\/\.env(?!\.example)\b/.test(content)
     })

@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs, MetaFunction } from "react-router"
 import { Link, useLoaderData } from "react-router"
 import { ArrowLeft, ArrowRight } from "lucide-react"
+import { Suspense } from "react"
 import { BlogAvatar } from "~/components/BlogAvatar"
 import { TableOfContents } from "~/components/TableOfContents"
 import { formatDate } from "~/lib/format"
@@ -21,6 +22,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     date: meta.date,
     tags: meta.tags ?? [],
     readingTime: meta.readingTime,
+    draft: meta.draft === true,
     prev: prev ? { slug: prev.slug, title: prev.title } : null,
     next: next ? { slug: next.slug, title: next.title } : null,
   }
@@ -141,6 +143,11 @@ export default function BlogPost() {
             <time dateTime={data.date}>{formatDate(data.date)}</time>
             <span aria-hidden>·</span>
             <span>{data.readingTime} min de lecture</span>
+            {data.draft ? (
+              <span className="rounded-sm bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+                Brouillon
+              </span>
+            ) : null}
           </div>
           <h1 className="blog-ui mt-3 text-3xl sm:text-4xl font-semibold tracking-tight text-[#0a0a0a] dark:text-[#fafafa]">
             {data.title}
@@ -153,15 +160,21 @@ export default function BlogPost() {
         </header>
 
         <article className="prose prose-blog dark:prose-invert">
-          <Component />
+          <Suspense
+            fallback={
+              <p className="text-neutral-500 dark:text-neutral-400">
+                Chargement de l&apos;article…
+              </p>
+            }
+          >
+            <Component />
+          </Suspense>
         </article>
 
         <footer className="blog-ui mt-20 flex items-center gap-4 border-t border-neutral-200 pt-8 dark:border-neutral-800">
           <BlogAvatar seed={AUTHOR.name} size={44} />
           <div>
-            <p className="text-sm font-medium text-[#0a0a0a] dark:text-[#fafafa]">
-              {AUTHOR.name}
-            </p>
+            <p className="text-sm font-medium text-[#0a0a0a] dark:text-[#fafafa]">{AUTHOR.name}</p>
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
               Publié le {formatDate(data.date)}
             </p>

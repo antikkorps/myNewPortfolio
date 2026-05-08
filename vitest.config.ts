@@ -10,10 +10,7 @@ import { defineConfig } from "vitest/config"
 export default defineConfig({
   plugins: [
     mdx({
-      remarkPlugins: [
-        remarkFrontmatter,
-        [remarkMdxFrontmatter, { name: "frontmatter" }],
-      ],
+      remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: "frontmatter" }]],
     }),
     tsconfigPaths(),
   ],

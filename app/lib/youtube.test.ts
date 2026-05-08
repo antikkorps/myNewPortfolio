@@ -46,11 +46,9 @@ describe("toEmbedUrl", () => {
     })
 
     it("converts youtube.com/watch with extra params", () => {
-      expect(
-        toEmbedUrl(
-          "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=foo&index=2"
-        )
-      ).toBe("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ")
+      expect(toEmbedUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=foo&index=2")).toBe(
+        "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"
+      )
     })
 
     it("accepts m.youtube.com", () => {
@@ -100,9 +98,7 @@ describe("toEmbedUrl", () => {
 
     it("rejects watch URLs with an invalid v parameter", () => {
       expect(toEmbedUrl("https://www.youtube.com/watch?v=tooshort")).toBeNull()
-      expect(
-        toEmbedUrl("https://www.youtube.com/watch?v=../../etc/pa")
-      ).toBeNull()
+      expect(toEmbedUrl("https://www.youtube.com/watch?v=../../etc/pa")).toBeNull()
     })
 
     it("rejects embed paths with an invalid id", () => {
@@ -111,9 +107,7 @@ describe("toEmbedUrl", () => {
     })
 
     it("rejects youtu.be paths with extra segments", () => {
-      expect(
-        toEmbedUrl("https://youtu.be/dQw4w9WgXcQ/extra")
-      ).toBeNull()
+      expect(toEmbedUrl("https://youtu.be/dQw4w9WgXcQ/extra")).toBeNull()
     })
   })
 })

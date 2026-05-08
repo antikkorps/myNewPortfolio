@@ -15,26 +15,31 @@ import Navbar from "./components/Navbar"
 import { ThemeProvider, themeScript } from "./contexts/ThemeContext"
 import { AUTHOR, OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "./lib/site"
 
+// Preload only the latin subset of each variable font so LCP doesn't wait
+// for the 60KB CSS to parse before discovering the woff2. Other subsets
+// (cyrillic, greek, vietnamese…) stay declared in CSS but are fetched on
+// demand thanks to unicode-range.
+import interLatinUrl from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url"
+import loraLatinUrl from "@fontsource-variable/lora/files/lora-latin-wght-normal.woff2?url"
+
 import "./tailwind.css"
 
 export const links: LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  // Preload Lora 400 (latin) — used as body font on /blog articles, avoids FOUT
+  // Fonts are self-hosted via @fontsource-variable/{inter,lora} imported in
+  // tailwind.css — no Google Fonts preconnect, no third-party round-trip.
   {
     rel: "preload",
     as: "font",
     type: "font/woff2",
-    href: "https://fonts.gstatic.com/s/lora/v36/0QI6MX1D_JOuGQbT0gvTJPa787weuxJBkqg.woff2",
+    href: interLatinUrl,
     crossOrigin: "anonymous",
   },
   {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap",
+    rel: "preload",
+    as: "font",
+    type: "font/woff2",
+    href: loraLatinUrl,
+    crossOrigin: "anonymous",
   },
   { rel: "icon", type: "image/png", href: "/favicon.png" },
   { rel: "apple-touch-icon", href: "/favicon.png" },
@@ -83,10 +88,7 @@ const personJsonLd = {
   email: `mailto:${AUTHOR.email}`,
   image: `${SITE_URL}/favicon.png`,
   jobTitle: "Architecte cloud, développeur web full-stack",
-  sameAs: [
-    `https://github.com/${AUTHOR.github}`,
-    ...(AUTHOR.linkedin ? [AUTHOR.linkedin] : []),
-  ],
+  sameAs: [`https://github.com/${AUTHOR.github}`, ...(AUTHOR.linkedin ? [AUTHOR.linkedin] : [])],
   knowsAbout: [
     "Architecture cloud",
     "Logiciel santé",
@@ -125,10 +127,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* Site-wide meta — these appear on EVERY page regardless of route,
             because RR7 child meta exports replace the parent's by default. */}
         <meta name="author" content={AUTHOR.name} />
-        <meta
-          name="robots"
-          content="index,follow,max-image-preview:large,max-snippet:-1"
-        />
+        <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
         <meta name="theme-color" content="#0d0d0d" />
         <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:locale" content="fr_FR" />
@@ -177,9 +176,7 @@ export function ErrorBoundary() {
   return (
     <main className="min-h-screen pt-32 pb-24 bg-gray-50 dark:bg-neutral-900">
       <div className="mx-auto max-w-xl px-6 text-center">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">
-          Erreur {status}
-        </p>
+        <p className="text-xs uppercase tracking-wider text-neutral-500">Erreur {status}</p>
         <h1 className="mt-2 text-4xl sm:text-5xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
           {is404 ? "Page introuvable" : "Une erreur est survenue"}
         </h1>

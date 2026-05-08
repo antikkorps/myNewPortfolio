@@ -1,9 +1,17 @@
-import type { MetaFunction } from "react-router"
-import { useLoaderData } from "react-router"
-import { Github, LetterText, Linkedin, Mail, Phone } from "lucide-react"
-import { useState } from "react"
-import AnimatedProfile from "../components/AnimatedProfil"
+import type { ActionFunction, MetaFunction } from "react-router"
+import { Form, useActionData, useNavigation } from "react-router"
+import { Github, Linkedin, Mail, Phone, Send } from "lucide-react"
+import { useEffect, useRef } from "react"
+import {
+  checkRateLimit,
+  getClientIp,
+  isValidEmail,
+  sanitizeInput,
+  validateMessage,
+} from "~/lib/contact.server"
+import { MailError, sendMail } from "~/lib/mailer.server"
 import { pageMeta } from "~/lib/seo"
+import { AUTHOR } from "~/lib/site"
 
 export const meta: MetaFunction = () =>
   pageMeta({
@@ -13,170 +21,292 @@ export const meta: MetaFunction = () =>
     path: "/contact",
   })
 
-import { AUTHOR } from "~/lib/site"
+interface ActionData {
+  success?: boolean
+  error?: string
+}
 
-export async function loader() {
-  // .env wins when set, otherwise fall back to AUTHOR (site.ts) so the page
-  // is never rendered with literal "undefined" strings.
-  return {
-    githubUsername: process.env.GITHUB_USERNAME || AUTHOR.github,
-    linkedinUrl: process.env.LINKEDIN_URL || AUTHOR.linkedin,
-    email: process.env.EMAIL || AUTHOR.email,
-    phone: process.env.PHONE || AUTHOR.phone,
-    name: process.env.NAME || AUTHOR.name,
+export const action: ActionFunction = async ({ request }): Promise<ActionData> => {
+  const ip = getClientIp(request)
+  if (!checkRateLimit(ip)) {
+    return { error: "Trop de messages envoyés depuis votre adresse. Réessayez plus tard." }
+  }
+
+  const formData = await request.formData()
+  const honeypot = formData.get("honeypot")?.toString()
+  const website = formData.get("website")?.toString()
+  const timestamp = formData.get("timestamp")?.toString()
+  const name = sanitizeInput(formData.get("name")?.toString() || "")
+  const email = formData.get("email")?.toString()
+  const subject = sanitizeInput(formData.get("subject")?.toString() || "")
+  const message = sanitizeInput(formData.get("message")?.toString() || "")
+
+  if (honeypot || website || !timestamp || Date.now() - Number(timestamp) < 5000) {
+    return { error: "Une erreur est survenue" }
+  }
+  if (!email || !isValidEmail(email)) {
+    return { error: "Adresse email invalide" }
+  }
+  if (!validateMessage(message)) {
+    return { error: "Message invalide" }
+  }
+
+  const from = process.env.EMAIL_FROM
+  const recipient = process.env.EMAIL_RECIPIENT
+  if (!from || !recipient) {
+    console.error("[contact] EMAIL_FROM / EMAIL_RECIPIENT are not configured")
+    return { error: "Erreur de configuration du serveur" }
+  }
+
+  const adminHtml = `
+    <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e5e5; border-radius: 8px;">
+      <h2 style="color: #0a0a0a; margin: 0 0 16px 0; font-size: 18px;">Nouveau message de contact</h2>
+      <p style="margin: 0 0 8px 0; color: #525252; font-size: 13px;">De</p>
+      <p style="margin: 0 0 16px 0; color: #0a0a0a;">${name} &lt;${email}&gt;</p>
+      <p style="margin: 0 0 8px 0; color: #525252; font-size: 13px;">Sujet</p>
+      <p style="margin: 0 0 16px 0; color: #0a0a0a;">${subject}</p>
+      <p style="margin: 0 0 8px 0; color: #525252; font-size: 13px;">Message</p>
+      <p style="margin: 0; color: #0a0a0a; white-space: pre-line; line-height: 1.6;">${message}</p>
+    </div>
+  `
+
+  const userHtml = `
+    <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e5e5; border-radius: 8px; line-height: 1.6;">
+      <p>Bonjour ${name},</p>
+      <p>J'ai bien reçu votre message concernant « ${subject} » et reviendrai vers vous rapidement.</p>
+      <p>Cordialement,<br />Franck</p>
+      <p style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #737373;">
+        Ceci est un message automatique, merci de ne pas y répondre.
+      </p>
+    </div>
+  `
+
+  try {
+    await sendMail({
+      from,
+      to: recipient,
+      bcc: process.env.EMAIL_BCC,
+      replyTo: email,
+      subject: `${subject} - Message de ${name}`,
+      html: adminHtml,
+    })
+    await sendMail({
+      from,
+      to: email,
+      replyTo: recipient,
+      subject: "Merci pour votre message",
+      html: userHtml,
+    })
+    return { success: true }
+  } catch (error) {
+    if (error instanceof MailError) {
+      console.error("[contact]", error.message)
+    } else {
+      console.error("[contact] unexpected error:", error)
+    }
+    return { error: "Erreur lors de l'envoi du message" }
   }
 }
 
-const ContactPage = () => {
-  const { githubUsername, linkedinUrl, email, phone, name } =
-    useLoaderData<typeof loader>()
-  const [activeSection, setActiveSection] = useState<number | null>(null)
-
-  const allContactLinks = [
-    githubUsername
-      ? {
-          title: "Github",
-          icon: Github,
-          href: `https://github.com/${githubUsername}`,
-          description: "Explorer mes projets open source et contributions",
-          details: `@${githubUsername}`,
-        }
-      : null,
-    linkedinUrl
-      ? {
-          title: "LinkedIn",
-          icon: Linkedin,
-          href: linkedinUrl,
-          description: "Mon parcours professionnel et mes compétences",
-          details: name,
-        }
-      : null,
-    email
-      ? {
-          title: "Email",
-          icon: Mail,
-          href: `mailto:${email}`,
-          description: "Me contacter directement par email",
-          details: email,
-        }
-      : null,
-    phone
-      ? {
-          title: "Téléphone",
+const directLinks = [
+  {
+    label: "Email",
+    value: AUTHOR.email,
+    href: `mailto:${AUTHOR.email}`,
+    icon: Mail,
+  },
+  {
+    label: "LinkedIn",
+    value: "linkedin.com/in/franck-vienot",
+    href: AUTHOR.linkedin,
+    icon: Linkedin,
+    external: true,
+  },
+  {
+    label: "GitHub",
+    value: `@${AUTHOR.github}`,
+    href: `https://github.com/${AUTHOR.github}`,
+    icon: Github,
+    external: true,
+  },
+  ...(AUTHOR.phone
+    ? [
+        {
+          label: "Téléphone",
+          value: AUTHOR.phone,
+          href: `tel:${AUTHOR.phone}`,
           icon: Phone,
-          href: `tel:${phone}`,
-          description: "Pour un échange direct et rapide",
-          details: phone,
-        }
-      : null,
-    {
-      title: "Formulaire",
-      icon: LetterText,
-      href: `/sendmail`,
-      description: "Si vous préférez un formulaire de contact c'est par ici",
-      details: "Envoyer un message",
-    },
-  ]
-  const contactLinks = allContactLinks.filter(
-    (link): link is NonNullable<typeof link> => link !== null
-  )
+        },
+      ]
+    : []),
+]
+
+export default function Contact() {
+  const actionData = useActionData<ActionData>()
+  const navigation = useNavigation()
+  const isSubmitting = navigation.state !== "idle"
+  const formRef = useRef<HTMLFormElement>(null)
+
+  // Set the timestamp client-side after mount so the 5s honeypot check
+  // can't be bypassed by a bot scraping the SSR-rendered HTML for a stale
+  // value. Each page view gets its own start timestamp.
+  useEffect(() => {
+    const input = formRef.current?.querySelector<HTMLInputElement>('input[name="timestamp"]')
+    if (input) input.value = Date.now().toString()
+  }, [])
+
+  useEffect(() => {
+    if (actionData?.success) formRef.current?.reset()
+  }, [actionData?.success])
 
   return (
-    <div className="min-h-screen relative top-10 sm:top-20  bg-neutral-900 text-white">
-      {/* Hero Section */}
-      <div className="relative h-[40vh] sm:h-[60vh] overflow-hidden">
-        {/* Image de fond avec effet parallaxe */}
-        <div
-          className="absolute inset-0 bg-cover bg-center transform scale-110"
-          style={{
-            backgroundImage:
-              "url(https://images.unsplash.com/photo-1536859355448-76f92ebdc33d?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)",
-            backgroundAttachment: "fixed",
-          }}
-        >
-          <div className="absolute inset-0 bg-neutral-900/70" />
-        </div>
-
-        {/* Contenu Hero */}
-        <div className="relative h-full flex flex-col justify-center items-center text-center px-4">
-          <AnimatedProfile name="Franck Vienot" imageUrl="/images/profil/profil.webp" />
-
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">{name}</h1>
-          <p className="text-neutral-300 text-sm sm:text-base max-w-md">
-            Développeur Full Stack passionné par la création d&apos;expériences web
-            innovantes
+    <main className="min-h-screen bg-gray-50 pt-24 pb-24 sm:pt-32 dark:bg-neutral-900">
+      <div className="mx-auto max-w-2xl px-6">
+        <header className="mb-10">
+          <p className="text-xs uppercase tracking-wider text-neutral-500">Contact</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-neutral-900 sm:text-4xl dark:text-neutral-100">
+            Discutons.
+          </h1>
+          <p className="mt-4 text-[17px] leading-relaxed text-neutral-700 dark:text-neutral-300">
+            Mission freelance, projet santé, archi cloud, outillage dev, ou simple échange — le plus
+            rapide est l&apos;email. Pour tout ce qui dépasse trois lignes, le formulaire en bas de
+            page passe par la même boîte.
           </p>
-        </div>
+        </header>
 
-        {/* Dégradé de transition */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-neutral-900 to-transparent" />
-      </div>
-
-      {/* Section Contact */}
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {contactLinks.map((link, index) => (
-            <a
-              key={link.title}
-              href={link.href}
-              target={
-                link.title !== "Téléphone" && link.title !== "Email"
-                  ? "_blank"
-                  : undefined
-              }
-              rel={
-                link.title !== "Téléphone" && link.title !== "Email"
-                  ? "noopener noreferrer"
-                  : undefined
-              }
-              className="group"
-              onMouseEnter={() => setActiveSection(index)}
-              onMouseLeave={() => setActiveSection(null)}
-            >
-              <div
-                className={`relative overflow-hidden rounded-xl transition-all duration-500
-                bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/50
-                hover:border-purple-500/50 hover:bg-neutral-800/80
-                ${activeSection === index ? "shadow-lg shadow-purple-500/10" : ""}`}
+        <ul className="mb-16 divide-y divide-neutral-200 border-y border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800">
+          {directLinks.map((link) => (
+            <li key={link.label}>
+              <a
+                href={link.href}
+                target={link.external ? "_blank" : undefined}
+                rel={link.external ? "noopener noreferrer" : undefined}
+                className="group flex items-center justify-between py-4 transition-colors"
               >
-                {/* Contenu principal */}
-                <div className="p-6 relative z-10">
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`p-3 rounded-lg bg-purple-500/10 
-                      transition-all duration-500 group-hover:scale-110 
-                      ${activeSection === index ? "bg-purple-500/20" : ""}`}
-                    >
-                      <link.icon className="w-6 h-6 text-purple-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-semibold mb-1">{link.title}</h2>
-                      <p className="text-sm text-neutral-400 mb-2">{link.description}</p>
-                      <span className="text-sm font-mono text-purple-400">
-                        {link.details}
-                      </span>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-3">
+                  <link.icon
+                    size={18}
+                    className="text-neutral-400 group-hover:text-[#2563eb] dark:group-hover:text-[#60a5fa]"
+                    aria-hidden
+                  />
+                  <span className="text-xs uppercase tracking-wider text-neutral-500">
+                    {link.label}
+                  </span>
                 </div>
-
-                {/* Effet de bordure animée */}
-                <div
-                  className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r 
-                  from-purple-500 to-blue-500 transition-all duration-500
-                  ${activeSection === index ? "w-full" : "w-0"}`}
-                />
-              </div>
-            </a>
+                <span className="text-sm text-neutral-700 group-hover:text-[#2563eb] dark:text-neutral-300 dark:group-hover:text-[#60a5fa]">
+                  {link.value}
+                </span>
+              </a>
+            </li>
           ))}
-        </div>
+        </ul>
 
-        {/* Footer */}
-        <div className="mt-12 text-center text-sm text-neutral-500">
-          <p>© 2024 • Conçu et développé avec passion</p>
-        </div>
+        <section aria-labelledby="form-heading">
+          <h2
+            id="form-heading"
+            className="mb-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
+          >
+            Formulaire
+          </h2>
+          <p className="mb-6 text-sm text-neutral-600 dark:text-neutral-400">
+            Réponse sous 48 h en semaine. Anti-spam : honeypot + délai minimal + cap par IP.
+          </p>
+
+          <Form ref={formRef} method="post" className="space-y-5">
+            <Field id="name" label="Nom" type="text" required />
+            <Field id="email" label="Email" type="email" required />
+            <Field id="subject" label="Sujet" type="text" required />
+
+            <div>
+              <label
+                htmlFor="message"
+                className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-neutral-200"
+              >
+                Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows={6}
+                required
+                minLength={10}
+                maxLength={1000}
+                className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[#2563eb] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+              />
+              <p className="mt-1 text-xs text-neutral-500">10 à 1000 caractères. Pas d&apos;URL.</p>
+            </div>
+
+            {/* Honeypots — hidden from users, attractive to bots. */}
+            <input
+              type="text"
+              name="honeypot"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden
+              className="hidden"
+            />
+            <input
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden
+              className="hidden"
+            />
+            <input type="hidden" name="timestamp" defaultValue="" />
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex items-center gap-2 rounded-md bg-[#2563eb] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1d4ed8] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Send size={14} aria-hidden />
+              {isSubmitting ? "Envoi…" : "Envoyer"}
+            </button>
+
+            {actionData?.success ? (
+              <p className="text-sm text-emerald-700 dark:text-emerald-400" role="status">
+                Message envoyé. À très bientôt.
+              </p>
+            ) : null}
+            {actionData?.error ? (
+              <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+                {actionData.error}
+              </p>
+            ) : null}
+          </Form>
+        </section>
       </div>
-    </div>
+    </main>
   )
 }
 
-export default ContactPage
+function Field({
+  id,
+  label,
+  type,
+  required,
+}: {
+  id: string
+  label: string
+  type: "text" | "email"
+  required?: boolean
+}) {
+  return (
+    <div>
+      <label
+        htmlFor={id}
+        className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-neutral-200"
+      >
+        {label}
+      </label>
+      <input
+        id={id}
+        name={id}
+        type={type}
+        required={required}
+        className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[#2563eb] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+      />
+    </div>
+  )
+}

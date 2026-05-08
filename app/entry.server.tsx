@@ -19,18 +19,8 @@ export default function handleRequest(
   loadContext: AppLoadContext
 ) {
   return isbot(request.headers.get("user-agent") || "")
-    ? handleBotRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        routerContext
-      )
-    : handleBrowserRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        routerContext
-      )
+    ? handleBotRequest(request, responseStatusCode, responseHeaders, routerContext)
+    : handleBrowserRequest(request, responseStatusCode, responseHeaders, routerContext)
 }
 
 function handleBotRequest(

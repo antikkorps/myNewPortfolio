@@ -253,15 +253,13 @@ export default function ProjetsPage() {
       />
       <div className="mx-auto max-w-3xl px-6">
         <header className="mb-12">
-          <p className="text-xs uppercase tracking-wider text-neutral-500">
-            Projets
-          </p>
+          <p className="text-xs uppercase tracking-wider text-neutral-500">Projets</p>
           <h1 className="mt-1 text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
             Ce que j&apos;ai construit
           </h1>
           <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-neutral-600 dark:text-neutral-400">
-            Sélection de projets web, classés par état. Pour les sites
-            archivés, je publie progressivement des démos vidéo en remplacement.
+            Sélection de projets web, classés par état. Pour les sites archivés, je publie
+            progressivement des démos vidéo en remplacement.
           </p>
         </header>
 
@@ -274,11 +272,7 @@ export default function ProjetsPage() {
               {live.length} projet{live.length > 1 ? "s" : ""}
             </span>
           </div>
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-          >
+          <motion.div initial="hidden" animate="visible" variants={containerVariants}>
             {live.map((p) => (
               <ProjectRow key={p.title} project={p} onPlayVideo={setActiveVideo} />
             ))}
@@ -294,11 +288,7 @@ export default function ProjetsPage() {
               {archived.length} projet{archived.length > 1 ? "s" : ""}
             </span>
           </div>
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-          >
+          <motion.div initial="hidden" animate="visible" variants={containerVariants}>
             {archived.map((p) => (
               <ProjectRow key={p.title} project={p} onPlayVideo={setActiveVideo} />
             ))}

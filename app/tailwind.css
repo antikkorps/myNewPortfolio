@@ -1,3 +1,7 @@
+/* Self-hosted fonts — same-origin, single round-trip, no Google Fonts. */
+@import "@fontsource-variable/inter/index.css";
+@import "@fontsource-variable/lora/index.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -24,175 +28,6 @@ html {
   }
 }
 
-/* Add your custom styles here */
-
-.perspective-1000 {
-  perspective: 1000px;
-}
-
-.glitch-text {
-  isolation: isolate;
-}
-
-.glitch-layer {
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-  transform-origin: center;
-  mix-blend-mode: hard-light;
-  pointer-events: none;
-}
-
-/* about Style */
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-down {
-  animation: fadeInDown 1s ease-out;
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 1s ease-out;
-}
-
-.animate-fade-in {
-  animation: fadeIn 1s ease-out 1s forwards;
-}
-
-/* About Header */
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: 0.3;
-    transform: scale(0.8);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2);
-  }
-}
-
-.animate-twinkle {
-  animation: twinkle 3s infinite ease-in-out;
-}
-
-/* Profil image */
-@layer utilities {
-  .animate-pulse-slow {
-    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  .animate-glitch-r {
-    animation: glitchR 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  .animate-glitch-b {
-    animation: glitchB 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  .animate-border-flow {
-    animation: borderFlow 4s linear infinite;
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-}
-
-@keyframes clipRotate {
-  0% {
-    clip-path: polygon(50% 50%, 0 0, 0 0, 0 0);
-  }
-  50% {
-    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 0);
-  }
-  100% {
-    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%);
-  }
-}
-
-@keyframes glitchR {
-  0%,
-  100% {
-    transform: translate(0);
-    opacity: 0.5;
-  }
-  10%,
-  90% {
-    transform: translate(-2px, 1px);
-    opacity: 0.8;
-  }
-  20%,
-  80% {
-    transform: translate(1px, -1px);
-    opacity: 0.6;
-  }
-  30%,
-  70% {
-    transform: translate(-3px, 2px);
-    opacity: 0.4;
-  }
-}
-
-@keyframes glitchB {
-  0%,
-  100% {
-    transform: translate(0);
-    opacity: 0.5;
-  }
-  10%,
-  90% {
-    transform: translate(2px, -1px);
-    opacity: 0.8;
-  }
-  20%,
-  80% {
-    transform: translate(-1px, 1px);
-    opacity: 0.6;
-  }
-  30%,
-  70% {
-    transform: translate(3px, -2px);
-    opacity: 0.4;
-  }
-}
-
-@keyframes borderFlow {
-  0% {
-    border-color: rgba(168, 85, 247, 0.5);
-    transform: rotate(0deg);
-  }
-  100% {
-    border-color: rgba(168, 85, 247, 0);
-    transform: rotate(360deg);
-  }
-}
-
 /* ------------------------------------------------------------- */
 /* Blog : palette dédiée, typographie Charter/Lora, Shiki dual   */
 /* ------------------------------------------------------------- */
@@ -200,7 +35,8 @@ html {
 .blog-surface {
   background-color: #fafafa;
   color: #1a1a1a;
-  font-family: Charter, Lora, "Iowan Old Style", "Apple Garamond", Baskerville,
+  font-family:
+    Charter, "Lora Variable", Lora, "Iowan Old Style", "Apple Garamond", Baskerville,
     "Times New Roman", serif;
 }
 
@@ -210,15 +46,16 @@ html.dark .blog-surface {
 }
 
 .blog-ui {
-  font-family: -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui,
-    "Segoe UI", Roboto, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
 }
 
 /* Shiki — rehype-pretty-code dual theme via CSS variables */
 .prose-blog pre,
 .prose-blog code {
-  font-family: "JetBrains Mono", "Fira Code", "IBM Plex Mono", ui-monospace,
-    SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family:
+    "JetBrains Mono", "Fira Code", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, monospace;
   font-size: 0.9em;
 }
 
@@ -362,7 +199,9 @@ html.dark .prose-blog td {
   border-bottom: none;
   color: #d4d4d4;
   opacity: 0;
-  transition: opacity 150ms ease, color 150ms ease;
+  transition:
+    opacity 150ms ease,
+    color 150ms ease;
   text-decoration: none;
 }
 
@@ -384,4 +223,3 @@ html.dark .prose-blog .heading-anchor {
 html.dark .prose-blog .heading-anchor:hover {
   color: #60a5fa;
 }
-

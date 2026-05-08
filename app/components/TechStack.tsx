@@ -1,4 +1,4 @@
-import { motion } from "framer-motion"
+import { motion } from "motion/react"
 import { useState } from "react"
 
 interface Tech {
@@ -27,15 +27,13 @@ const categories: Category[] = [
       },
       {
         name: "Nuxt",
-        description:
-          "Vue full-stack avec auto-imports, SSR/SSG/ISR, routing par fichiers.",
+        description: "Vue full-stack avec auto-imports, SSR/SSG/ISR, routing par fichiers.",
         notes: ["Server routes", "Nitro", "Modules officiels"],
         url: "https://nuxt.com/",
       },
       {
         name: "React Router",
-        description:
-          "Le successeur de Remix v2 — loaders, actions, file-based routing, SSR.",
+        description: "Le successeur de Remix v2 — loaders, actions, file-based routing, SSR.",
         notes: ["v7 framework mode", "Type-safe routes", "Streaming SSR"],
         url: "https://reactrouter.com/",
       },
@@ -48,8 +46,7 @@ const categories: Category[] = [
       },
       {
         name: "Tailwind CSS",
-        description:
-          "Utility-first, build avec JIT. Productivité élevée sans CSS-in-JS.",
+        description: "Utility-first, build avec JIT. Productivité élevée sans CSS-in-JS.",
         notes: ["Plugin typography", "Design tokens", "Dark mode class"],
         url: "https://tailwindcss.com/",
       },
@@ -68,15 +65,13 @@ const categories: Category[] = [
       },
       {
         name: "Express",
-        description:
-          "Toujours présent — middleware-based, simple, écosystème massif.",
+        description: "Toujours présent — middleware-based, simple, écosystème massif.",
         notes: ["Compatibilité étendue", "Routes flexibles", "Maintenance long-terme"],
         url: "https://expressjs.com/",
       },
       {
         name: "Laravel",
-        description:
-          "PHP moderne — Eloquent, Blade, Artisan. Quand le contexte impose PHP.",
+        description: "PHP moderne — Eloquent, Blade, Artisan. Quand le contexte impose PHP.",
         notes: ["Eloquent ORM", "Queues et jobs", "Auth intégré"],
         url: "https://laravel.com/",
       },
@@ -108,8 +103,7 @@ const categories: Category[] = [
       },
       {
         name: "Python",
-        description:
-          "Scripts d'analyse, data, automatisation. Le couteau suisse hors web.",
+        description: "Scripts d'analyse, data, automatisation. Le couteau suisse hors web.",
         notes: ["Type hints + mypy", "uv pour la vélocité", "FastAPI quand HTTP"],
         url: "https://www.python.org/",
       },
@@ -127,8 +121,7 @@ const categories: Category[] = [
       },
       {
         name: "MySQL",
-        description:
-          "Quand l'écosystème ou le client l'impose — performant, fiable, bien outillé.",
+        description: "Quand l'écosystème ou le client l'impose — performant, fiable, bien outillé.",
         notes: ["InnoDB", "Réplication", "JSON columns"],
         url: "https://www.mysql.com/",
       },
@@ -235,9 +228,9 @@ export default function TechStack() {
             Avec quoi je travaille
           </h1>
           <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-neutral-600 dark:text-neutral-400">
-            Outils que j&apos;utilise au quotidien — par familiarité, par confort, ou
-            parce qu&apos;ils résolvent vraiment bien un problème. Cliquez sur un
-            élément pour les détails.
+            Outils que j&apos;utilise au quotidien — par familiarité, par confort, ou parce
+            qu&apos;ils résolvent vraiment bien un problème. Cliquez sur un élément pour les
+            détails.
           </p>
         </header>
 
@@ -248,9 +241,7 @@ export default function TechStack() {
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                   {cat.title}
                 </h2>
-                <p className="text-xs uppercase tracking-wider text-neutral-500">
-                  {cat.subtitle}
-                </p>
+                <p className="text-xs uppercase tracking-wider text-neutral-500">{cat.subtitle}</p>
               </div>
               <ul className="grid grid-cols-1 gap-px overflow-hidden rounded-lg bg-neutral-200 sm:grid-cols-2 lg:grid-cols-3 dark:bg-neutral-800">
                 {cat.items.map((tech) => (
@@ -275,9 +266,7 @@ export default function TechStack() {
         </div>
       </div>
 
-      {selected ? (
-        <TechDetail tech={selected} onClose={() => setSelected(null)} />
-      ) : null}
+      {selected ? <TechDetail tech={selected} onClose={() => setSelected(null)} /> : null}
     </main>
   )
 }

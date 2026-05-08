@@ -1,10 +1,16 @@
 import { render } from "@testing-library/react"
+import { createMemoryRouter, RouterProvider } from "react-router"
 import { describe, expect, it } from "vitest"
 import { TableOfContents } from "./TableOfContents"
 
+function renderWithRouter(ui: React.ReactElement) {
+  const router = createMemoryRouter([{ path: "/", element: ui }], { initialEntries: ["/"] })
+  return render(<RouterProvider router={router} />)
+}
+
 describe("<TableOfContents>", () => {
   it("renders nothing when there are no headings (initial mount)", () => {
-    const { container } = render(<TableOfContents />)
+    const { container } = renderWithRouter(<TableOfContents />)
     // Component renders null on first paint because IntersectionObserver runs
     // in useEffect; with no headings detected (and our jsdom stub), nothing
     // appears.
@@ -17,7 +23,7 @@ describe("<TableOfContents>", () => {
         <h2 id="a">A</h2>
       </article>
     `
-    const { container } = render(<TableOfContents minHeadings={4} />)
+    const { container } = renderWithRouter(<TableOfContents minHeadings={4} />)
     expect(container.querySelector("nav")).toBeNull()
   })
 })

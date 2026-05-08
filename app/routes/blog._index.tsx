@@ -1,12 +1,5 @@
 import type { LoaderFunctionArgs, MetaFunction } from "react-router"
-import {
-  Form,
-  Link,
-  useLoaderData,
-  useNavigation,
-  useSearchParams,
-  useSubmit,
-} from "react-router"
+import { Form, Link, useLoaderData, useNavigation, useSearchParams, useSubmit } from "react-router"
 import { Search } from "lucide-react"
 import { Fragment, useEffect, useRef } from "react"
 import { formatDate } from "~/lib/format"
@@ -23,13 +16,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const filtered = q
     ? postsMeta.filter((p) => {
-        const haystack = [
-          p.title,
-          p.description,
-          ...(p.tags ?? []),
-        ]
-          .join(" ")
-          .toLowerCase()
+        const haystack = [p.title, p.description, ...(p.tags ?? [])].join(" ").toLowerCase()
         return haystack.includes(q)
       })
     : postsMeta
@@ -45,6 +32,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     date: p.date,
     readingTime: p.readingTime,
     tags: p.tags ?? [],
+    draft: p.draft === true,
   }))
 
   return { items, page: safePage, totalPages, total, q }
@@ -149,8 +137,7 @@ export default function BlogIndex() {
             Blog
           </h1>
           <p className="blog-ui mt-3 text-[15px] text-neutral-600 dark:text-neutral-400">
-            Notes, retours d&apos;expérience et réflexions sur le développement
-            web.
+            Notes, retours d&apos;expérience et réflexions sur le développement web.
           </p>
         </header>
 
@@ -206,22 +193,21 @@ export default function BlogIndex() {
         ) : null}
 
         <ul
-          className={`space-y-10 transition-opacity ${
-            isSearching ? "opacity-50" : "opacity-100"
-          }`}
+          className={`space-y-10 transition-opacity ${isSearching ? "opacity-50" : "opacity-100"}`}
         >
           {items.map((post) => (
             <li key={post.slug}>
               <article>
-                <Link
-                  to={`/blog/${post.slug}`}
-                  className="group block"
-                  prefetch="intent"
-                >
+                <Link to={`/blog/${post.slug}`} className="group block" prefetch="intent">
                   <div className="blog-ui flex items-baseline gap-3 text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-500">
                     <time dateTime={post.date}>{formatDate(post.date)}</time>
                     <span aria-hidden>·</span>
                     <span>{post.readingTime} min de lecture</span>
+                    {post.draft ? (
+                      <span className="rounded-sm bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+                        Brouillon
+                      </span>
+                    ) : null}
                   </div>
                   <h2 className="blog-ui mt-2 text-xl font-semibold text-[#0a0a0a] transition-colors group-hover:text-[#2563eb] dark:text-[#fafafa] dark:group-hover:text-[#60a5fa]">
                     {highlight(post.title, q)}
@@ -243,15 +229,13 @@ export default function BlogIndex() {
             {page > 1 ? (
               <Link
                 to={buildPageHref(searchParams, page - 1)}
-                prefetch="intent"
+                prefetch="render"
                 className="text-neutral-600 hover:text-[#2563eb] dark:text-neutral-400 dark:hover:text-[#60a5fa]"
               >
                 ← Précédent
               </Link>
             ) : (
-              <span className="text-neutral-300 dark:text-neutral-700">
-                ← Précédent
-              </span>
+              <span className="text-neutral-300 dark:text-neutral-700">← Précédent</span>
             )}
 
             <span className="text-neutral-500 dark:text-neutral-400">
@@ -261,15 +245,13 @@ export default function BlogIndex() {
             {page < totalPages ? (
               <Link
                 to={buildPageHref(searchParams, page + 1)}
-                prefetch="intent"
+                prefetch="render"
                 className="text-neutral-600 hover:text-[#2563eb] dark:text-neutral-400 dark:hover:text-[#60a5fa]"
               >
                 Suivant →
               </Link>
             ) : (
-              <span className="text-neutral-300 dark:text-neutral-700">
-                Suivant →
-              </span>
+              <span className="text-neutral-300 dark:text-neutral-700">Suivant →</span>
             )}
           </nav>
         ) : null}
