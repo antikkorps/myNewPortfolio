@@ -159,6 +159,19 @@ const categories: Category[] = [
         notes: ["Rebase interactif", "Worktrees", "Hooks"],
         url: "https://git-scm.com/",
       },
+      {
+        name: "AWS",
+        description:
+          "Cloud public le plus large. Utilisé sur des contextes pro où l'écosystème managé compte.",
+        notes: ["EC2 / ECS / Fargate", "S3, RDS, CloudFront", "IAM granulaire"],
+        url: "https://aws.amazon.com/",
+      },
+      {
+        name: "Azure",
+        description: "Cloud Microsoft, fort sur les contextes entreprise et l'intégration AD/M365.",
+        notes: ["App Service, AKS", "Entra ID", "Azure SQL"],
+        url: "https://azure.microsoft.com/",
+      },
     ],
   },
 ]
