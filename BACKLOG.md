@@ -47,7 +47,7 @@ priorité.
 - **`/a-propos`** : texte LogiBOP / DAW Rust / GoTK / security, liens externes
 - **`/projets`** : sections "En ligne" (incl. LogiBOP & GoTK en tête) / "Archives", embed YouTube en `<dialog>` natif (toEmbedUrl validé)
 - **`/tech-stacks`** : refonte sobre, catégorisée (Frontend/Backend/Langages/Données/Infra), Remix→RR, Nest→Fastify, ajout Go/Rust/Python/TypeScript
-- **`/contact`** : fallback `AUTHOR` quand `process.env.*` absent (plus de "undefined")
+- **`/contact`** unifié : page éditoriale (palette + ton du blog), liens directs (email, LinkedIn, GitHub, téléphone) puis formulaire dans la même page. `/sendmail` redirige en 301 vers `/contact`. Helpers anti-abus extraits dans `app/lib/contact.server.ts` (validation, sanitization, honeypot, rate-limit IP). Plus d'image Unsplash externe, plus d'`AnimatedProfile`.
 
 ### Tests & CI
 
