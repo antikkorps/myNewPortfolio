@@ -63,7 +63,7 @@ priorité.
 
 ### 1. Migrer le mail vers Resend (ou équivalent à token)
 
-Actuellement `/sendmail` utilise nodemailer + Gmail avec `EMAIL_USER` / `EMAIL_PASS` en clair en env Vercel. Le mot de passe d'app Gmail est révocable par compromission, et stocker des credentials d'authentification (vs un token API scopé) n'est pas idéal pour un site qui se positionne « security by design ». Resend (ou Postmark, Mailjet) propose un token API scopé à l'envoi, avec un dashboard de logs propre, des limites de taux côté provider, et un domaine d'envoi vérifié (DKIM/SPF). Garder le honeypot, le délai 5 s, le rate-limit IP en place — ils restent utiles côté défense en profondeur.
+L'envoi est désormais derrière `sendMail()` dans `app/lib/mailer.server.ts`, agnostique du provider. L'action `/contact` ne sait rien du fournisseur. Aujourd'hui c'est nodemailer + Gmail SMTP avec `EMAIL_USER` / `EMAIL_PASS` ; pour migrer vers Resend, réécrire le corps de `sendMail()` (avec `Resend(process.env.RESEND_API_KEY).emails.send(...)`) et changer les env vars en prod. Domaine d'envoi recommandé : sous-domaine de `fvienot.link` (ex. `mail.fvienot.link`), records DKIM/SPF/DMARC poussés via l'intégration Cloudflare de Resend. Garder le honeypot, le délai 5 s, le rate-limit IP en place — ils restent utiles côté défense en profondeur.
 
 ---
 

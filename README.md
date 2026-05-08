@@ -72,16 +72,17 @@ test/                 # tests d'intégration (security scan)
 
 ## Variables d'environnement
 
-Pour le formulaire de contact (`/sendmail`), définir dans `.env` ou via Vercel :
+Pour le formulaire de contact (`/contact`), définir dans `.env` ou via Vercel :
 
 ```
-EMAIL_USER=…           # compte SMTP (gmail actuel)
-EMAIL_PASS=…           # mot de passe d'app gmail
-EMAIL_RECIPIENT=…      # destinataire admin
+EMAIL_FROM=…           # adresse "From:" complète, ex. "Franck <contact@mail.fvienot.link>"
+EMAIL_RECIPIENT=…      # adresse où arrivent les messages reçus
 EMAIL_BCC=…            # CCI optionnel
-PHONE_NUMBER=…
-LINKEDIN_URL=…
+EMAIL_USER=…           # SMTP user — utilisé par l'implémentation Gmail/nodemailer
+EMAIL_PASS=…           # SMTP pass — utilisé par l'implémentation Gmail/nodemailer
 ```
+
+L'envoi passe par `app/lib/mailer.server.ts` → `sendMail()`, derrière une interface `MailMessage` agnostique du provider. L'implémentation actuelle utilise nodemailer + SMTP Gmail. Pour swapper vers un autre provider (Resend, Postmark, Mailgun…), réécrire le corps de `sendMail()` et ajuster les env vars qu'il lit. L'action dans `app/routes/contact.tsx` ne change pas.
 
 ## Déploiement
 

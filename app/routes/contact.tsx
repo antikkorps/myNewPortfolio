@@ -1,7 +1,6 @@
 import type { ActionFunction, MetaFunction } from "react-router"
 import { Form, useActionData, useNavigation } from "react-router"
 import { Github, Linkedin, Mail, Phone, Send } from "lucide-react"
-import nodemailer from "nodemailer"
 import { useEffect, useRef } from "react"
 import {
   checkRateLimit,
@@ -10,6 +9,7 @@ import {
   sanitizeInput,
   validateMessage,
 } from "~/lib/contact.server"
+import { MailError, sendMail } from "~/lib/mailer.server"
 import { pageMeta } from "~/lib/seo"
 import { AUTHOR } from "~/lib/site"
 
@@ -51,52 +51,59 @@ export const action: ActionFunction = async ({ request }): Promise<ActionData> =
     return { error: "Message invalide" }
   }
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-  })
-
-  const adminMailOptions = {
-    from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_RECIPIENT,
-    bcc: process.env.EMAIL_BCC,
-    subject: `${subject} - Message de ${name}`,
-    html: `
-      <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e5e5; border-radius: 8px;">
-        <h2 style="color: #0a0a0a; margin: 0 0 16px 0; font-size: 18px;">Nouveau message de contact</h2>
-        <p style="margin: 0 0 8px 0; color: #525252; font-size: 13px;">De</p>
-        <p style="margin: 0 0 16px 0; color: #0a0a0a;">${name} &lt;${email}&gt;</p>
-        <p style="margin: 0 0 8px 0; color: #525252; font-size: 13px;">Sujet</p>
-        <p style="margin: 0 0 16px 0; color: #0a0a0a;">${subject}</p>
-        <p style="margin: 0 0 8px 0; color: #525252; font-size: 13px;">Message</p>
-        <p style="margin: 0; color: #0a0a0a; white-space: pre-line; line-height: 1.6;">${message}</p>
-      </div>
-    `,
+  const from = process.env.EMAIL_FROM
+  const recipient = process.env.EMAIL_RECIPIENT
+  if (!from || !recipient) {
+    console.error("[contact] EMAIL_FROM / EMAIL_RECIPIENT are not configured")
+    return { error: "Erreur de configuration du serveur" }
   }
 
-  const userMailOptions = {
-    from: `"Ne pas répondre" <${process.env.EMAIL_USER}>`,
-    replyTo: process.env.EMAIL_USER,
-    to: email,
-    subject: `Merci pour votre message`,
-    html: `
-      <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e5e5; border-radius: 8px; line-height: 1.6;">
-        <p>Bonjour ${name},</p>
-        <p>J'ai bien reçu votre message concernant « ${subject} » et reviendrai vers vous rapidement.</p>
-        <p>Cordialement,<br />Franck</p>
-        <p style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #737373;">
-          Ceci est un message automatique, merci de ne pas y répondre.
-        </p>
-      </div>
-    `,
-  }
+  const adminHtml = `
+    <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e5e5; border-radius: 8px;">
+      <h2 style="color: #0a0a0a; margin: 0 0 16px 0; font-size: 18px;">Nouveau message de contact</h2>
+      <p style="margin: 0 0 8px 0; color: #525252; font-size: 13px;">De</p>
+      <p style="margin: 0 0 16px 0; color: #0a0a0a;">${name} &lt;${email}&gt;</p>
+      <p style="margin: 0 0 8px 0; color: #525252; font-size: 13px;">Sujet</p>
+      <p style="margin: 0 0 16px 0; color: #0a0a0a;">${subject}</p>
+      <p style="margin: 0 0 8px 0; color: #525252; font-size: 13px;">Message</p>
+      <p style="margin: 0; color: #0a0a0a; white-space: pre-line; line-height: 1.6;">${message}</p>
+    </div>
+  `
+
+  const userHtml = `
+    <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e5e5; border-radius: 8px; line-height: 1.6;">
+      <p>Bonjour ${name},</p>
+      <p>J'ai bien reçu votre message concernant « ${subject} » et reviendrai vers vous rapidement.</p>
+      <p>Cordialement,<br />Franck</p>
+      <p style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #737373;">
+        Ceci est un message automatique, merci de ne pas y répondre.
+      </p>
+    </div>
+  `
 
   try {
-    await transporter.sendMail(adminMailOptions)
-    await transporter.sendMail(userMailOptions)
+    await sendMail({
+      from,
+      to: recipient,
+      bcc: process.env.EMAIL_BCC,
+      replyTo: email,
+      subject: `${subject} - Message de ${name}`,
+      html: adminHtml,
+    })
+    await sendMail({
+      from,
+      to: email,
+      replyTo: recipient,
+      subject: "Merci pour votre message",
+      html: userHtml,
+    })
     return { success: true }
   } catch (error) {
-    console.error("[contact] send failed:", error instanceof Error ? error.message : error)
+    if (error instanceof MailError) {
+      console.error("[contact]", error.message)
+    } else {
+      console.error("[contact] unexpected error:", error)
+    }
     return { error: "Erreur lors de l'envoi du message" }
   }
 }
