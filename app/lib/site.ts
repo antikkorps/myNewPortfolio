@@ -9,7 +9,7 @@ export const AUTHOR = {
   twitter: "",
   github: "antikkorps",
   linkedin: "https://www.linkedin.com/in/franck-vienot/",
-  phone: "",
+  phone: "0760741172",
 }
 export const OG_IMAGE = "/og/default.png"
 export const ogImageForSlug = (slug: string) => `/og/${slug}.png`
