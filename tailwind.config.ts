@@ -32,6 +32,7 @@ export default {
       },
       fontFamily: {
         sans: [
+          "Inter Variable",
           "Inter",
           "ui-sans-serif",
           "system-ui",
@@ -52,6 +53,7 @@ export default {
         ],
         serif: [
           "Charter",
+          "Lora Variable",
           "Lora",
           "Iowan Old Style",
           "Apple Garamond",

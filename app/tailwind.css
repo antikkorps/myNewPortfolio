@@ -1,3 +1,7 @@
+/* Self-hosted fonts — same-origin, single round-trip, no Google Fonts. */
+@import "@fontsource-variable/inter/index.css";
+@import "@fontsource-variable/lora/index.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -201,7 +205,8 @@ html {
   background-color: #fafafa;
   color: #1a1a1a;
   font-family:
-    Charter, Lora, "Iowan Old Style", "Apple Garamond", Baskerville, "Times New Roman", serif;
+    Charter, "Lora Variable", Lora, "Iowan Old Style", "Apple Garamond", Baskerville,
+    "Times New Roman", serif;
 }
 
 html.dark .blog-surface {
