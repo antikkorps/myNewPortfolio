@@ -45,6 +45,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     date: p.date,
     readingTime: p.readingTime,
     tags: p.tags ?? [],
+    draft: p.draft === true,
   }))
 
   return { items, page: safePage, totalPages, total, q }
@@ -222,6 +223,11 @@ export default function BlogIndex() {
                     <time dateTime={post.date}>{formatDate(post.date)}</time>
                     <span aria-hidden>·</span>
                     <span>{post.readingTime} min de lecture</span>
+                    {post.draft ? (
+                      <span className="rounded-sm bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+                        Brouillon
+                      </span>
+                    ) : null}
                   </div>
                   <h2 className="blog-ui mt-2 text-xl font-semibold text-[#0a0a0a] transition-colors group-hover:text-[#2563eb] dark:text-[#fafafa] dark:group-hover:text-[#60a5fa]">
                     {highlight(post.title, q)}

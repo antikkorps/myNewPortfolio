@@ -21,6 +21,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     date: meta.date,
     tags: meta.tags ?? [],
     readingTime: meta.readingTime,
+    draft: meta.draft === true,
     prev: prev ? { slug: prev.slug, title: prev.title } : null,
     next: next ? { slug: next.slug, title: next.title } : null,
   }
@@ -141,6 +142,11 @@ export default function BlogPost() {
             <time dateTime={data.date}>{formatDate(data.date)}</time>
             <span aria-hidden>·</span>
             <span>{data.readingTime} min de lecture</span>
+            {data.draft ? (
+              <span className="rounded-sm bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+                Brouillon
+              </span>
+            ) : null}
           </div>
           <h1 className="blog-ui mt-3 text-3xl sm:text-4xl font-semibold tracking-tight text-[#0a0a0a] dark:text-[#fafafa]">
             {data.title}

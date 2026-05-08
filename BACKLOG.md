@@ -19,10 +19,10 @@ priorité.
 - Pagination, recherche server-side avec **highlight** des matches via `<mark>`
 - RSS feed `/blog/rss.xml` + autodiscovery `<link rel=alternate>`
 - Heading anchors (rehype-slug + rehype-autolink-headings)
-- Table of contents fixed (xl+) avec IntersectionObserver
+- Table of contents fixed (xl+) avec IntersectionObserver, ancres en simple-clic (handler manuel + `preventScrollReset` pour ne pas concurrencer `<ScrollRestoration>` de RR7)
 - Tags clickables → `/blog/tags/$tag`
 - Prev/next article au pied de chaque article
-- Frontmatter `draft: true` filtré
+- Frontmatter `draft: true` : filtré en prod, **visible en dev** (`NODE_ENV=development`) avec badge "Brouillon" sur l'index et l'article
 - **Lazy frontmatter** : split `posts-meta.server.ts` (server-only, frontmatter via `import.meta.glob({ import: 'frontmatter' })`) vs `posts.ts` (component glob). `/blog` index passe de 73 KB à ~5 KB côté client.
 
 ### SEO
@@ -53,19 +53,15 @@ priorité.
 
 ## 🚧 À faire — par priorité
 
-### 1. Vue draft en dev
-
-Afficher les articles `draft: true` quand `process.env.NODE_ENV === "development"`. Actuellement filtré partout, ce qui empêche d'écrire en local sans publier.
-
-### 2. Lighthouse CI
+### 1. Lighthouse CI
 
 GitHub Action qui run Lighthouse sur chaque PR. Budget : perf ≥ 90, SEO ≥ 95, a11y ≥ 95. Bloque les régressions silencieuses sur les Core Web Vitals.
 
-### 3. Lazy MDX (full split — quand `posts.length > ~10`)
+### 2. Lazy MDX (full split — quand `posts.length > ~10`)
 
 `/blog/$slug` reste à ~110 KB car eager glob de tous les MDX. À convertir en `import.meta.glob({ eager: false })` + `React.lazy` + Suspense quand le nombre d'articles dépasse ~10. Aujourd'hui non urgent.
 
-### 4. Préfetch agressif
+### 3. Préfetch agressif
 
 Passer de `prefetch="intent"` à `prefetch="render"` sur les liens vers la prochaine page de pagination — déjà visible donc bon candidat à charger en avance.
 

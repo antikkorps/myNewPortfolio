@@ -33,6 +33,11 @@ function slugFromPath(path: string): string {
   return m[1]
 }
 
+// In dev we keep drafts so we can preview them while writing without
+// publishing. In prod (and in tests, where NODE_ENV is "test") drafts are
+// filtered out.
+const showDrafts = process.env.NODE_ENV === "development"
+
 export const postsMeta: PostMeta[] = Object.entries(frontmatterModules)
   .map(([path, fm]) => ({
     slug: slugFromPath(path),
@@ -43,7 +48,7 @@ export const postsMeta: PostMeta[] = Object.entries(frontmatterModules)
     readingTime: typeof fm?.readingTime === "number" ? fm.readingTime : 1,
     draft: fm?.draft === true,
   }))
-  .filter((p) => !p.draft)
+  .filter((p) => showDrafts || !p.draft)
   .sort((a, b) => b.date.localeCompare(a.date))
 
 export function getPostMeta(slug: string): PostMeta | undefined {
