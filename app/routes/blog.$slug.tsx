@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs, MetaFunction } from "react-router"
 import { Link, useLoaderData } from "react-router"
 import { ArrowLeft, ArrowRight } from "lucide-react"
+import { Suspense } from "react"
 import { BlogAvatar } from "~/components/BlogAvatar"
 import { TableOfContents } from "~/components/TableOfContents"
 import { formatDate } from "~/lib/format"
@@ -159,7 +160,15 @@ export default function BlogPost() {
         </header>
 
         <article className="prose prose-blog dark:prose-invert">
-          <Component />
+          <Suspense
+            fallback={
+              <p className="text-neutral-500 dark:text-neutral-400">
+                Chargement de l&apos;article…
+              </p>
+            }
+          >
+            <Component />
+          </Suspense>
         </article>
 
         <footer className="blog-ui mt-20 flex items-center gap-4 border-t border-neutral-200 pt-8 dark:border-neutral-800">

@@ -24,6 +24,7 @@ priorité.
 - Prev/next article au pied de chaque article
 - Frontmatter `draft: true` : filtré en prod, **visible en dev** (`NODE_ENV=development`) avec badge "Brouillon" sur l'index et l'article
 - **Lazy frontmatter** : split `posts-meta.server.ts` (server-only, frontmatter via `import.meta.glob({ import: 'frontmatter' })`) vs `posts.ts` (component glob). `/blog` index passe de 73 KB à ~5 KB côté client.
+- **Lazy MDX** : `posts.ts` utilise désormais un glob non-eager + `React.lazy` + `<Suspense>`. Chaque article devient son propre chunk Vite, `/blog/$slug` chute de **~110 KB → 35 KB**. La TOC utilise un MutationObserver pour récupérer les headings après que le chunk lazy soit hydraté côté client (le SSR streame déjà l'article complet, donc OK pour les bots et le first paint plein écran).
 
 ### SEO
 - `<html lang="fr">`, méta site-wide (`author`, `robots:max-image-preview`, `theme-color`, `og:site_name`, `og:locale`, JSON-LD Person + WebSite) statiques dans `<Layout>` (RR7 override les méta parent par défaut)
@@ -54,11 +55,7 @@ priorité.
 
 ## 🚧 À faire — par priorité
 
-### 1. Lazy MDX (full split — quand `posts.length > ~10`)
-
-`/blog/$slug` reste à ~110 KB car eager glob de tous les MDX. À convertir en `import.meta.glob({ eager: false })` + `React.lazy` + Suspense quand le nombre d'articles dépasse ~10. Aujourd'hui non urgent.
-
-### 2. Préfetch agressif
+### 1. Préfetch agressif
 
 Passer de `prefetch="intent"` à `prefetch="render"` sur les liens vers la prochaine page de pagination — déjà visible donc bon candidat à charger en avance.
 
