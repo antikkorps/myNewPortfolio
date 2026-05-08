@@ -174,9 +174,7 @@ export default function BlogPost() {
         <footer className="blog-ui mt-20 flex items-center gap-4 border-t border-neutral-200 pt-8 dark:border-neutral-800">
           <BlogAvatar seed={AUTHOR.name} size={44} />
           <div>
-            <p className="text-sm font-medium text-[#0a0a0a] dark:text-[#fafafa]">
-              {AUTHOR.name}
-            </p>
+            <p className="text-sm font-medium text-[#0a0a0a] dark:text-[#fafafa]">{AUTHOR.name}</p>
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
               Publié le {formatDate(data.date)}
             </p>

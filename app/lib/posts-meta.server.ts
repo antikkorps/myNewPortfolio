@@ -22,10 +22,10 @@ export interface PostMeta {
   draft?: boolean
 }
 
-const frontmatterModules = import.meta.glob<RawFrontmatter>(
-  "../content/blog/*.mdx",
-  { eager: true, import: "frontmatter" }
-)
+const frontmatterModules = import.meta.glob<RawFrontmatter>("../content/blog/*.mdx", {
+  eager: true,
+  import: "frontmatter",
+})
 
 function slugFromPath(path: string): string {
   const m = path.match(/\/([^/]+)\.mdx$/)

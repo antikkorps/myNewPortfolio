@@ -28,8 +28,7 @@ export async function loader() {
 }
 
 const ContactPage = () => {
-  const { githubUsername, linkedinUrl, email, phone, name } =
-    useLoaderData<typeof loader>()
+  const { githubUsername, linkedinUrl, email, phone, name } = useLoaderData<typeof loader>()
   const [activeSection, setActiveSection] = useState<number | null>(null)
 
   const allContactLinks = [
@@ -103,8 +102,7 @@ const ContactPage = () => {
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">{name}</h1>
           <p className="text-neutral-300 text-sm sm:text-base max-w-md">
-            Développeur Full Stack passionné par la création d&apos;expériences web
-            innovantes
+            Développeur Full Stack passionné par la création d&apos;expériences web innovantes
           </p>
         </div>
 
@@ -119,11 +117,7 @@ const ContactPage = () => {
             <a
               key={link.title}
               href={link.href}
-              target={
-                link.title !== "Téléphone" && link.title !== "Email"
-                  ? "_blank"
-                  : undefined
-              }
+              target={link.title !== "Téléphone" && link.title !== "Email" ? "_blank" : undefined}
               rel={
                 link.title !== "Téléphone" && link.title !== "Email"
                   ? "noopener noreferrer"
@@ -152,9 +146,7 @@ const ContactPage = () => {
                     <div>
                       <h2 className="text-lg font-semibold mb-1">{link.title}</h2>
                       <p className="text-sm text-neutral-400 mb-2">{link.description}</p>
-                      <span className="text-sm font-mono text-purple-400">
-                        {link.details}
-                      </span>
+                      <span className="text-sm font-mono text-purple-400">{link.details}</span>
                     </div>
                   </div>
                 </div>

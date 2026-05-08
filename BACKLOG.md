@@ -8,6 +8,7 @@ priorité.
 ## ✅ Faits (mergés sur `main`)
 
 ### Stack & sécurité
+
 - Migration **Remix v2 → React Router v7** (`@react-router/{dev,node,serve,fs-routes}`)
 - `npm audit` ramené de 15 vulns (6 moderate / 9 high) à **0** côté projet
 - Headers de sécurité Netlify-style (`public/_headers`) : HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, COOP, cache long pour assets/og/favicon
@@ -15,6 +16,7 @@ priorité.
 - **Fix CodeQL** : sanitization stricte des URLs YouTube via allowlist exact (plus d'`endsWith("youtube.com")`), helper extrait dans `app/lib/youtube.ts` avec 20 tests dédiés couvrant les look-alikes (`evilyoutube.com`, `youtu.be.evil.com`), schemes `javascript:`/`data:`, IDs invalides, traversal.
 
 ### Blog
+
 - Articles MDX avec **Shiki dual-theme** (`github-light` / `github-dark`)
 - Pagination, recherche server-side avec **highlight** des matches via `<mark>`
 - RSS feed `/blog/rss.xml` + autodiscovery `<link rel=alternate>`
@@ -27,6 +29,7 @@ priorité.
 - **Lazy MDX** : `posts.ts` utilise désormais un glob non-eager + `React.lazy` + `<Suspense>`. Chaque article devient son propre chunk Vite, `/blog/$slug` chute de **~110 KB → 35 KB**. La TOC utilise un MutationObserver pour récupérer les headings après que le chunk lazy soit hydraté côté client (le SSR streame déjà l'article complet, donc OK pour les bots et le first paint plein écran).
 
 ### SEO
+
 - `<html lang="fr">`, méta site-wide (`author`, `robots:max-image-preview`, `theme-color`, `og:site_name`, `og:locale`, JSON-LD Person + WebSite) statiques dans `<Layout>` (RR7 override les méta parent par défaut)
 - **Open Graph pré-générés au build** : `scripts/build-og.ts` (tsx) génère `public/og/<slug>.png` + `default.png` (1200×630 PNG via satori + resvg). `npm run build` chaîne `build:og && react-router build`. Plus de Vercel Function pour les OG → 0 cold start, servi depuis le CDN edge. La route runtime `app/routes/og[.]png.tsx` est supprimée.
 - **JSON-LD complet** : Person + WebSite site-wide ; Blog + BreadcrumbList sur `/blog` ; **BlogPosting** enrichi (ImageObject avec dimensions, publisher, articleSection, wordCount, timeRequired, dateModified) + BreadcrumbList sur articles ; BreadcrumbList sur tag pages
@@ -38,6 +41,7 @@ priorité.
 - `SITE_URL` → `https://dev2go.vercel.app` (production)
 
 ### Pages
+
 - **`/` (home)** éditoriale : hero "Architecte cloud, solutions web et outillage dev", derniers articles loadés server-side, quick-links
 - **`/a-propos`** : texte LogiBOP / DAW Rust / GoTK / security, liens externes
 - **`/projets`** : sections "En ligne" (incl. LogiBOP & GoTK en tête) / "Archives", embed YouTube en `<dialog>` natif (toEmbedUrl validé)
@@ -45,6 +49,7 @@ priorité.
 - **`/contact`** : fallback `AUTHOR` quand `process.env.*` absent (plus de "undefined")
 
 ### Tests & CI
+
 - **Vitest** unit : `lib/{format,seo,site,posts-meta.server,youtube}` (~49 tests)
 - **Vitest** components : `mdx/{Note,Warning,Aside}`, `BlogAvatar`, `TableOfContents` (9 tests)
 - **Vitest** security scan : grep des secrets dans `build/client/assets/*.js` — `process.env.EMAIL_*`, dotenv, AWS/Google/GitHub key signatures (11 tests)

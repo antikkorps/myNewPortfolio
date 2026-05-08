@@ -30,17 +30,13 @@ export function toEmbedUrl(url: string): string | null {
 
   if (YOUTU_BE_HOSTS.has(u.hostname)) {
     const id = u.pathname.replace(/^\//, "")
-    return isValidYoutubeId(id)
-      ? `https://www.youtube-nocookie.com/embed/${id}`
-      : null
+    return isValidYoutubeId(id) ? `https://www.youtube-nocookie.com/embed/${id}` : null
   }
 
   if (YOUTUBE_HOSTS.has(u.hostname)) {
     if (u.pathname === "/watch") {
       const id = u.searchParams.get("v")
-      return isValidYoutubeId(id)
-        ? `https://www.youtube-nocookie.com/embed/${id}`
-        : null
+      return isValidYoutubeId(id) ? `https://www.youtube-nocookie.com/embed/${id}` : null
     }
     const embedMatch = u.pathname.match(/^\/embed\/([A-Za-z0-9_-]{11})$/)
     if (embedMatch) {

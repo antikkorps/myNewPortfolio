@@ -1,0 +1,15 @@
+node_modules
+build
+.cache
+.react-router
+test-results
+playwright-report
+blob-report
+playwright/.cache
+.vercel
+public/og
+package-lock.json
+
+# MDX content stays verbatim — Prettier rewraps prose paragraphs and reformats
+# code samples inside fences, both of which are author-controlled on a blog.
+**/*.mdx

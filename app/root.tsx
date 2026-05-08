@@ -83,10 +83,7 @@ const personJsonLd = {
   email: `mailto:${AUTHOR.email}`,
   image: `${SITE_URL}/favicon.png`,
   jobTitle: "Architecte cloud, développeur web full-stack",
-  sameAs: [
-    `https://github.com/${AUTHOR.github}`,
-    ...(AUTHOR.linkedin ? [AUTHOR.linkedin] : []),
-  ],
+  sameAs: [`https://github.com/${AUTHOR.github}`, ...(AUTHOR.linkedin ? [AUTHOR.linkedin] : [])],
   knowsAbout: [
     "Architecture cloud",
     "Logiciel santé",
@@ -125,10 +122,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* Site-wide meta — these appear on EVERY page regardless of route,
             because RR7 child meta exports replace the parent's by default. */}
         <meta name="author" content={AUTHOR.name} />
-        <meta
-          name="robots"
-          content="index,follow,max-image-preview:large,max-snippet:-1"
-        />
+        <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
         <meta name="theme-color" content="#0d0d0d" />
         <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:locale" content="fr_FR" />
@@ -177,9 +171,7 @@ export function ErrorBoundary() {
   return (
     <main className="min-h-screen pt-32 pb-24 bg-gray-50 dark:bg-neutral-900">
       <div className="mx-auto max-w-xl px-6 text-center">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">
-          Erreur {status}
-        </p>
+        <p className="text-xs uppercase tracking-wider text-neutral-500">Erreur {status}</p>
         <h1 className="mt-2 text-4xl sm:text-5xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
           {is404 ? "Page introuvable" : "Une erreur est survenue"}
         </h1>

@@ -152,10 +152,7 @@ const Navbar = () => {
                         >
                           <item.icon size={40} strokeWidth={1.5} />
                         </motion.span>
-                        <motion.span
-                          className="inline-block"
-                          whileHover={{ x: 20, scale: 1.05 }}
-                        >
+                        <motion.span className="inline-block" whileHover={{ x: 20, scale: 1.05 }}>
                           {item.name}
                         </motion.span>
                       </span>

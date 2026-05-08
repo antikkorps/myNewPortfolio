@@ -1,12 +1,5 @@
 import type { LoaderFunctionArgs, MetaFunction } from "react-router"
-import {
-  Form,
-  Link,
-  useLoaderData,
-  useNavigation,
-  useSearchParams,
-  useSubmit,
-} from "react-router"
+import { Form, Link, useLoaderData, useNavigation, useSearchParams, useSubmit } from "react-router"
 import { Search } from "lucide-react"
 import { Fragment, useEffect, useRef } from "react"
 import { formatDate } from "~/lib/format"
@@ -23,13 +16,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const filtered = q
     ? postsMeta.filter((p) => {
-        const haystack = [
-          p.title,
-          p.description,
-          ...(p.tags ?? []),
-        ]
-          .join(" ")
-          .toLowerCase()
+        const haystack = [p.title, p.description, ...(p.tags ?? [])].join(" ").toLowerCase()
         return haystack.includes(q)
       })
     : postsMeta
@@ -150,8 +137,7 @@ export default function BlogIndex() {
             Blog
           </h1>
           <p className="blog-ui mt-3 text-[15px] text-neutral-600 dark:text-neutral-400">
-            Notes, retours d&apos;expérience et réflexions sur le développement
-            web.
+            Notes, retours d&apos;expérience et réflexions sur le développement web.
           </p>
         </header>
 
@@ -207,18 +193,12 @@ export default function BlogIndex() {
         ) : null}
 
         <ul
-          className={`space-y-10 transition-opacity ${
-            isSearching ? "opacity-50" : "opacity-100"
-          }`}
+          className={`space-y-10 transition-opacity ${isSearching ? "opacity-50" : "opacity-100"}`}
         >
           {items.map((post) => (
             <li key={post.slug}>
               <article>
-                <Link
-                  to={`/blog/${post.slug}`}
-                  className="group block"
-                  prefetch="intent"
-                >
+                <Link to={`/blog/${post.slug}`} className="group block" prefetch="intent">
                   <div className="blog-ui flex items-baseline gap-3 text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-500">
                     <time dateTime={post.date}>{formatDate(post.date)}</time>
                     <span aria-hidden>·</span>
@@ -255,9 +235,7 @@ export default function BlogIndex() {
                 ← Précédent
               </Link>
             ) : (
-              <span className="text-neutral-300 dark:text-neutral-700">
-                ← Précédent
-              </span>
+              <span className="text-neutral-300 dark:text-neutral-700">← Précédent</span>
             )}
 
             <span className="text-neutral-500 dark:text-neutral-400">
@@ -273,9 +251,7 @@ export default function BlogIndex() {
                 Suivant →
               </Link>
             ) : (
-              <span className="text-neutral-300 dark:text-neutral-700">
-                Suivant →
-              </span>
+              <span className="text-neutral-300 dark:text-neutral-700">Suivant →</span>
             )}
           </nav>
         ) : null}

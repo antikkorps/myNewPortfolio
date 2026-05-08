@@ -12,5 +12,4 @@ class IntersectionObserverStub implements IntersectionObserver {
     return []
   }
 }
-globalThis.IntersectionObserver =
-  globalThis.IntersectionObserver ?? IntersectionObserverStub
+globalThis.IntersectionObserver = globalThis.IntersectionObserver ?? IntersectionObserverStub

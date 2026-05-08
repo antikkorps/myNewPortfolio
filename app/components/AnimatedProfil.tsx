@@ -95,9 +95,7 @@ const AnimatedProfile = ({ name, imageUrl }: AnimatedProfileProps) => {
         <div
           className={`absolute inset-0 rounded-full border-2
           transition-all duration-500
-          ${
-            isHovered ? "border-purple-400 scale-105" : "border-purple-500/50 scale-100"
-          }`}
+          ${isHovered ? "border-purple-400 scale-105" : "border-purple-500/50 scale-100"}`}
         >
           <div className="absolute inset-0 rounded-full animate-border-flow" />
         </div>
@@ -133,8 +131,7 @@ const AnimatedProfile = ({ name, imageUrl }: AnimatedProfileProps) => {
         transition-all duration-700 ease-out
         ${isHovered ? "opacity-70 scale-125" : "opacity-0 scale-100"}`}
         style={{
-          background:
-            "radial-gradient(circle, rgba(168, 85, 247, 0.5) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(168, 85, 247, 0.5) 0%, transparent 70%)",
         }}
       />
     </div>

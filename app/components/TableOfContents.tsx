@@ -12,10 +12,7 @@ interface Props {
   minHeadings?: number
 }
 
-export function TableOfContents({
-  containerSelector = "article.prose",
-  minHeadings = 4,
-}: Props) {
+export function TableOfContents({ containerSelector = "article.prose", minHeadings = 4 }: Props) {
   const [headings, setHeadings] = useState<Heading[]>([])
   const [activeId, setActiveId] = useState<string>("")
   const navigate = useNavigate()
@@ -44,9 +41,7 @@ export function TableOfContents({
     )
 
     const collect = () => {
-      const nodes = Array.from(
-        container.querySelectorAll<HTMLHeadingElement>("h2[id], h3[id]")
-      )
+      const nodes = Array.from(container.querySelectorAll<HTMLHeadingElement>("h2[id], h3[id]"))
       if (nodes.length === 0) return false
       setHeadings(
         nodes.map((n) => ({
@@ -89,10 +84,7 @@ export function TableOfContents({
       </p>
       <ul className="space-y-2 text-sm">
         {headings.map((h) => (
-          <li
-            key={h.id}
-            className={h.level === 3 ? "pl-3" : ""}
-          >
+          <li key={h.id} className={h.level === 3 ? "pl-3" : ""}>
             <a
               href={`#${h.id}`}
               onClick={(e) => handleClick(e, h.id)}

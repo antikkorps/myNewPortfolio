@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest"
-import {
-  getNeighborsMeta,
-  getPostMeta,
-  postsMeta,
-  type PostMeta,
-} from "./posts-meta.server"
+import { getNeighborsMeta, getPostMeta, postsMeta, type PostMeta } from "./posts-meta.server"
 
 describe("postsMeta", () => {
   it("loads at least one post", () => {
@@ -17,9 +12,7 @@ describe("postsMeta", () => {
 
   it("sorts by date descending (newest first)", () => {
     for (let i = 1; i < postsMeta.length; i++) {
-      expect(
-        postsMeta[i - 1].date.localeCompare(postsMeta[i].date)
-      ).toBeGreaterThanOrEqual(0)
+      expect(postsMeta[i - 1].date.localeCompare(postsMeta[i].date)).toBeGreaterThanOrEqual(0)
     }
   })
 

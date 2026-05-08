@@ -9,13 +9,9 @@
 
 import { lazy, type ComponentType, type LazyExoticComponent } from "react"
 
-const componentModules = import.meta.glob<{ default: ComponentType }>(
-  "../content/blog/*.mdx"
-)
+const componentModules = import.meta.glob<{ default: ComponentType }>("../content/blog/*.mdx")
 
-export function componentForSlug(
-  slug: string
-): LazyExoticComponent<ComponentType> | null {
+export function componentForSlug(slug: string): LazyExoticComponent<ComponentType> | null {
   const path = `../content/blog/${slug}.mdx`
   const loader = componentModules[path]
   if (!loader) return null

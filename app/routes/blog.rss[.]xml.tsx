@@ -15,9 +15,7 @@ export async function loader() {
     .map((p) => {
       const url = `${SITE_URL}/blog/${p.slug}`
       const pubDate = new Date(p.date).toUTCString()
-      const categories = (p.tags ?? [])
-        .map((t) => `<category>${escape(t)}</category>`)
-        .join("")
+      const categories = (p.tags ?? []).map((t) => `<category>${escape(t)}</category>`).join("")
       return `<item>
   <title>${escape(p.title)}</title>
   <link>${url}</link>

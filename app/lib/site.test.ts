@@ -33,8 +33,6 @@ describe("ogImageForSlug", () => {
   })
 
   it("returns the static OG path even for slugs with hyphens", () => {
-    expect(ogImageForSlug("archi-forgejo-distribuee")).toBe(
-      "/og/archi-forgejo-distribuee.png"
-    )
+    expect(ogImageForSlug("archi-forgejo-distribuee")).toBe("/og/archi-forgejo-distribuee.png")
   })
 })

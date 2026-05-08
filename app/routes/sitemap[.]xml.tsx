@@ -56,9 +56,7 @@ export async function loader() {
 
   // Tag pages — distinct tags, lowercased
   const tags = Array.from(
-    new Set(
-      postsMeta.flatMap((p) => (p.tags ?? []).map((t) => t.toLowerCase()))
-    )
+    new Set(postsMeta.flatMap((p) => (p.tags ?? []).map((t) => t.toLowerCase())))
   )
   const tagUrls = tags
     .map(

@@ -70,9 +70,7 @@ export default function TagPage() {
         </Link>
 
         <header className="mt-10 mb-12">
-          <p className="blog-ui text-xs uppercase tracking-wider text-neutral-500">
-            Tag
-          </p>
+          <p className="blog-ui text-xs uppercase tracking-wider text-neutral-500">Tag</p>
           <h1 className="blog-ui mt-1 text-3xl sm:text-4xl font-semibold tracking-tight text-[#0a0a0a] dark:text-[#fafafa]">
             #{tag}
           </h1>
@@ -85,11 +83,7 @@ export default function TagPage() {
           {items.map((post) => (
             <li key={post.slug}>
               <article>
-                <Link
-                  to={`/blog/${post.slug}`}
-                  className="group block"
-                  prefetch="intent"
-                >
+                <Link to={`/blog/${post.slug}`} className="group block" prefetch="intent">
                   <div className="blog-ui flex items-baseline gap-3 text-xs uppercase tracking-wider text-neutral-500">
                     <time dateTime={post.date}>{formatDate(post.date)}</time>
                     <span aria-hidden>·</span>

@@ -45,15 +45,10 @@ export default function Index() {
     <main className="min-h-screen bg-gray-50 pt-24 sm:pt-32 pb-24 dark:bg-neutral-900">
       <div className="mx-auto max-w-2xl px-6">
         <header className="mb-10">
-          <p className="text-xs uppercase tracking-wider text-neutral-500">
-            Franck Vienot
-          </p>
+          <p className="text-xs uppercase tracking-wider text-neutral-500">Franck Vienot</p>
           <h1 className="mt-2 text-3xl sm:text-5xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
             Architecte cloud, solutions web et{" "}
-            <span className="text-[#2563eb] dark:text-[#60a5fa]">
-              outillage dev
-            </span>
-            .
+            <span className="text-[#2563eb] dark:text-[#60a5fa]">outillage dev</span>.
           </h1>
         </header>
 
@@ -74,8 +69,8 @@ export default function Index() {
           >
             GoTK
           </Link>{" "}
-          (CLI Go pour agents LLM), un DAW en Rust, et une infra self-hébergée
-          (forge, photos, docs).
+          (CLI Go pour agents LLM), un DAW en Rust, et une infra self-hébergée (forge, photos,
+          docs).
         </p>
 
         <ul className="mt-10 flex flex-wrap gap-2">
@@ -105,11 +100,7 @@ export default function Index() {
           <ul className="space-y-7">
             {latestArticles.map((post) => (
               <li key={post.slug}>
-                <Link
-                  to={`/blog/${post.slug}`}
-                  prefetch="intent"
-                  className="group block"
-                >
+                <Link to={`/blog/${post.slug}`} prefetch="intent" className="group block">
                   <div className="flex items-baseline gap-3 text-xs uppercase tracking-wider text-neutral-500">
                     <time dateTime={post.date}>{formatDate(post.date)}</time>
                     <span aria-hidden>·</span>
@@ -127,19 +118,14 @@ export default function Index() {
           </ul>
         </section>
 
-        <nav
-          className="mt-20 grid grid-cols-1 gap-3 sm:grid-cols-3"
-          aria-label="Liens rapides"
-        >
+        <nav className="mt-20 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Liens rapides">
           <Link
             to="/projets"
             prefetch="intent"
             className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
           >
             <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">
-                Voir
-              </p>
+              <p className="text-xs uppercase tracking-wider text-neutral-500">Voir</p>
               <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
                 Mes projets
               </p>
@@ -156,9 +142,7 @@ export default function Index() {
             className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
           >
             <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">
-                Stack
-              </p>
+              <p className="text-xs uppercase tracking-wider text-neutral-500">Stack</p>
               <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
                 Mes outils
               </p>
@@ -175,9 +159,7 @@ export default function Index() {
             className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
           >
             <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">
-                Discuter
-              </p>
+              <p className="text-xs uppercase tracking-wider text-neutral-500">Discuter</p>
               <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
                 Me contacter
               </p>

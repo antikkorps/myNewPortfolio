@@ -4,10 +4,7 @@ import { describe, expect, it } from "vitest"
 import { TableOfContents } from "./TableOfContents"
 
 function renderWithRouter(ui: React.ReactElement) {
-  const router = createMemoryRouter(
-    [{ path: "/", element: ui }],
-    { initialEntries: ["/"] }
-  )
+  const router = createMemoryRouter([{ path: "/", element: ui }], { initialEntries: ["/"] })
   return render(<RouterProvider router={router} />)
 }
 

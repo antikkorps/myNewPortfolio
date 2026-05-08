@@ -52,9 +52,7 @@ const EmailInput = () => {
         onChange={(e) => setIsValid(isValidEmail(e.target.value))}
         className={`w-full px-4 py-3 rounded-lg bg-neutral-50 dark:bg-neutral-700 
                      border ${
-                       isValid
-                         ? "border-neutral-200 dark:border-neutral-600"
-                         : "border-red-500"
+                       isValid ? "border-neutral-200 dark:border-neutral-600" : "border-red-500"
                      } 
                      focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
                      text-neutral-900 dark:text-white
@@ -204,9 +202,7 @@ const ContactPage = () => {
   const isSubmitting = navigation.state === "submitting"
 
   useEffect(() => {
-    const timestampInput = document.querySelector(
-      'input[name="timestamp"]'
-    ) as HTMLInputElement
+    const timestampInput = document.querySelector('input[name="timestamp"]') as HTMLInputElement
     if (timestampInput) {
       timestampInput.value = Date.now().toString()
     }
@@ -444,9 +440,7 @@ const ContactPage = () => {
                   >
                     <info.icon className="w-5 h-5" />
                     <div>
-                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                        {info.label}
-                      </p>
+                      <p className="text-sm text-neutral-500 dark:text-neutral-400">{info.label}</p>
                       <p className="font-medium">{info.value}</p>
                     </div>
                   </motion.a>

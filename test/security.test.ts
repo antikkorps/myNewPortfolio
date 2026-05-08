@@ -9,8 +9,14 @@ const SECRET_PATTERNS: Array<{ name: string; pattern: RegExp }> = [
   { name: "EMAIL_PASS env var literal", pattern: /process\.env\.EMAIL_PASS/ },
   { name: "EMAIL_RECIPIENT env var literal", pattern: /process\.env\.EMAIL_RECIPIENT/ },
   { name: "EMAIL_BCC env var literal", pattern: /process\.env\.EMAIL_BCC/ },
-  { name: "raw nodemailer import in client bundle", pattern: /from"nodemailer"|require\("nodemailer"\)/ },
-  { name: "dotenv module in client bundle", pattern: /from"dotenv\/?config?"|require\("dotenv\/?config?"\)/ },
+  {
+    name: "raw nodemailer import in client bundle",
+    pattern: /from"nodemailer"|require\("nodemailer"\)/,
+  },
+  {
+    name: "dotenv module in client bundle",
+    pattern: /from"dotenv\/?config?"|require\("dotenv\/?config?"\)/,
+  },
   { name: "AWS access key signature", pattern: /AKIA[0-9A-Z]{16}/ },
   { name: "Google API key signature", pattern: /AIza[0-9A-Za-z\-_]{35}/ },
   { name: "GitHub PAT signature", pattern: /ghp_[A-Za-z0-9]{36}/ },
