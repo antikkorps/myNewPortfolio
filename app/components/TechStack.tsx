@@ -75,6 +75,20 @@ const categories: Category[] = [
         notes: ["Eloquent ORM", "Queues et jobs", "Auth intégré"],
         url: "https://laravel.com/",
       },
+      {
+        name: "Django",
+        description:
+          "Batteries-included Python, ORM mature, admin auto-généré. Productif sur les apps métiers.",
+        notes: ["ORM + migrations", "Admin gratuit", "DRF pour les APIs"],
+        url: "https://www.djangoproject.com/",
+      },
+      {
+        name: "Fiber",
+        description:
+          "Framework Go inspiré d'Express. Quand la perf brute compte sur du HTTP avec une API familière.",
+        notes: ["Routing rapide", "Middleware Express-like", "Léger en mémoire"],
+        url: "https://gofiber.io/",
+      },
     ],
   },
   {
