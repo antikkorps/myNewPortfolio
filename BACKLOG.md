@@ -61,7 +61,9 @@ priorité.
 
 ## 🚧 À faire — par priorité
 
-_Aucune tâche prioritaire en cours — voir « À envisager » plus bas._
+### 1. Migrer le mail vers Resend (ou équivalent à token)
+
+Actuellement `/sendmail` utilise nodemailer + Gmail avec `EMAIL_USER` / `EMAIL_PASS` en clair en env Vercel. Le mot de passe d'app Gmail est révocable par compromission, et stocker des credentials d'authentification (vs un token API scopé) n'est pas idéal pour un site qui se positionne « security by design ». Resend (ou Postmark, Mailjet) propose un token API scopé à l'envoi, avec un dashboard de logs propre, des limites de taux côté provider, et un domaine d'envoi vérifié (DKIM/SPF). Garder le honeypot, le délai 5 s, le rate-limit IP en place — ils restent utiles côté défense en profondeur.
 
 ---
 

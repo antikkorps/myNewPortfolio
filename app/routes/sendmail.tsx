@@ -95,7 +95,42 @@ function validateMessage(message: string) {
   return !(containsSpamWords || tooManyUrls || tooManyEmails)
 }
 
+// In-memory rate limit. Per-IP, sliding window of 1 hour, 5 submissions max.
+// Survives only within a single serverless instance — adequate against the
+// mass-spam pattern but not a hard guarantee. For a stronger ceiling, switch
+// to Vercel KV or move the mail send behind a third-party (Resend) that
+// enforces its own quota.
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000
+const RATE_LIMIT_MAX = 5
+const submissionsByIp = new Map<string, number[]>()
+
+function getClientIp(request: Request): string {
+  const forwarded = request.headers.get("x-forwarded-for")
+  if (forwarded) return forwarded.split(",")[0].trim()
+  const real = request.headers.get("x-real-ip")
+  if (real) return real
+  return "unknown"
+}
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const cutoff = now - RATE_LIMIT_WINDOW_MS
+  const recent = (submissionsByIp.get(ip) ?? []).filter((t) => t > cutoff)
+  if (recent.length >= RATE_LIMIT_MAX) {
+    submissionsByIp.set(ip, recent)
+    return false
+  }
+  recent.push(now)
+  submissionsByIp.set(ip, recent)
+  return true
+}
+
 export const action: ActionFunction = async ({ request }): Promise<ActionData> => {
+  const ip = getClientIp(request)
+  if (!checkRateLimit(ip)) {
+    return { error: "Trop de messages envoyés depuis votre adresse. Réessayez plus tard." }
+  }
+
   const formData = await request.formData()
   const honeypot = formData.get("honeypot")?.toString()
   const website = formData.get("website")?.toString()
@@ -186,10 +221,10 @@ export const action: ActionFunction = async ({ request }): Promise<ActionData> =
   try {
     await transporter.sendMail(adminMailOptions)
     await transporter.sendMail(userMailOptions)
-    console.log({ name, email, subject, message })
     return { success: true }
   } catch (error) {
-    console.error(error)
+    // Log without PII so Vercel function logs don't carry contact details.
+    console.error("[sendmail] send failed:", error instanceof Error ? error.message : error)
     return { error: "Erreur lors de l'envoi du message" }
   }
 }
