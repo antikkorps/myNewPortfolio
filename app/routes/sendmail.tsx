@@ -1,6 +1,6 @@
 import { type ActionFunction } from "react-router"
 import { Form, useActionData, useLoaderData, useNavigation } from "react-router"
-import { motion } from "framer-motion"
+import { motion } from "motion/react"
 import { Linkedin, Mail, MapPin, Phone, Send } from "lucide-react"
 import nodemailer from "nodemailer"
 import { useEffect, useRef, useState } from "react"
