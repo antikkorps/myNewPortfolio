@@ -43,25 +43,22 @@ priorité.
 - **`/tech-stacks`** : refonte sobre, catégorisée (Frontend/Backend/Langages/Données/Infra), Remix→RR, Nest→Fastify, ajout Go/Rust/Python/TypeScript
 - **`/contact`** : fallback `AUTHOR` quand `process.env.*` absent (plus de "undefined")
 
-### Tests (78 vert sur la PR initiale, 89 maintenant avec youtube.test.ts)
-- **Vitest** unit : `lib/{format,seo,site,posts-meta.server,youtube}` (49 tests)
+### Tests & CI
+- **Vitest** unit : `lib/{format,seo,site,posts-meta.server,youtube}` (~49 tests)
 - **Vitest** components : `mdx/{Note,Warning,Aside}`, `BlogAvatar`, `TableOfContents` (9 tests)
 - **Vitest** security scan : grep des secrets dans `build/client/assets/*.js` — `process.env.EMAIL_*`, dotenv, AWS/Google/GitHub key signatures (11 tests)
 - **Playwright** e2e : routes 200/404, JSON-LD Person/WebSite/BlogPosting/BreadcrumbList, sitemap valide, recherche/pagination, 404 page (29 tests)
+- **Lighthouse CI** sur chaque PR (`.github/workflows/lighthouse.yml` + `lighthouserc.json`) : 4 URLs, desktop preset, 3 runs avec median. Budgets : perf ≥ 0.9, a11y ≥ 0.95, SEO ≥ 0.95 (error), best-practices ≥ 0.9 (warn). Rapport HTML uploadé sur temporary-public-storage.
 
 ---
 
 ## 🚧 À faire — par priorité
 
-### 1. Lighthouse CI
-
-GitHub Action qui run Lighthouse sur chaque PR. Budget : perf ≥ 90, SEO ≥ 95, a11y ≥ 95. Bloque les régressions silencieuses sur les Core Web Vitals.
-
-### 2. Lazy MDX (full split — quand `posts.length > ~10`)
+### 1. Lazy MDX (full split — quand `posts.length > ~10`)
 
 `/blog/$slug` reste à ~110 KB car eager glob de tous les MDX. À convertir en `import.meta.glob({ eager: false })` + `React.lazy` + Suspense quand le nombre d'articles dépasse ~10. Aujourd'hui non urgent.
 
-### 3. Préfetch agressif
+### 2. Préfetch agressif
 
 Passer de `prefetch="intent"` à `prefetch="render"` sur les liens vers la prochaine page de pagination — déjà visible donc bon candidat à charger en avance.
 
