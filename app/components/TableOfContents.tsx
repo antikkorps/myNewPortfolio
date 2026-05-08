@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router"
 
 interface Heading {
   id: string
@@ -17,6 +18,16 @@ export function TableOfContents({
 }: Props) {
   const [headings, setHeadings] = useState<Heading[]>([])
   const [activeId, setActiveId] = useState<string>("")
+  const navigate = useNavigate()
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    e.preventDefault()
+    const el = document.getElementById(id)
+    if (!el) return
+    el.scrollIntoView({ behavior: "smooth", block: "start" })
+    navigate(`#${id}`, { replace: true, preventScrollReset: true })
+  }
 
   useEffect(() => {
     const container = document.querySelector(containerSelector)
@@ -63,6 +74,7 @@ export function TableOfContents({
           >
             <a
               href={`#${h.id}`}
+              onClick={(e) => handleClick(e, h.id)}
               className={`block leading-snug transition-colors ${
                 activeId === h.id
                   ? "text-[#2563eb] dark:text-[#60a5fa]"
