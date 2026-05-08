@@ -31,5 +31,11 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # Build first so the security suite (test/security.test.ts) can scan
+      # build/client/assets for secret leaks. Without a build the scan is
+      # skipped — making it useless on PRs, where it matters most.
+      - name: Build
+        run: npm run build
+
       - name: Unit + component tests
         run: npm test
