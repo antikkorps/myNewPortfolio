@@ -10,6 +10,7 @@ import {
   useLocation,
   useRouteError,
 } from "react-router"
+import { Analytics } from "@vercel/analytics/react"
 import CursorHalo from "./components/CursorHalo"
 import Navbar from "./components/Navbar"
 import { ThemeProvider, themeScript } from "./contexts/ThemeContext"
@@ -154,6 +155,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
+        <Analytics />
       </body>
     </html>
   )
