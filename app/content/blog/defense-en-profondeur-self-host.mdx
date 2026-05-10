@@ -1,0 +1,137 @@
+---
+title: "Self-host sans se faire défoncer : la défense en profondeur appliquée à un setup perso"
+description: "Retour d'expérience sur la sécurisation d'un VPS auto-hébergé avec le Hetzner Cloud Firewall, UFW, fail2ban et Tailscale. Pourquoi le seul changement de port SSH ne suffit pas, et ce qui marche vraiment."
+date: "2026-06-04"
+tags: ["security", "self-hosting", "tailscale", "fail2ban", "ufw", "devops"]
+readingTime: 8
+draft: true
+---
+
+Il y a quelques semaines, j'ai [monté une instance Forgejo sur un VPS Hetzner](/blog/forgejo-install-retour-experience). Pendant l'install, comme je le raconte dans cet article, j'ai déplacé mon SSH admin sur le port 2222 — et dans les minutes qui ont suivi, les scanners étaient déjà là. Cet épisode m'a confirmé une intuition que j'avais depuis un moment : **la sécurité d'un serveur auto-hébergé ne se joue pas sur une seule ligne de défense, mais sur leur empilement**.
+
+Cet article, c'est le retour d'expérience d'une mise en place sécurisée qui repose sur quatre couches, et pourquoi chacune compte vraiment.
+
+## Pourquoi changer de port SSH ne suffit jamais
+
+La sécurité par l'obscurité n'existe pas. Les scanners modernes ne se contentent pas du port 22 : ils balaient toutes les plages portuaires, et ils s'adaptent. Un VPS Hetzner basique qui expose SSH sur n'importe quel port reçoit en général **plusieurs milliers de tentatives par jour**, principalement des bruteforce avec des combinaisons type `root`, `admin`, `ubuntu`, `test` avec des mots de passe communs.
+
+Si ton seul rempart c'est un port différent, en fait tu n'as pas de rempart. D'où l'empilement qui suit.
+
+## Couche 1 : le firewall infrastructure (Hetzner Cloud Firewall)
+
+Avant même que le trafic atteigne ta VM, il passe par le firewall managé du provider. Sur Hetzner, c'est gratuit et configurable depuis la console web. C'est la couche la plus en amont, et c'est aussi la plus simple à configurer correctement.
+
+Mes règles d'entrée se résument à :
+
+- **80/tcp** (Caddy → Let's Encrypt challenge HTTP)
+- **443/tcp** (Caddy → HTTPS pour Forgejo, services exposés)
+- **2222/tcp** (SSH admin, en attendant que je le ferme aussi)
+- **41641/udp** (Tailscale, port par défaut du daemon)
+
+Tout le reste est bloqué. Les ports applicatifs internes (PostgreSQL, le port d'écoute Forgejo derrière Caddy, le port SonarQube si je le mets) ne sont jamais accessibles depuis l'extérieur.
+
+L'intérêt de cette couche, c'est qu'elle filtre **avant** que les paquets atteignent l'OS. Si un service applicatif foire et expose accidentellement un port (un Docker mal configuré, un binding `0.0.0.0` qui devait être `127.0.0.1`), le firewall infrastructure attrape la bourde. C'est une assurance peu coûteuse qui ne demande aucune maintenance.
+
+## Couche 2 : le firewall OS (UFW)
+
+Doublonne en partie avec la couche 1, et c'est volontaire. Le principe de défense en profondeur, c'est précisément que chaque couche assume qu'une autre puisse échouer.
+
+```bash
+ufw default deny incoming
+ufw default allow outgoing
+
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw allow 2222/tcp
+ufw allow 41641/udp comment "Tailscale"
+
+ufw enable
+```
+
+UFW a deux avantages spécifiques par rapport à la couche 1 :
+
+D'abord, il est **configurable rapidement en local**. Si je veux tester une règle ou ouvrir temporairement un port pour debug, je n'ai pas à passer par la console Hetzner — je tape la commande, c'est appliqué en quelques secondes.
+
+Ensuite, il **filtre aussi le trafic en provenance d'autres services Docker**. Le firewall infrastructure ne voit pas ce qui se passe entre containers ou entre la VM et ses VMs voisines. UFW oui.
+
+Petit piège classique avec Docker : par défaut, Docker bypasse UFW en manipulant directement iptables. Si tu publies un port Docker (`-p 5432:5432`), il sera accessible depuis Internet **même si UFW dit non**. La parade c'est soit de toujours binder explicitement sur `127.0.0.1` (`-p 127.0.0.1:5432:5432`), soit d'installer `ufw-docker` qui réconcilie les deux. Personnellement j'ai opté pour le binding explicite — moins de magie, comportement prévisible.
+
+## Couche 3 : la détection comportementale (fail2ban)
+
+Les couches 1 et 2 disent "qui peut se connecter". fail2ban dit "celui qui se connecte mais se comporte mal, on le ban".
+
+C'est une couche fondamentale parce qu'elle gère ce que les couches firewall ne peuvent pas savoir : **l'intention**. Une IP qui se connecte sur le port 2222, c'est légitime au niveau réseau. La même IP qui rate 50 mots de passe en 5 minutes, c'est un scanner.
+
+Configuration minimale dans `/etc/fail2ban/jail.local` :
+
+```ini
+[DEFAULT]
+bantime = 1h
+bantime.increment = true
+bantime.factor = 2
+bantime.maxtime = 1w
+ignoreip = 127.0.0.1/8 ::1 100.64.0.0/10
+findtime = 10m
+maxretry = 3
+backend = systemd
+
+[sshd]
+enabled = true
+port = 2222
+mode = aggressive
+```
+
+Quelques points qui méritent qu'on s'y attarde :
+
+**Le `bantime.increment`** transforme les bans en peine progressive. Première offense 1h, deuxième 2h, troisième 4h, jusqu'à une semaine. Un scanner persistant se retrouve banni pendant des jours après quelques itérations.
+
+**La whitelist `100.64.0.0/10`** est essentielle si tu utilises Tailscale. C'est la plage CGNAT que Tailscale assigne à ses noeuds, et tu ne veux jamais te bannir toi-même via cette voie.
+
+**Le mode `aggressive` de sshd** active des patterns supplémentaires (probes diverses, énumération d'utilisateurs). Pour un serveur perso accessible à toi seul, les faux positifs sont quasi-inexistants.
+
+J'ai aussi configuré une jail pour Forgejo qui détecte les échecs d'authentification dans ses logs. Cinq échecs en 10 minutes = IP bannie. Ça protège efficacement contre les bruteforces sur l'interface web.
+
+**Petit warning** : tu vas te bannir toi-même au moins une fois. Mauvais layout de clavier, terminal qui répète une commande, test de connexion mal calibré — ça arrive. C'est aussi pour ça que la couche 4 existe.
+
+## Couche 4 : l'accès privé (Tailscale)
+
+C'est probablement la couche qui change le plus la donne, et c'est aussi celle qui demande de désapprendre des habitudes.
+
+Le principe : **plutôt que d'exposer ton SSH sur Internet, tu le mets sur un réseau privé chiffré qui ne traverse pas l'Internet public**. Tailscale est un mesh VPN basé sur WireGuard, qui te donne un réseau virtuel entre tes machines (laptop, VPS, serveur maison, mobile éventuellement) avec des IPs stables dans la plage `100.64.0.0/10`.
+
+Une fois Tailscale installé sur le VPS et sur mon laptop, je peux atteindre le VPS via son nom Tailscale (`forgejo.tailnet-xyz.ts.net`) sans aucun port ouvert sur Internet. Le port 22 du VPS est complètement fermé côté Internet (on l'a vu, il n'a jamais été ouvert d'ailleurs). Le 2222 reste ouvert pour l'instant, mais à terme je le fermerai aussi.
+
+Concrètement, ça change la nature même de la sécurité du serveur. Un attaquant ne peut plus brute-forcer SSH parce que **il ne peut pas atteindre SSH du tout**. Pour avoir une chance, il devrait d'abord compromettre une de mes machines déjà membres du tailnet (mon Mac typiquement), ce qui transforme un problème de sécurité réseau en un problème de sécurité endpoint, qui se gère avec d'autres outils (chiffrement disque, MFA sur l'OAuth Tailscale, locks d'écran, etc.).
+
+L'auth Tailscale s'appuie sur ton compte Google/Microsoft/GitHub avec MFA recommandé. Si je perds mon Mac, je révoque l'identité depuis l'admin Tailscale et l'accès est immédiatement coupé sur tous les serveurs. Comparé à devoir révoquer manuellement des clés SSH sur chaque serveur, c'est radical.
+
+**Le tradeoff souveraineté** : Tailscale est un service géré, le control plane est chez eux. Ils ne voient pas le contenu de tes connexions (c'est WireGuard E2E), mais ils orchestrent les clés et voient les métadonnées (qui parle à qui, quand). Pour un puriste full-souverain, **Headscale** (une réimplémentation FOSS du control plane Tailscale, compatible avec les clients officiels) est l'alternative à considérer. À mon stade, le ratio bénéfice/coût de Tailscale managé reste favorable, mais Headscale est dans ma ligne de mire pour plus tard.
+
+**Le filet de sécurité ultime** : si Tailscale tombe (ça arrive très rarement mais ça arrive), j'ai la console KVM Hetzner accessible depuis l'interface web de mon compte. C'est lent, pas pratique, mais ça garantit que je ne suis jamais complètement enfermé dehors.
+
+## L'effet cumulatif des quatre couches
+
+Vu de l'extérieur, voilà ce qui doit se passer pour qu'un attaquant compromette mon Forgejo :
+
+1. **Trouver mon IP publique** (facile, c'est public)
+2. **Trouver un port qui répond** (facile, port 443 répond, et 2222 aussi)
+3. **Sur le 443, attaquer Caddy ou Forgejo via HTTP** (Caddy est solide, Forgejo a son propre rate limiting)
+4. **Sur le 2222, brute-force SSH** (échouer 3 fois en 10 minutes = banni 1h, puis 2h, 4h...)
+5. **Tenter via le réseau Tailscale** (impossible sans compromettre une de mes machines)
+6. **Compromettre mon laptop** (chiffrement FileVault/LUKS, écran verrouillé, MFA partout)
+
+Aucune de ces étapes n'est insurmontable individuellement pour un attaquant déterminé. Mais l'accumulation rend l'attaque économiquement absurde pour 99% des cas réels — qui sont des scanners automatisés cherchant des cibles faciles, pas des ennemis personnels avec des ressources étatiques.
+
+## Ce que cette stack m'apprend
+
+**La sécurité réseau pure est devenue une commodité.** Avec Tailscale + UFW + fail2ban, on atteint en un après-midi un niveau de sécurité réseau qui demandait, il y a 10 ans, des compétences réseau pointues et beaucoup d'iptables manuelles.
+
+**La sécurité endpoint devient le maillon faible.** Une fois le réseau verrouillé, ton ordi portable devient le point d'entrée critique. Chiffrement disque, MFA partout, écran verrouillé, gestion sérieuse des clés SSH/Tailscale — c'est là que se joue la différence aujourd'hui.
+
+**La défense en profondeur n'est pas un luxe.** Beaucoup de tutos self-hosting parlent de "sécurité" en mentionnant un ou deux trucs (changer le port SSH, désactiver l'auth par mot de passe). C'est un début, mais c'est insuffisant. La bonne pratique c'est d'empiler les couches, en assumant que chacune peut tomber et d'ailleurs malheureusement, quand on regarde l'actualité, on voit bien que des entreprises ou des administrations font directement face à ce genre d'attaques, et cela de façon régulière...
+
+**Le coût de mise en place est minimal.** Cette stack à quatre couches, je l'ai mise en place en quelques heures, sur un VPS à 4€/mois. Aucun service payant. Aucune complexité opérationnelle au quotidien. Le seul vrai investissement, c'est l'apprentissage initial des concepts.
+
+Pour qui se lance dans le self-hosting en 2026, je dirais que cette baseline devrait être le minimum. Tout en dessous, c'est de l'auto-hébergement amateur qui finira mal le jour où un bot trouvera la faille.
+
+Je pense que le prochain article ira plus loin : ce que j'ai mis en place côté **observabilité et monitoring** pour ne pas découvrir qu'un service est down quand un utilisateur me ping.

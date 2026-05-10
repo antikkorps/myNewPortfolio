@@ -1,0 +1,273 @@
+---
+title: "Forgejo en self-hosted : retour d'expérience d'une installation honnête"
+description: "Cinq heures de mise en place sur un VPS Hetzner avec Postgres, Caddy, Cloudflare et Tailscale. Ce qui a bien marché, les pièges rencontrés, et ce que je ferais différemment si je devais recommencer."
+date: "2026-05-10"
+tags: ["forgejo", "self-hosting", "tutoriel", "devops", "retour-experience"]
+readingTime: 11
+draft: false
+---
+
+Comme je l'avais [annoncé dans un article précédent](/blog/github-2026-alternatives), j'ai monté une instance Forgejo en parallèle de mon usage GitHub pour me faire la main et préparer une éventuelle migration future. L'installation a pris une demi-journée, ce qui est dans les clous mais cache plusieurs détails que la documentation officielle n'aborde pas frontalement. Voici un retour structuré : ce qui s'est passé, les choix que j'ai faits, et les pièges sur lesquels j'ai trébuché.
+
+L'objectif n'est pas de réécrire le guide officiel, qui est très correct par ailleurs. C'est de partager ce qu'on apprend en faisant — la couche d'expérience qui transforme un tutoriel théorique en setup réellement fonctionnel.
+
+## Le contexte technique
+
+Setup cible :
+
+- **VPS Hetzner CX22** (4 Go RAM, 2 vCPU, ~4€/mois)
+- **Forgejo** dans Docker
+- **PostgreSQL Alpine** comme base de données
+- **Caddy** en reverse proxy (SSL automatique)
+- **Cloudflare** côté DNS (sans tunnel sur ce setup, juste DNS)
+- **Tailscale** pour l'accès admin privé
+- **Cloudflare R2** pour les backups
+
+L'idée derrière chaque choix sera détaillée plus loin, mais le résumé c'est : un setup léger, économique, sécurisé, qui ne dépend pas de services SaaS pour les couches critiques.
+
+## La structure docker-compose
+
+Voilà la base que j'ai utilisée, après quelques itérations :
+
+```yaml
+services:
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:12
+    container_name: forgejo
+    restart: unless-stopped
+    depends_on:
+      - forgejo-db
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - FORGEJO__server__DOMAIN=git.mondomaine.fr
+      - FORGEJO__server__ROOT_URL=https://git.mondomaine.fr/
+      - FORGEJO__server__SSH_DOMAIN=git.mondomaine.fr
+      - FORGEJO__server__SSH_PORT=22
+      - FORGEJO__server__PROTOCOL=http
+      - FORGEJO__database__DB_TYPE=postgres
+      - FORGEJO__database__HOST=forgejo-db:5432
+      - FORGEJO__database__NAME=forgejo
+      - FORGEJO__database__USER=forgejo
+      - FORGEJO__database__PASSWD=${DB_PASSWORD}
+      - FORGEJO__service__DISABLE_REGISTRATION=true
+      - FORGEJO__security__REVERSE_PROXY_TRUSTED_PROXIES=127.0.0.1/32
+    volumes:
+      - ./data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "127.0.0.1:3000:3000"
+      - "22:22"  # SSH Git public — implique de déplacer le sshd système sur un autre port
+
+  forgejo-db:
+    image: postgres:16-alpine
+    container_name: forgejo-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=forgejo
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=forgejo
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+```
+
+Le binding sur `127.0.0.1:3000` est volontaire : le container Forgejo n'écoute que sur localhost, et c'est Caddy qui fait le pont entre l'Internet et le service. Aucun accès direct possible. Le port 22 est dédié à SSH Forgejo (pour les `git push` via SSH), ce qui implique que l'admin SSH du serveur tourne sur un autre port — j'y reviens.
+
+## Caddy : la simplicité qui change tout
+
+J'avais déjà du Caddy en place pour d'autres services sur ce serveur, mais à ma grande honte, certains tournaient encore en exposition directe (un héritage d'anciennes installations bricolées). Une des leçons de cette installation, c'est que **tout passer derrière Caddy dès le départ aurait dû être ma règle absolue**.
+
+Le Caddyfile pour Forgejo tient en quatre lignes :
+
+```caddy
+git.mondomaine.fr {
+    reverse_proxy 127.0.0.1:3000
+    encode gzip zstd
+}
+```
+
+Caddy gère automatiquement le challenge ACME pour Let's Encrypt, le renouvellement des certificats, le redirect HTTP→HTTPS, et la compression. Pas de fichier de conf SSL à toucher, pas de cron à configurer pour les renouvellements. Pour quelqu'un qui a connu Nginx + Certbot + cron, c'est un soulagement.
+
+**Ce que j'aurais fait différemment** : plutôt que de migrer mon ancienne config au fur et à mesure des besoins, j'aurais dû dédier 30 minutes au début pour rapatrier tous mes services existants derrière Caddy. C'est un type de refactor qui fait gagner du temps long terme et qui réduit la surface d'attaque immédiatement.
+
+## Le piège SSH 22 → 2222
+
+Premier vrai piège de l'install. Forgejo a besoin du port 22 pour ses connexions Git SSH. Mais le port 22 est aussi celui utilisé par défaut par SSH système. Conflit évident.
+
+Solution : déplacer SSH système sur un autre port. J'ai choisi 2222 (classique, mais à reconsidérer — voir plus bas). Trois étapes en théorie :
+
+```bash
+# 1. Modifier sshd
+sudo nano /etc/ssh/sshd_config
+# Port 2222
+
+# 2. Mettre à jour le firewall
+sudo ufw allow 2222/tcp
+sudo ufw delete allow 22/tcp  # à retarder, voir plus bas
+
+# 3. Redémarrer sshd
+sudo systemctl reload sshd
+```
+
+En pratique, ça a un peu cafouillé. Plusieurs raisons possibles :
+
+- Le firewall Hetzner Cloud Firewall (au niveau infra) avait sa propre règle pour 22 qu'il fallait aussi mettre à jour
+- Une session SSH active peut continuer à fonctionner sur 22 même après le reload, ce qui peut donner l'illusion que tout marche
+- Certains setups SELinux/AppArmor bloquent sshd sur des ports non standard et nécessitent une policy
+
+**La règle d'or à se rappeler** : avant de fermer le port 22, **garde une seconde session SSH ouverte sur le nouveau port** pour vérifier qu'il fonctionne. Si tu fermes le 22 et que le 2222 ne répond pas, tu te retrouves verrouillé dehors. Pour un VPS Hetzner ce n'est pas dramatique parce que la console KVM web est toujours accessible, mais ça t'évite une demi-heure de panique.
+
+**Avec le recul, je serais probablement passé directement à un port différent moins évident que 2222**. Les scanners modernes connaissent ce classique. Un port aléatoire dans la plage haute est moins ciblé. Mieux encore : utiliser Tailscale et fermer complètement le SSH côté Internet.
+
+## Tailscale, ou pourquoi le port SSH n'a peut-être pas besoin d'exister
+
+Pendant que je galérais avec le passage de 22 à 2222, je me suis rappelé que j'avais déjà Tailscale installé sur mon Mac pour d'autres usages. Donc go installer sur le VPS :
+
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+# Suivre le lien pour authentifier
+```
+
+À partir de là, le VPS est accessible depuis tous mes appareils Tailscale via son nom de tailnet, sans aucun port ouvert sur Internet pour SSH. Quand j'ai compris ce que ça impliquait, j'ai fini par fermer complètement le port 22 côté Internet (et à terme je fermerai aussi le 2222). Tout l'accès admin se fait via le réseau Tailscale.
+
+L'observation amusante de cette transition : **dans les heures qui ont suivi le passage de 22 à 2222, j'ai vu apparaître des tentatives de connexion sur le 2222 avec des users random**. Les scanners modernes ne se contentent pas du port 22, ils scannent toutes les plages. Changer de port est un faux sentiment de sécurité. La seule vraie protection c'est de ne pas exposer SSH du tout, ou de filtrer en amont.
+
+## Postgres plutôt que SQLite : la décision qui m'a paru juste
+
+Petite mise au point d'abord : dans [mon article sur l'archi distribuée](/blog/archi-forgejo-distribuee), j'avais tablé sur SQLite comme base de données. Au moment de poser les mains dans le cambouis, j'ai pivoté sur Postgres tout simplement pour ne pas avoir à faire la migration plus tard ^^.
+
+Forgejo supporte SQLite, qui est largement suffisant pour des petites instances. J'ai quand même choisi Postgres dès le départ, pour deux raisons :
+
+D'abord, **éviter une migration future** si l'instance grandit. SQLite tient bien jusqu'à plusieurs dizaines de repos avec activité modérée, mais migrer une instance peuplée vers Postgres demande de l'attention. Mieux vaut commencer là où on veut finir.
+
+Ensuite, **bénéficier des features Postgres** dès le début — le full-text search performant, les types JSON, les outils de monitoring (`pg_stat_statements`, `pg_top`), un comportement plus prévisible sous charge.
+
+Le coût additionnel est minime sur un CX22 : Postgres Alpine en idle, c'est ~50 Mo de RAM. Le container Postgres complet avec Forgejo + Caddy + le système, j'ai 3+ Go de RAM libre pour les builds CI sur le runner.
+
+**Le piège que j'ai découvert** : le test de restore d'une base **fraîche** (juste après l'installation, avec un seul user et zéro repo) plante systématiquement. Forgejo crée son arborescence de données paresseusement — le dossier `repositories/`, `avatars/`, `attachments/`, n'existent que quand quelqu'un fait l'action correspondante. Si tu testes le restore tôt — en l'occurrence comme moi, à peine installé —, tu te retrouves avec un backup qui contient juste la conf et la DB, mais Forgejo plante au démarrage parce qu'il s'attend à trouver des chemins inexistants.
+
+Solution : utiliser `forgejo dump` plutôt qu'un tar manuel. La commande gère elle-même la création de la structure attendue :
+
+```bash
+docker exec forgejo forgejo dump \
+  --type tar.gz \
+  --file /tmp/forgejo-dump-$(date +%Y%m%d).tar.gz \
+  -c /data/gitea/conf/app.ini
+```
+
+Et faire un premier test de restore **après** avoir poussé au moins un repo de test, pour s'assurer que la structure complète est bien dans le backup.
+
+## Le runner Forgejo : la friction inattendue
+
+L'enregistrement du runner self-hosted a été pour moi le point le plus rugueux de l'install. La procédure :
+
+1. Aller dans l'admin Forgejo → Actions → Runners → Create new runner
+2. Récupérer le token affiché (visible une seule fois)
+3. Le coller dans la conf du runner
+4. Démarrer le runner
+5. Vérifier dans l'admin qu'il apparaît bien comme "online"
+
+Sur le papier, c'est cinq étapes. En pratique, il y a un effet "copier-coller à la main" qui m'a paru sous-évolué pour un outil moderne. GitHub Actions enregistre ses runners de manière beaucoup plus fluide. Forgejo gagnerait à avoir un init container qui fait l'auto-enregistrement à partir d'une variable d'env, ou une UI plus directe.
+
+Ma config docker-compose pour le runner :
+
+```yaml
+forgejo-runner:
+  image: code.forgejo.org/forgejo/runner:6
+  container_name: forgejo-runner
+  restart: unless-stopped
+  depends_on:
+    - forgejo
+  volumes:
+    - ./runner-data:/data
+    - /var/run/docker.sock:/var/run/docker.sock
+  environment:
+    - FORGEJO_INSTANCE_URL=https://git.mondomaine.fr
+    - FORGEJO_RUNNER_REGISTRATION_TOKEN=${RUNNER_TOKEN}
+    - FORGEJO_RUNNER_NAME=runner-vps-01
+    - FORGEJO_RUNNER_LABELS=docker,ubuntu-latest
+```
+
+Une fois enregistré, le runner fonctionne sans plus jamais y toucher. Mais le moment de l'enregistrement, on sent que ce n'est pas le point le plus poli du produit.
+
+**Note à moi-même pour la suite** : les `FORGEJO_RUNNER_LABELS` sont hyper importants, surtout si tu prévois d'avoir plusieurs runners avec des capacités différentes. Pour l'instant je n'en ai qu'un, donc je lui mets des labels génériques. Mais si demain j'ajoute un runner sur ma machine maison pour les builds lourds, je leur donnerai des labels distincts pour pouvoir router les workflows.
+
+## Healthchecks.io pour le monitoring externe
+
+Une fois l'instance en route, j'ai mis en place un ping régulier via Healthchecks.io. Le free tier (20 checks) suffit largement pour un setup perso.
+
+Trois checks que je recommande dès le départ :
+
+1. **L'instance Forgejo répond** : check ping qui s'attend à un GET `https://git.mondomaine.fr/api/healthz` toutes les 5 minutes
+2. **Le job de backup tourne** : à la fin du script de backup, `curl https://hc-ping.com/uuid` si tout s'est bien passé. L'absence de ping pendant 25h = alerte
+3. **Le runner est online** : un check qui interroge l'API Forgejo pour vérifier que le runner répond
+
+Pour le premier, voici un exemple de cron qui ping seulement si la réponse HTTP est 200 :
+
+```bash
+*/5 * * * * curl -fsS https://git.mondomaine.fr/api/healthz > /dev/null && curl -fsS https://hc-ping.com/uuid-1 > /dev/null
+```
+
+L'avantage de Healthchecks.io vs un monitoring uniquement local, c'est que les notifications partent même si **tout** ton VPS est down. Un Prometheus self-hosted sur la même machine ne te préviendra pas que la machine est en feu.
+
+## Backups : R2 et chiffrement côté client
+
+Je faisais déjà des backups vers Cloudflare R2 pour mes autres services (Immich, Paperless, Seafile), donc l'intégration de Forgejo dans la même routine relevait un peu de l'habitude, je l'avoue. Le script qui tourne en cron quotidien :
+
+```bash
+#!/bin/bash
+set -euo pipefail
+DATE=$(date +%Y%m%d)
+
+# 1. Dump complet via la commande native Forgejo
+docker exec forgejo forgejo dump \
+  --type tar.gz \
+  --file /tmp/forgejo-dump.tar.gz \
+  -c /data/gitea/conf/app.ini
+docker cp forgejo:/tmp/forgejo-dump.tar.gz /tmp/forgejo-dump-$DATE.tar.gz
+
+# 2. Dump Postgres séparé (consistant pendant que Forgejo tourne)
+docker exec forgejo-db pg_dump -U forgejo forgejo | \
+  gzip > /tmp/forgejo-pg-$DATE.sql.gz
+
+# 3. Upload chiffré côté client vers R2
+rclone copy /tmp/forgejo-dump-$DATE.tar.gz \
+  /tmp/forgejo-pg-$DATE.sql.gz \
+  r2-encrypted:forgejo-backups/
+
+# 4. Cleanup local
+find /tmp/forgejo-* -mtime +1 -delete
+
+# 5. Ping Healthchecks.io
+curl -fsS https://hc-ping.com/uuid-backup > /dev/null
+```
+
+Le `r2-encrypted` est un remote rclone de type `crypt` qui chiffre tous les fichiers avant upload vers R2. Même si Cloudflare avait un incident, mes backups restent illisibles sans ma clé.
+
+R2 a un avantage spécifique pour les backups : **pas de frais d'egress**. Les autres providers facturent quand tu sors les données, ce qui rend la restauration potentiellement coûteuse en panique. Avec R2, tu peux pull plusieurs Go en urgence sans réfléchir au coût.
+
+Rétention gérée côté R2 via une lifecycle rule : 30 jours pour les snapshots quotidiens, conservation prolongée pour les snapshots mensuels (script qui copie le 1er du mois vers un préfixe `monthly/`).
+
+## Ce que je ferais différemment si je recommençais demain
+
+**1. Tout passer derrière Caddy en premier.** Avant même d'installer Forgejo, faire un nettoyage complet pour que tous les services existants soient déjà derrière Caddy. Ça évite la friction de migration en pleine install.
+
+**2. Installer Tailscale avant de toucher au port SSH.** L'enchaînement logique est : Tailscale → fermeture port 22 → installation Forgejo qui réutilise le port 22. Plutôt que ce que j'ai fait dans un ordre moins propre.
+
+**3. Choisir un port SSH non standard moins évident que 2222.** Ou plutôt, ne pas exposer SSH du tout (Tailscale only) si possible.
+
+**4. Faire un repo de test peuplé avant le premier backup test.** Pour avoir une vraie structure de données à restaurer, pas une instance vide qui plante au restore.
+
+**5. Documenter les choix pendant qu'on les fait.** Dans un fichier markdown au sein d'un repo `infra-notes` (sur le tout nouveau Forgejo). Dans 6 mois, je remercierai mon moi de mai 2026 quand je voudrai modifier la config et que j'aurai oublié les arbitrages.
+
+## Le résultat global
+
+Cinq heures pour avoir une instance Forgejo fonctionnelle, sécurisée (Tailscale, UFW, Caddy en SSL), monitorée (Healthchecks.io), backupée (R2 chiffré), avec un runner CI qui répond. Sur un VPS à 4€/mois.
+
+C'est plus de boulot qu'un simple "git push sur GitHub". Mais c'est aussi 100% sous mon contrôle, sans dépendance à un service tiers pour les couches critiques, dans le respect d'une cohérence européenne (Hetzner en Allemagne, Cloudflare en EU pour le DNS, accès via Tailscale managé US — c'est le seul compromis souveraineté restant. Headscale est dans ma ligne de mire pour plus tard, mais le confort du tout-en-un Tailscale a fini par l'emporter sur ce coup-ci).
+
+Pour qui se lance dans le self-hosting d'une forge, mon conseil : ne sous-estime pas le temps des **petits détails** (le port SSH, les règles UFW, le test de restore qui plante, l'enregistrement du runner). Ce sont ces 30 minutes par-ci par-là qui font la différence entre l'estimation initiale et le temps réellement passé. Mais le résultat en vaut la peine, et l'apprentissage est durable.
+
+Le prochain article reviendra sur ce que j'ai fait **après** l'installation : configurer mes premiers workflows CI, intégrer Renovate pour les dépendances, et comment j'ai migré mes premiers projets.
