@@ -1,0 +1,181 @@
+---
+title: "Migration Remix → React Router v7 : forcé par une faille, soulagé d'avoir tranché"
+description: "15 vulnérabilités npm, un upgrade Remix qui n'existait plus vraiment, et la décision de migrer d'un coup vers React Router v7 plutôt que de patcher en surface."
+date: "2026-05-30"
+tags: ["remix", "react-router", "migration", "dette-technique"]
+readingTime: 8
+draft: false
+---
+
+Cet article n'aurait probablement pas existé si je n'avais pas reçu une alerte `npm audit` un matin. **15 vulnérabilités dans l'arbre de dépendances de mon portfolio Remix — 6 moderate, 9 high.** Pas une CVE isolée et impressionnante : un empilement progressif qui s'était accumulé pendant que je travaillais à autre chose.
+
+J'ai essayé l'option paresseuse d'abord : forcer quelques overrides dans `package.json` pour bumper les sous-dépendances coupables. Le build a tenu une fois, puis a cassé au second `npm install` parce que les contraintes de versions remontaient à des deps Remix elles-mêmes en fin de vie. J'ai compris que je n'allais pas tenir longtemps à patcher des résolutions. Ce qu'il fallait, c'était passer à la version majeure suivante de Remix.
+
+Sauf que la version majeure suivante de Remix, en 2026, c'est… React Router v7.
+
+## Le piège : où aller ?
+
+Pour ceux qui n'ont pas suivi : Remix et React Router, c'est la même équipe depuis des années. En 2024, l'équipe a annoncé que le développement futur de Remix se ferait sous le nom de React Router v7. Concrètement, Remix v2 reste maintenu pour les corrections critiques, mais tout ce qui faisait l'identité de Remix (loaders, actions, nested routes, conventions de fichiers) est désormais dans React Router. Si tu veux les nouvelles features, et surtout si tu veux des deps maintenues, tu migres.
+
+J'avais deux options :
+
+1. **Rester sur Remix v2** et patcher avec des overrides en croisant les doigts pour les prochaines failles.
+2. **Migrer vers React Router v7**, prendre la dette en charge maintenant, et arrêter de me dire "je m'en occuperai plus tard".
+
+J'ai détesté l'option 1. Pas parce qu'elle était techniquement impossible, mais parce qu'elle me condamnait à reproduire ce moment tous les trois mois : une nouvelle faille, un patch fragile, un peu plus de dette. Et je savais qu'en attendant six mois de plus, la migration ne deviendrait pas plus facile — au contraire, l'écart entre les deux mondes ne ferait que grandir.
+
+J'ai pris l'option 2 un samedi matin.
+
+## Ce qui a changé concrètement
+
+La migration n'est pas une réécriture — la logique applicative est restée intacte. Mais c'est un *breaking change* d'API complet : packages, entry points, config Vite, conventions de routes, scripts npm. Tout y passe.
+
+### Les packages
+
+Le bloc principal des packages Remix saute, remplacé par React Router et ses adaptateurs :
+
+```bash
+# Out
+@remix-run/dev
+@remix-run/node
+@remix-run/react
+@remix-run/serve
+
+# In
+react-router
+@react-router/dev
+@react-router/node
+@react-router/serve
+@react-router/fs-routes
+```
+
+Au passage, `isbot` est passé en v5 — c'est un peer dep requis par React Router v7, et c'est typiquement le genre de bump qu'on oublie tant qu'on n'a pas l'erreur d'install qui pointe dessus.
+
+### Les entry files
+
+`entry.client.tsx` et `entry.server.tsx` changent leurs composants racine. `RemixBrowser` devient `HydratedRouter`, `RemixServer` devient `ServerRouter` :
+
+```tsx
+// app/entry.client.tsx
+import { HydratedRouter } from "react-router/dom";
+import { startTransition, StrictMode } from "react";
+import { hydrateRoot } from "react-dom/client";
+
+startTransition(() => {
+  hydrateRoot(
+    document,
+    <StrictMode>
+      <HydratedRouter />
+    </StrictMode>,
+  );
+});
+```
+
+```tsx
+// app/entry.server.tsx
+import { ServerRouter } from "react-router";
+// … reste du SSR similaire à avant
+```
+
+C'est l'un des points où j'ai dû lire la doc deux fois pour être sûr — l'erreur si on se trompe d'import n'est pas toujours très parlante.
+
+### La config Vite (et un piège d'ordre)
+
+Le plugin Vite Remix devient le plugin Vite React Router. Côté config, ça ressemble à :
+
+```ts
+import { reactRouter } from "@react-router/dev/vite";
+import mdx from "@mdx-js/rollup";
+import { defineConfig } from "vite";
+import tsconfigPaths from "vite-tsconfig-paths";
+
+export default defineConfig({
+  plugins: [
+    mdx({ /* … */ }),
+    reactRouter(),   // ← APRÈS le plugin MDX, pas avant
+    tsconfigPaths(),
+  ],
+});
+```
+
+**Attention à l'ordre.** En Remix v2, `vitePlugin as remix` se mettait sans trop se poser de questions. En React Router v7, **le plugin `reactRouter()` doit venir après le plugin MDX** sinon les routes `.mdx` ne sont pas reconnues correctement. Ce n'est pas évident à débugger si on ne sait pas, parce que ça se manifeste par des "route not found" sur les articles de blog plutôt que par une erreur explicite au démarrage.
+
+### Le nouveau fichier `react-router.config.ts`
+
+La config Remix qui vivait dans le plugin a son propre fichier dédié maintenant :
+
+```ts
+// react-router.config.ts
+import type { Config } from "@react-router/dev/config";
+
+export default {
+  ssr: true,
+} satisfies Config;
+```
+
+Et un fichier `app/routes.ts` qui déclare comment React Router résout les routes — dans mon cas, en gardant les conventions Remix grâce au helper `flatRoutes` :
+
+```ts
+// app/routes.ts
+import { type RouteConfig } from "@react-router/dev/routes";
+import { flatRoutes } from "@react-router/fs-routes";
+
+export default flatRoutes() satisfies RouteConfig;
+```
+
+C'est le mode le plus indolore pour migrer : on garde la structure `app/routes/_index.tsx`, `app/routes/blog.$slug.tsx`, etc. exactement comme avant.
+
+### TypeScript et le typegen
+
+React Router v7 génère désormais des types automatiquement dans un dossier `.react-router/`. J'ai mis à jour `tsconfig.json` pour les inclure :
+
+```jsonc
+{
+  "compilerOptions": {
+    "rootDirs": [".", "./.react-router/types"],
+    "types": ["@react-router/node", "vite/client"],
+    // …
+  }
+}
+```
+
+Et ajouté `.react-router/` au `.gitignore` puisque c'est régénéré au build.
+
+### Les scripts npm
+
+Les scripts changent de binaire :
+
+```jsonc
+{
+  "scripts": {
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc"
+  }
+}
+```
+
+Le `react-router typegen` en préambule du typecheck est important — sans lui, le typecheck échoue parce qu'il manque les types générés.
+
+## Vérification après migration
+
+Une fois tout en place, j'ai testé toutes les routes une à une plutôt que de me fier à un seul smoke test :
+
+- `/`, `/projets`, `/tech-stacks`, `/a-propos`, `/contact` : pages statiques, OK
+- `/blog`, `/blog/<slug>` : pagination du blog et rendu MDX, OK
+- `/sitemap.xml`, `/robots.txt` : resource routes, OK
+- Recherche et pagination sur le blog : OK
+- `typecheck` : clean après le `typegen`
+
+Toutes les routes répondent en 200, le SSR fonctionne, le HMR aussi (après un `rm -rf node_modules .cache` initial qui m'a évité quelques heures de débugger en aveugle).
+
+## Le verdict
+
+Côté sécurité, le résultat est net : **15 vulnérabilités au départ (6 moderate, 9 high), 6 restantes après migration — toutes en `high` mais toutes dans `@typescript-eslint/*`, donc dans des `devDependencies`** qui ne partent pas en production et qui se corrigent indépendamment. La dette critique sur le runtime, elle, est purgée.
+
+Je suis content d'avoir tranché. Pas parce que React Router v7 est révolutionnaire — c'est globalement le même outil que Remix v2 avec un nouveau nom et quelques améliorations sur la marge. Mais parce que **je ne suis plus sur une branche en fin de vie**, et que les prochaines failles, les prochaines features, les prochains tutos seront sur la version que j'utilise.
+
+La leçon que je retiens : **les migrations forcées par des contraintes externes (sécurité, dépréciation) sont rarement les pires**. Ce sont celles qu'on repousse "parce que ça marche" qui finissent par coûter le plus cher. La pression de l'audit npm m'a forcé à faire en deux jours ce que j'aurais reporté de six mois en six mois, en accumulant un écart de plus en plus douloureux à combler.
+
+Si tu hésites encore à faire le saut sur ton propre projet Remix : la doc officielle a un guide de migration plutôt bien fait, et tant que ton app n'utilise pas de patterns trop exotiques, ça se passe bien. Le seul vrai conseil que je donnerais : ne fais pas la migration sur la branche `main`. Une branche dédiée, un commit unique bien documenté, des tests route par route avant le merge. C'est ce qui m'a évité de me retrouver avec une prod cassée pour une raison stupide.
