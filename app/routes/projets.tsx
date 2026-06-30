@@ -28,6 +28,16 @@ interface Project {
 
 const projects: Project[] = [
   {
+    title: "L'Encre Humaine",
+    description:
+      "Site vitrine et boutique d'une consultante RH (conseil & serious games). Nuxt 4 / Nitro, CMS Directus, paiements Stripe Checkout, newsletter en double opt-in. Entièrement dockerisé et auto-hébergé : Caddy (TLS), PostgreSQL, sauvegardes chiffrées vers R2, CI Forgejo.",
+    technologies: ["Nuxt", "Nitro", "Directus", "PostgreSQL", "Stripe", "Docker"],
+    status: "wip",
+    liveUrl: "https://encrehumaine.fr",
+    githubUrl: "https://github.com/antikkorps/encre_humaine",
+    year: "2026",
+  },
+  {
     title: "LogiBOP",
     description:
       "Application de préparation des interventions chirurgicales pour environnement hospitalier. Quasar / Express, déployée sur Azure.",
