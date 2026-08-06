@@ -9,16 +9,23 @@ updates:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
 
-    # The @react-router/* packages pin an exact peer on react-router (e.g.
-    # @react-router/dev@7.18.0 requires react-router@^7.18.0). Bumping any one
-    # of them alone produces a lockfile that fails `npm ci` with ERESOLVE, so
-    # they have to move together in a single PR.
     groups:
+      # The @react-router/* packages pin an exact peer on react-router (e.g.
+      # @react-router/dev@7.18.0 requires react-router@^7.18.0). Bumping any one
+      # of them alone produces a lockfile that fails `npm ci` with ERESOLVE, so
+      # they have to move together in a single PR.
       react-router:
         patterns:
           - "react-router"
           - "@react-router/*"
           - "@vercel/react-router"
+
+      # typescript-eslint pins an upper bound on the TypeScript it accepts, so
+      # the compiler and the lint toolchain have to move as one unit.
+      typescript:
+        patterns:
+          - "typescript"
+          - "@typescript-eslint/*"
 
     # NOTE: ignore rules also apply to Dependabot security updates, so a CVE
     # that could only be fixed by a major bump would not be proposed here.
@@ -33,4 +40,13 @@ updates:
       - dependency-name: "react-router"
         update-types: ["version-update:semver-major"]
       - dependency-name: "@react-router/*"
+        update-types: ["version-update:semver-major"]
+
+      # TypeScript 7 (the native compiler port) is not supported by our
+      # toolchain: @typescript-eslint/eslint-plugin caps at `typescript
+      # >=4.8.4 <6.1.0` even on its latest release (8.66.0), and
+      # @react-router/dev@7 peers on `^5.1.0 || ^6.0.0`. No combination of
+      # versions resolves today. Drop this entry once typescript-eslint
+      # raises its upper bound, then migrate via the `typescript` group above.
+      - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
