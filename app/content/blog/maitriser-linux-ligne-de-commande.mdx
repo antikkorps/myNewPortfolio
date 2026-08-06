@@ -1,0 +1,157 @@
+---
+title: "Mon agent écrivait de meilleurs pipes que moi : deux lectures pour reprendre Linux en main"
+description: "Retour sur le Linux Pocket Guide et Efficient Linux at the Command Line, lus à la suite. Pourquoi on utilise Linux comme un runtime sans jamais s'en servir comme d'un outil, et ce que la composition de commandes change vraiment au quotidien."
+date: "2026-08-07"
+tags: ["linux", "cli", "shell", "tmux", "lectures", "devops"]
+readingTime: 11
+draft: false
+---
+
+Il y a quelques mois, j'ai écrit [GoTK](/blog/gotk-proxy-cli-llm), un proxy CLI qui nettoie la sortie des commandes shell avant qu'elle n'atteigne un LLM. Un outil né d'une observation très concrète : mon agent exécute des commandes toute la journée, et leur sortie coûte cher en contexte.
+
+Sauf qu'à force de regarder passer ces commandes, j'ai fini par remarquer autre chose. Pas le volume de la sortie — **la qualité de ce qui était tapé**. L'agent enchaînait des pipes à quatre étages, redirigeait, comptait, triait, coupait, et sortait exactement l'information qu'il cherchait. Moi, en face, je faisais un `grep`, je regardais le résultat, je refaisais un `grep`.
+
+Il y a une ironie que j'assume : j'ai construit un outil pour optimiser la conversation entre le shell et une IA, pendant que l'IA se servait du shell mieux que moi.
+
+C'est ce qui m'a poussé à ouvrir deux livres. Et à me rendre compte que le problème n'était pas mon niveau — c'était ma façon de considérer Linux.
+
+## Le constat : j'exécute Linux, je ne le pilote pas
+
+Ça fait des années que je bosse sur Linux. J'y déploie, j'y débogue, je l'utilise même comme os principal chez moi,  j'ai [monté un VPS Hetzner avec Forgejo](/blog/forgejo-install-retour-experience), j'y ai [empilé quatre couches de sécurité](/blog/defense-en-profondeur-self-host). À aucun moment je ne me serais décrit comme quelqu'un qui « ne connaît pas Linux ».
+
+Et pourtant, en regardant honnêtement ma pratique, le constat est net : **Linux était pour moi un environnement d'exécution, pas un outil de travail.**
+
+La différence n'est pas cosmétique. Traiter Linux comme un runtime, ça veut dire :
+
+- copier-coller un fichier `systemd` depuis un tuto sans le lire ligne à ligne ;
+- connaître les commandes Docker par cœur et ignorer ce que fait `xargs` ;
+- ouvrir un fichier de log dans un éditeur pour le parcourir à la main ;
+- utiliser `grep` comme un `Ctrl+F` de terminal, et rien de plus.
+
+Chacun de ces réflexes fonctionne. C'est bien ça le piège : ça marche assez bien pour qu'on ne se pose jamais la question. On atteint un plateau de compétence confortable, on livre, et le plateau devient la norme.
+
+Ce que ces deux lectures ont fait, c'est rendre le plateau visible.
+
+## Le Pocket Guide : récupérer du vocabulaire
+
+Le [Linux Pocket Guide](https://danieljbarrett.com/books/linux-pocket-guide-fourth-edition/) de Daniel J. Barrett en est à sa 4ᵉ édition (2024, celle des vingt ans du livre). C'est un format de poche, plus de 200 commandes, avec une cinquantaine d'ajouts sur cette édition — conteneurs, gestion de paquets, gestion de versions, conversions de formats.
+
+Il faut être clair sur ce que c'est : **un dictionnaire, pas un roman.** On ne le lit pas d'une traite, et prétendre le contraire serait malhonnête. Je l'ai parcouru par blocs, en m'arrêtant sur les familles de commandes que je pensais connaître.
+
+C'est là que ça devient intéressant, parce que la valeur du livre n'est pas dans les commandes que tu découvres — elle est dans **la mesure de ce que tu ignorais**. Je savais faire un `grep`. Je n'avais jamais vraiment intégré que `wc`, `sort`, `uniq`, `cut`, `tr`, `head` et `tail` formaient une boîte à outils cohérente, pensée pour fonctionner ensemble.
+
+Chaque commande prise isolément est décevante. `wc` compte des lignes. C'est tout. Vue seule, c'est une commande sans intérêt, et c'est exactement pour ça qu'on ne la retient pas. Sa valeur n'apparaît qu'au moment où elle devient le dernier maillon d'une chaîne.
+
+Un dictionnaire te donne des mots. Il ne t'apprend pas à faire des phrases. D'où le second livre.
+
+## Efficient Linux : apprendre la grammaire
+
+Le même auteur a publié [Efficient Linux at the Command Line](https://danieljbarrett.com/books/efficient-linux-at-the-command-line/) en 2022. Et le simple fait que Barrett ait ressenti le besoin d'écrire ce livre-là, dix-huit ans après son dictionnaire, dit tout de ce dont je parle depuis le début : **connaître les commandes n'est pas maîtriser l'outil.**
+
+Ce livre ne traite quasiment pas de commandes nouvelles. Il traite de leur **assemblage**. Le pipe n'y est pas présenté comme un opérateur parmi d'autres, mais comme le principe structurant de tout le système.
+
+L'idée centrale, que je résumerais comme ça : chaque commande est un petit module qui fait une chose et la fait bien, en lisant du texte et en écrivant du texte. Tant que tu respectes ce contrat, tu peux les brancher les uns aux autres indéfiniment. Le pipeline n'est pas un raccourci d'écriture — c'est une manière de construire un raisonnement, étape par étape.
+
+Et c'est le point de méthode qui m'a le plus servi : **on n'écrit pas un pipeline de quatre commandes d'un coup.** On en écrit un, on regarde la sortie. On en ajoute un deuxième, on regarde encore. C'est incrémental, c'est vérifiable à chaque étape, et ça enlève complètement l'effet « formule magique » qui rendait ces lignes intimidantes.
+
+### Presque plus puissant qu'une requête SQL
+
+C'est la comparaison qui m'est venue en lisant, et je la trouve juste — à condition de la préciser un peu.
+
+Un pipeline shell et une requête SQL font la même chose sur le fond : filtrer, regrouper, agréger, trier, limiter. `grep` fait le `WHERE`, `sort | uniq -c` fait le `GROUP BY`, `sort -rn` fait le `ORDER BY`, `head` fait le `LIMIT`.
+
+Là où le shell est **plus puissant**, c'est sur sa portée. SQL interroge ce qui est dans la base. Le shell interroge tout ce qui produit du texte — donc les logs, les processus, les fichiers, l'état du réseau, la sortie de n'importe quel binaire, y compris ceux que tu écris toi-même. Aucun schéma à déclarer, aucune ingestion préalable. C'est disponible immédiatement, partout, sur n'importe quelle machine.
+
+Là où il est **plus faible**, et il faut le dire : SQL est déclaratif et travaille sur des données structurées avec un optimiseur derrière. Le shell est impératif et travaille sur du texte non structuré. Tu re-parses le monde à chaque fois, à coups de colonnes et de séparateurs, et c'est fragile dès que le format d'entrée bouge. C'est précisément la faille que `awk`, `jq` ou `miller` viennent combler.
+
+Donc pas « meilleur ». Un compromis différent : tu échanges de la rigueur structurelle contre une portée quasi universelle. Pour de l'exploration et du diagnostic, c'est le bon échange presque à chaque fois.
+
+## Requêter le système, et pas seulement son code
+
+Si je devais ne retenir qu'une chose de ces deux lectures, ce serait ce déplacement-là.
+
+En tant que dev, j'utilisais le shell pour interroger **mes projets**. Chercher une fonction, retrouver un import, compter des occurrences dans un dossier `src`. Le périmètre s'arrêtait au dépôt git.
+
+Or la machine est pleine d'information qui ne demande qu'à être interrogée de la même manière. Quels processus consomment quoi. Quels fichiers ont grossi. Qui a tenté de se connecter, combien de fois, depuis où. Quelles unités systemd ont redémarré cette nuit.
+
+Sur mon propre VPS, ça change la nature du diagnostic. Un exemple parlant : savoir qui se fait bannir par fail2ban, et à quelle fréquence.
+
+```bash
+journalctl -u fail2ban --since "24 hours ago" \
+  | grep "Ban " \
+  | awk '{print $NF}' \
+  | sort \
+  | uniq -c \
+  | sort -rn \
+  | head -20
+```
+
+Sept commandes, aucune n'est compliquée, et le résultat c'est le top 20 des IP bannies sur la journée avec leur nombre d'occurrences. Avant, j'aurais ouvert le log et scrollé.
+
+Même logique pour retrouver ce qui remplit un disque, un grand classique du serveur perso :
+
+```bash
+du -h --max-depth=1 /var | sort -rh | head -10
+```
+
+Ou pour vérifier ce qui écoute réellement sur la machine, ce qui est une question de sécurité directe quand on auto-héberge :
+
+```bash
+ss -tlpn | awk 'NR>1 {print $4, $6}' | sort
+```
+
+Le point n'est pas la ligne exacte, qui dépend de ta distribution et de ce que tu cherches. C'est le réflexe. **Une question sur l'état du système devient une phrase qu'on écrit, au lieu d'être une inspection manuelle qu'on subit.**
+
+Et pour les logs applicatifs, l'analyse d'accès Caddy suit exactement le même patron : filtrer, extraire la colonne, grouper, trier, tronquer. Une fois la structure en tête, elle se réutilise partout.
+
+## tmux : le jour où j'ai compris
+
+Pendant longtemps, tmux était pour moi une curiosité de sysadmin. Je voyais des gens en parler avec ferveur, je regardais les captures d'écran découpées en panneaux, et je ne voyais qu'une complexité gratuite. J'avais déjà des onglets dans mon terminal.
+
+Et puis un jour, une coupure de wifi.
+
+Rien de dramatique en soi — quelques secondes d'interruption, le genre d'incident qu'on remarque à peine en navigation normale. Sauf que j'étais en SSH sur le serveur, au milieu d'une opération longue. La connexion tombe, le shell distant reçoit un `SIGHUP`, et le processus meurt avec lui. Pas de reprise, pas de sortie récupérable : l'opération s'est arrêtée quelque part au milieu, et je n'ai même pas su exactement où.
+
+C'est le moment où j'ai compris que je n'avais jamais cherché à quoi servait tmux, parce que je m'étais posé la mauvaise question. Je voyais le multiplexeur — les panneaux, le découpage de l'écran, la partie visible et finalement la plus anecdotique. Le vrai sujet, c'est la **persistance**.
+
+tmux découple la session du terminal qui l'affiche. Le processus tourne côté serveur, dans une session qui lui survit, et ta connexion SSH n'est plus qu'une fenêtre ouverte dessus. Tu la fermes, elle tombe, ton chat marche sur le câble — le travail continue. Tu te reconnectes, tu fais `tmux attach`, et tu retrouves ton écran exactement où tu l'avais laissé, scrollback compris.
+
+```bash
+# côté serveur, avant de lancer quoi que ce soit de long
+tmux new -s maintenance
+
+# après une déconnexion, subie ou volontaire
+tmux attach -t maintenance
+```
+
+Deux commandes. C'est tout ce qu'il fallait pour que l'incident n'en soit plus un.
+
+Ce qui me frappe rétrospectivement, c'est que je connaissais l'existence de tmux depuis des années. Ce qui me manquait, ce n'était pas l'outil — c'était d'avoir relié l'outil au problème. C'est exactement le même mécanisme que pour `wc` : une commande qu'on a croisée cent fois reste inutile tant qu'on n'a pas rencontré la situation qui la rend évidente. Les livres accélèrent cette rencontre. La panne, elle, s'en charge gratuitement.
+
+Le corollaire vaut d'être dit : sur une machine distante, toute opération qui dure plus de quelques secondes devrait tourner dans un tmux. Ça ne coûte rien à prendre comme réflexe, et ça supprime une catégorie entière d'incidents.
+
+## Ce que ça dit du métier en 2026
+
+**On confond outillage et compétence.** Docker, les PaaS, les services managés sont d'excellentes abstractions — j'en utilise tous les jours et je ne compte pas arrêter. Mais chaque abstraction adoptée sans comprendre ce qu'elle recouvre est une compétence déléguée. Tant que tout va bien, la dette est invisible. Le jour où il faut descendre d'un étage pour comprendre un incident, elle se paie d'un coup. Le self-hosting m'a mis face à ça sans échappatoire : il n'y a plus de support à qui écrire.
+
+**La composition est une compétence à part entière.** Ce n'est pas de la culture générale Unix, ni de la nostalgie. C'est ce qui sépare quelqu'un qui subit sa machine de quelqu'un qui l'interroge. Et contrairement à un framework, ça ne se périme pas : le pipe que j'apprends aujourd'hui marchera encore dans quinze ans, sur n'importe quelle distribution, dans n'importe quel conteneur. Peu de choses dans ce métier offrent ce retour sur investissement.
+
+**Et il y a l'argument agent, qui devient difficile à ignorer.** Les assistants en ligne de commande écrivent des pipelines à longueur de journée, sur ta machine, avec tes droits. Si tu ne sais pas lire en détail et rapidement ce qu'ils te proposent, tu ne peux pas le valider — tu ne peux que l'accepter. Ne pas maîtriser le shell est en train de passer du statut de lacune inconfortable à celui de problème de sécurité opérationnelle. Je ne dis pas ça de façon abstraite : c'est ce que je fais quand j'approuve une commande dans un agent, plusieurs fois par jour.
+
+C'est aussi ce qui rend l'apprentissage plus facile qu'avant, à condition de le vouloir. Un agent qui compose un pipeline sous tes yeux est un excellent professeur, tant que tu prends la peine de lui demander pourquoi il a écrit ça plutôt qu'autre chose.
+
+## Lequel lire, dans quel ordre
+
+L'ordre chronologique n'est pas forcément le bon. Le Pocket Guide est un ouvrage de référence qu'on garde ouvert à côté du clavier, pas une lecture d'apprentissage. Efficient Linux est celui qui change la pratique — et si tu ne devais en lire qu'un en sachant déjà te débrouiller sur un serveur, ce serait celui-là.
+
+---
+
+Ces lectures n'ont rien d'exotique et ne prétendent rien révolutionner. Elles réparent quelque chose de plus banal, et sans doute plus répandu qu'on ne l'admet : **on est nombreux à travailler tous les jours sur un outil formidable qu'on n'utilise qu'au quart de ce qu'il propose.**
+
+La suite s'est d'ailleurs enchaînée toute seule. J'ai commencé Neovim, avec [Kickstart](https://github.com/nvim-lua/kickstart.nvim) comme point de départ — un `init.lua` unique et commenté, qu'on est censé lire et modifier, plutôt qu'un environnement clé en main qui cache ses choix. Vu tout ce qui précède, difficile de faire autrement.
+
+Et je ne m'attendais pas à ce que les deux sujets se répondent à ce point. Mieux comprendre les commandes m'a rendu Neovim nettement plus lisible, parce que c'est la même idée en dessous : ce ne sont pas des raccourcis à mémoriser, c'est une grammaire. Dans le shell, tu composes des commandes avec des pipes. Dans vim, tu composes un verbe, un mouvement et un objet — `d2w`, `ci"`, `yi(`. Dans les deux cas, personne n'apprend la liste : on apprend les règles d'assemblage, et tout le reste se déduit.
+
+Le même déclic, deux fois de suite. Ça confirme au moins que je creusais au bon endroit.
+
+Pour la suite, j'hésite encore entre deux directions. Soit **Kali Linux**, qui prolongerait la série sécurité — passer du défensif à l'offensif change la façon dont on regarde ses propres serveurs. Soit [Learning Modern Linux](https://www.oreilly.com/library/view/learning-modern-linux/9781098108939/) de Michael Hausenblas (O'Reilly, 2022), sous-titré *A Handbook for the Cloud Native Practitioner*, qui attaque de front la question que cet article contourne soigneusement : ce que devient Linux quand tout tourne en conteneur.
