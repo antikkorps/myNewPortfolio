@@ -11,12 +11,14 @@ const ROUTES_200 = [
   "/blog?page=2",
   "/blog/gotk-proxy-cli-llm",
   "/blog/archi-forgejo-distribuee",
+  "/blog/cheatsheet-debian-ubuntu",
   "/blog/tags/forgejo",
   "/sitemap.xml",
   "/blog/rss.xml",
   "/robots.txt",
   "/og/default.png",
   "/og/archi-forgejo-distribuee.png",
+  "/downloads/cheatsheet-debian-ubuntu.pdf",
   "/favicon.png",
 ]
 
@@ -113,6 +115,20 @@ test.describe("Sitemap content", () => {
     for (const url of expected) {
       expect(xml).toContain(url)
     }
+  })
+})
+
+test.describe("Cheat sheet download", () => {
+  test("the article offers the PDF and the PDF is served as such", async ({ page, request }) => {
+    await page.goto("/blog/cheatsheet-debian-ubuntu")
+    const link = page.locator('a[href="/downloads/cheatsheet-debian-ubuntu.pdf"]')
+    await expect(link).toBeVisible()
+    await expect(link).toHaveAttribute("download", "")
+
+    const res = await request.get("/downloads/cheatsheet-debian-ubuntu.pdf")
+    expect(res.headers()["content-type"]).toContain("application/pdf")
+    const body = await res.body()
+    expect(body.subarray(0, 5).toString()).toBe("%PDF-")
   })
 })
 

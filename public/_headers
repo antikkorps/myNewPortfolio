@@ -13,6 +13,10 @@
 /favicon.png
   Cache-Control: public, max-age=2592000, immutable
 
+# Downloadable PDFs, rebuilt at each deploy
+/downloads/*
+  Cache-Control: public, max-age=3600, s-maxage=604800
+
 # Hashed assets are content-addressable; they can be cached forever.
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
