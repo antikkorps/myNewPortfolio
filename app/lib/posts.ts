@@ -11,9 +11,38 @@ import { lazy, type ComponentType, type LazyExoticComponent } from "react"
 
 const componentModules = import.meta.glob<{ default: ComponentType }>("../content/blog/*.mdx")
 
-export function componentForSlug(slug: string): LazyExoticComponent<ComponentType> | null {
-  const path = `../content/blog/${slug}.mdx`
+// Modules already loaded, rendered synchronously so <Suspense> never triggers.
+const loaded = new Map<string, ComponentType>()
+// One lazy wrapper per article: creating a fresh one on every render would
+// restart it in its pending state and suspend again.
+const wrappers = new Map<string, LazyExoticComponent<ComponentType>>()
+
+const pathForSlug = (slug: string) => `../content/blog/${slug}.mdx`
+
+export function componentForSlug(slug: string): ComponentType | null {
+  const path = pathForSlug(slug)
   const loader = componentModules[path]
   if (!loader) return null
-  return lazy(loader as () => Promise<{ default: ComponentType }>)
+
+  const ready = loaded.get(path)
+  if (ready) return ready
+
+  let wrapper = wrappers.get(path)
+  if (!wrapper) {
+    wrapper = lazy(loader as () => Promise<{ default: ComponentType }>)
+    wrappers.set(path, wrapper)
+  }
+  return wrapper
+}
+
+// Resolves an article module up front. Called before hydration so the route
+// renders the component synchronously: without it React re-renders the
+// <Suspense> fallback over server-rendered text, wiping the article off screen
+// until the chunk lands (a ~0.45 layout shift on a long post).
+export async function preloadComponentForSlug(slug: string): Promise<void> {
+  const path = pathForSlug(slug)
+  const loader = componentModules[path]
+  if (!loader || loaded.has(path)) return
+  const mod = await loader()
+  loaded.set(path, mod.default)
 }
