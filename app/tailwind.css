@@ -152,19 +152,76 @@ html.dark .prose-blog code span {
   margin-left: -1.25rem;
 }
 
-/* Liens articles : underline subtle, accent on hover */
-.prose-blog a {
+/*
+  Liens articles : underline subtle, accent on hover.
+
+  Scoped out of .not-prose because these are hand-written descendant selectors,
+  which `not-prose` does not neutralise — it only guards the utilities emitted
+  by @tailwindcss/typography. Without the guard, the accent colour also hits
+  links styled as buttons (<Download />), repainting their label over their own
+  background on hover. `:not(:where(…))` keeps the specificity unchanged.
+*/
+.prose-blog a:not(:where(.not-prose, .not-prose *)) {
   text-decoration: none;
   border-bottom: 1px solid currentColor;
   transition: color 150ms ease;
 }
 
-.prose-blog a:hover {
+.prose-blog a:not(:where(.not-prose, .not-prose *)):hover {
   color: #2563eb;
 }
 
-html.dark .prose-blog a:hover {
+html.dark .prose-blog a:not(:where(.not-prose, .not-prose *)):hover {
   color: #60a5fa;
+}
+
+/*
+  Sommaire d'article : la liste déborde sur les articles très découpés (32
+  entrées sur la cheat sheet). Barre de défilement discrète, et fondu sur le
+  bord où il reste du contenu — les deux longueurs sont pilotées par le
+  composant, à 0 elles laissent le masque entièrement opaque.
+*/
+.toc-scroll {
+  --toc-fade-top: 0px;
+  --toc-fade-bottom: 0px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d4 transparent;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--toc-fade-top),
+    #000 calc(100% - var(--toc-fade-bottom)),
+    transparent 100%
+  );
+}
+
+html.dark .toc-scroll {
+  scrollbar-color: #404040 transparent;
+}
+
+/* WebKit ignore encore scrollbar-width/color sur certaines versions. */
+.toc-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.toc-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toc-scroll::-webkit-scrollbar-thumb {
+  background-color: #d4d4d4;
+  border-radius: 3px;
+}
+
+html.dark .toc-scroll::-webkit-scrollbar-thumb {
+  background-color: #404040;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toc-scroll {
+    scroll-behavior: auto;
+  }
 }
 
 /* Tables in articles : scroll horizontal sur petits écrans, bordures sobres */
