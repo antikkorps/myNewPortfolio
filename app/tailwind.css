@@ -152,18 +152,26 @@ html.dark .prose-blog code span {
   margin-left: -1.25rem;
 }
 
-/* Liens articles : underline subtle, accent on hover */
-.prose-blog a {
+/*
+  Liens articles : underline subtle, accent on hover.
+
+  Scoped out of .not-prose because these are hand-written descendant selectors,
+  which `not-prose` does not neutralise — it only guards the utilities emitted
+  by @tailwindcss/typography. Without the guard, the accent colour also hits
+  links styled as buttons (<Download />), repainting their label over their own
+  background on hover. `:not(:where(…))` keeps the specificity unchanged.
+*/
+.prose-blog a:not(:where(.not-prose, .not-prose *)) {
   text-decoration: none;
   border-bottom: 1px solid currentColor;
   transition: color 150ms ease;
 }
 
-.prose-blog a:hover {
+.prose-blog a:not(:where(.not-prose, .not-prose *)):hover {
   color: #2563eb;
 }
 
-html.dark .prose-blog a:hover {
+html.dark .prose-blog a:not(:where(.not-prose, .not-prose *)):hover {
   color: #60a5fa;
 }
 
