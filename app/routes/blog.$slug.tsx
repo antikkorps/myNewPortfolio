@@ -144,7 +144,7 @@ export default function BlogPost() {
             <span aria-hidden>·</span>
             <span>{data.readingTime} min de lecture</span>
             {data.draft ? (
-              <span className="rounded-sm bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+              <span className="rounded-xs bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
                 Brouillon
               </span>
             ) : null}

@@ -42,7 +42,7 @@ export function VideoDialog({ url, title, onClose }: Props) {
       onClose={onClose}
       aria-labelledby="video-dialog-title"
       aria-modal="true"
-      className="m-0 max-h-none max-w-none w-full h-full bg-transparent p-4 backdrop:bg-black/70 backdrop:backdrop-blur-sm"
+      className="m-0 max-h-none max-w-none w-full h-full bg-transparent p-4 backdrop:bg-black/70 backdrop:backdrop-blur-xs"
     >
       <div className="pointer-events-none mx-auto flex h-full max-w-5xl items-center justify-center">
         <div className="pointer-events-auto relative w-full overflow-hidden rounded-xl bg-black shadow-2xl">

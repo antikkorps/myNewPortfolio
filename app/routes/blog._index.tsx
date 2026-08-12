@@ -95,7 +95,7 @@ function highlight(text: string, q: string) {
     part.toLowerCase() === lower ? (
       <mark
         key={i}
-        className="rounded-sm bg-[#2563eb]/10 px-0.5 text-[#2563eb] dark:bg-[#60a5fa]/15 dark:text-[#60a5fa]"
+        className="rounded-xs bg-[#2563eb]/10 px-0.5 text-[#2563eb] dark:bg-[#60a5fa]/15 dark:text-[#60a5fa]"
       >
         {part}
       </mark>
@@ -168,7 +168,7 @@ export default function BlogIndex() {
               defaultValue={q}
               placeholder="Rechercher (titre, description, tag)…"
               autoComplete="off"
-              className="w-full rounded-md border border-neutral-200 bg-white py-2 pl-9 pr-3 text-sm text-[#1a1a1a] placeholder:text-neutral-400 focus:border-[#2563eb] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 dark:border-neutral-800 dark:bg-neutral-900 dark:text-[#e8e8e8]"
+              className="w-full rounded-md border border-neutral-200 bg-white py-2 pl-9 pr-3 text-sm text-[#1a1a1a] placeholder:text-neutral-400 focus:border-[#2563eb] focus:outline-hidden focus:ring-2 focus:ring-[#2563eb]/20 dark:border-neutral-800 dark:bg-neutral-900 dark:text-[#e8e8e8]"
             />
           </label>
           <noscript>
@@ -204,7 +204,7 @@ export default function BlogIndex() {
                     <span aria-hidden>·</span>
                     <span>{post.readingTime} min de lecture</span>
                     {post.draft ? (
-                      <span className="rounded-sm bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+                      <span className="rounded-xs bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
                         Brouillon
                       </span>
                     ) : null}

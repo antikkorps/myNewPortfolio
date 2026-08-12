@@ -10,7 +10,7 @@ export function Note({ children }: { children: ReactNode }) {
       <Info
         size={18}
         strokeWidth={2}
-        className="mt-0.5 flex-shrink-0 text-blue-600 dark:text-blue-400"
+        className="mt-0.5 shrink-0 text-blue-600 dark:text-blue-400"
         aria-hidden
       />
       <div className="leading-relaxed">{children}</div>

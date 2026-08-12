@@ -231,7 +231,7 @@ export default function Contact() {
                 required
                 minLength={10}
                 maxLength={1000}
-                className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[#2563eb] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+                className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[#2563eb] focus:outline-hidden focus:ring-2 focus:ring-[#2563eb]/20 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
               />
               <p className="mt-1 text-xs text-neutral-500">10 à 1000 caractères. Pas d&apos;URL.</p>
             </div>
@@ -305,7 +305,7 @@ function Field({
         name={id}
         type={type}
         required={required}
-        className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[#2563eb] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+        className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[#2563eb] focus:outline-hidden focus:ring-2 focus:ring-[#2563eb]/20 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
       />
     </div>
   )
