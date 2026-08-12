@@ -28,8 +28,8 @@ const CursorHalo = () => {
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div
           className={`
-            absolute w-[40rem] h-[40rem] rounded-full 
-            bg-gradient-radial from-purple-500/5 via-blue-500/3 to-transparent
+            absolute w-160 h-160 rounded-full 
+            bg-radial from-purple-500/5 via-blue-500/3 to-transparent
             transition-opacity duration-500 ease-in-out
             blur-3xl
             pointer-events-none

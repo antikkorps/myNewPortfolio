@@ -43,11 +43,11 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="fixed w-full z-50 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm transition-colors duration-300">
+      <nav className="fixed w-full z-50 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xs transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <motion.div
-              className="flex-shrink-0"
+              className="shrink-0"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

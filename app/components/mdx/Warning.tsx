@@ -10,7 +10,7 @@ export function Warning({ children }: { children: ReactNode }) {
       <AlertTriangle
         size={18}
         strokeWidth={2}
-        className="mt-0.5 flex-shrink-0 text-amber-600 dark:text-amber-400"
+        className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400"
         aria-hidden
       />
       <div className="leading-relaxed">{children}</div>

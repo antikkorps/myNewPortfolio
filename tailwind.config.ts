@@ -15,9 +15,6 @@ export default {
           accent: "#2563eb",
         },
       },
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-      },
       fontFamily: {
         sans: [
           "Inter Variable",
