@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react"
 import { useNavigate } from "react-router"
 
 interface Heading {
@@ -16,6 +16,25 @@ export function TableOfContents({ containerSelector = "article.prose", minHeadin
   const [headings, setHeadings] = useState<Heading[]>([])
   const [activeId, setActiveId] = useState<string>("")
   const navigate = useNavigate()
+
+  // Which edges still hide content, so the fade only shows where there is more
+  // to scroll to — a permanent top fade would clip the first entry at rest.
+  const navRef = useRef<HTMLElement>(null)
+  const [overflow, setOverflow] = useState({ top: false, bottom: false })
+
+  const syncOverflow = useCallback(() => {
+    const el = navRef.current
+    if (!el) return
+    const top = el.scrollTop > 4
+    const bottom = Math.ceil(el.scrollTop + el.clientHeight) < el.scrollHeight - 4
+    setOverflow((prev) => (prev.top === top && prev.bottom === bottom ? prev : { top, bottom }))
+  }, [])
+
+  useEffect(() => {
+    syncOverflow()
+    window.addEventListener("resize", syncOverflow)
+    return () => window.removeEventListener("resize", syncOverflow)
+  }, [headings, syncOverflow])
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
@@ -76,8 +95,16 @@ export function TableOfContents({ containerSelector = "article.prose", minHeadin
 
   return (
     <nav
+      ref={navRef}
+      onScroll={syncOverflow}
       aria-label="Table des matières"
-      className="blog-ui fixed right-8 top-32 hidden w-56 max-h-[calc(100vh-10rem)] overflow-y-auto pr-2 xl:block 2xl:right-[max(2rem,calc((100vw-65rem)/2-15rem))]"
+      style={
+        {
+          "--toc-fade-top": overflow.top ? "2.5rem" : "0px",
+          "--toc-fade-bottom": overflow.bottom ? "2.5rem" : "0px",
+        } as CSSProperties
+      }
+      className="blog-ui toc-scroll fixed right-8 top-32 hidden w-56 max-h-[calc(100vh-10rem)] overflow-y-auto pr-2 xl:block 2xl:right-[max(2rem,calc((100vw-65rem)/2-15rem))]"
     >
       <p className="mb-3 text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-500">
         Sommaire
