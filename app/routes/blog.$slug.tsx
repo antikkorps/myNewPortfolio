@@ -5,7 +5,7 @@ import { Suspense } from "react"
 import { BlogAvatar } from "~/components/BlogAvatar"
 import { TableOfContents } from "~/components/TableOfContents"
 import { formatDate } from "~/lib/format"
-import { componentForSlug } from "~/lib/posts"
+import { componentForSlug, isComponentReady, preloadComponentForSlug } from "~/lib/posts"
 import { getNeighborsMeta, getPostMeta } from "~/lib/posts-meta.server"
 import { AUTHOR, ogImageForSlug, SITE_NAME, SITE_URL } from "~/lib/site"
 
@@ -14,6 +14,14 @@ export async function loader({ params }: LoaderFunctionArgs) {
   if (!meta) {
     throw new Response("Article introuvable", { status: 404 })
   }
+  // Resolve the article module before rendering so the component below is
+  // rendered outside a <Suspense> boundary and lands in the HTML shell.
+  // React 19 defers whatever sits inside a boundary past the shell — even a
+  // child that renders synchronously — so leaving one here ships the fallback
+  // as the shell and streams the body in afterwards, pushing the footer down
+  // (CLS 0.45 on a long post). entry.client.tsx preloads the same way.
+  await preloadComponentForSlug(meta.slug)
+
   const { prev, next } = getNeighborsMeta(meta.slug)
   return {
     slug: meta.slug,
@@ -160,15 +168,23 @@ export default function BlogPost() {
         </header>
 
         <article className="prose prose-blog dark:prose-invert">
-          <Suspense
-            fallback={
-              <p className="text-neutral-500 dark:text-neutral-400">
-                Chargement de l&apos;article…
-              </p>
-            }
-          >
+          {/* Server render and hydration always take the ready branch: both the
+              loader and entry.client resolve the module first. The boundary is
+              for client-side navigation, where the next article's chunk is
+              still in flight. */}
+          {isComponentReady(data.slug) ? (
             <Component />
-          </Suspense>
+          ) : (
+            <Suspense
+              fallback={
+                <p className="text-neutral-500 dark:text-neutral-400">
+                  Chargement de l&apos;article…
+                </p>
+              }
+            >
+              <Component />
+            </Suspense>
+          )}
         </article>
 
         <footer className="blog-ui mt-20 flex items-center gap-4 border-t border-neutral-200 pt-8 dark:border-neutral-800">

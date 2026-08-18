@@ -4,8 +4,9 @@
 //
 // Glob is non-eager: each MDX becomes its own dynamic import, Vite emits a
 // chunk per article, and the /blog/$slug entry only ships the article being
-// read. We wrap the loader in React.lazy and the route renders the component
-// inside <Suspense> so SSR streams the article into the response.
+// read. We wrap the loader in React.lazy, and the route falls back to
+// <Suspense> only for the articles that are not resolved yet — see
+// isComponentReady below.
 
 import { lazy, type ComponentType, type LazyExoticComponent } from "react"
 
@@ -35,10 +36,15 @@ export function componentForSlug(slug: string): ComponentType | null {
   return wrapper
 }
 
-// Resolves an article module up front. Called before hydration so the route
-// renders the component synchronously: without it React re-renders the
-// <Suspense> fallback over server-rendered text, wiping the article off screen
-// until the chunk lands (a ~0.45 layout shift on a long post).
+// True once the article module is resolved, i.e. componentForSlug returns it
+// synchronously and the route can render it without a <Suspense> boundary.
+export function isComponentReady(slug: string): boolean {
+  return loaded.has(pathForSlug(slug))
+}
+
+// Resolves an article module up front. Awaited by the route loader before SSR
+// and by entry.client before hydration, so the article is part of the HTML
+// shell instead of arriving after it (a ~0.45 layout shift on a long post).
 export async function preloadComponentForSlug(slug: string): Promise<void> {
   const path = pathForSlug(slug)
   const loader = componentModules[path]
