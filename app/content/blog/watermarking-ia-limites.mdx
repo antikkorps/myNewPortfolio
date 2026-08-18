@@ -1,0 +1,116 @@
+---
+title: "Non, le watermarking ne dira pas si un texte a été écrit par une IA"
+description: "Ce qu'il mesure vraiment, et pourquoi le flou n'est pas un défaut de jeunesse. Retour sur les limites du marquage statistique des sorties de LLM, telles que Google et Anthropic les documentent eux-mêmes."
+date: "2026-08-18"
+tags: ["ia", "llm", "watermarking", "souveraineté", "éthique"]
+readingTime: 9
+draft: false
+---
+
+import { Note } from "../../components/mdx/Note"
+import { Warning } from "../../components/mdx/Warning"
+
+Je me suis mis en tête, il y a quelques semaines, d'écrire un détecteur de watermark. L'idée paraissait raisonnable : les grands modèles marquent désormais leurs sorties, ces marques sont documentées, il ne restait plus qu'à les lire.
+
+J'ai commencé par comprendre comment elles fonctionnent. Et j'ai compris surtout que je m'étais trompé de question.
+
+Ce texte n'est pas un réquisitoire. Après tout, il est utile de pouvoir distinguer ce qui est généré par une IA de ce qui est produit par un humain. Google et Anthropic documentent les limites de leur technologie avec transparence, et l'essentiel de ce qui suit vient d'ailleurs de leurs propres publications. Le problème n'est pas ce qu'ils disent. C'est ce que tout le monde comprend, et ce que les humains vont en faire.
+
+## On ne tatoue pas le texte, on pipe le dé
+
+Première surprise : il n'y a rien à trouver dans le texte, contrairement à ce que tout le monde semble croire.
+
+Beaucoup de gens imaginent un caractère invisible glissé entre les mots, une sorte d'encre sympathique numérique. Ce n'est pas ça du tout. Un modèle de langage choisit ses mots un par un, en tirant dans une distribution de probabilités. Le watermarking ne touche pas au texte : il remplace la source d'aléa de ce tirage. Anthropic le décrit ainsi : la clé secrète et les quelques mots précédents déterminent ensemble le mot suivant, là où il y avait auparavant un vrai hasard.
+
+Le texte produit est rigoureusement identique à l'œil. Le signal n'est pas dans les caractères, il est dans la statistique des choix, répartie sur des centaines de décisions minuscules : « gris » plutôt que « couvert », « toutefois » plutôt que « cependant ».
+
+<Note>
+  Ce n'est pas une signature à l'encre invisible. C'est un dé pipé. Et pour voir
+  qu'un dé est pipé, il faut connaître le pipage.
+</Note>
+
+## Flou n° 1 : sans la clé, il n'y a strictement rien à voir
+
+C'est le point qui a mis fin à mon projet initial, et c'est le plus mal compris.
+
+La détection exige la clé secrète de marquage. Ce n'est pas une limitation d'implémentation qu'une version ultérieure corrigera : c'est la propriété de sécurité du procédé lui-même. Un watermark qui serait détectable sans clé serait, par construction, un watermark que n'importe qui pourrait retirer. L'article de Nature qui décrit SynthID-Text l'énonce sans ambiguïté : la vérification passe par la clé de marquage.
+
+La conséquence est vertigineuse et pourtant peu discutée. Il ne peut pas exister de détecteur universel indépendant. Face à un texte, vous ne pouvez pas analyser. Vous pouvez seulement demander, à chaque fournisseur, un par un, via son API.
+
+Autrement dit : **le verdict sur votre texte ne vous appartient pas**. Il n'appartient ni à un tiers de confiance, ni à un expert judiciaire. Il appartient à l'entreprise qui a fabriqué le modèle. Elle détient la clé, elle fixe le seuil, elle décide de la disponibilité du service.
+
+## Flou n° 2 : le signal a besoin de liberté pour exister
+
+Le watermark ne peut vivre que là où le modèle avait le choix.
+
+Quand un modèle hésite entre trois synonymes équivalents, il peut encoder de l'information dans son choix sans rien dégrader. Mais quand la réponse est contrainte — un fait, une date, un nom propre, une ligne de code qui doit compiler — il n'y a plus d'espace où loger le signal.
+
+Google l'écrit noir sur blanc : le marquage est « moins efficace sur les réponses factuelles, car il y a moins de latitude pour modifier la génération sans dégrader l'exactitude ». Anthropic dit la même chose du code : les commentaires peuvent porter la marque, le code lui-même quasiment jamais.
+
+Il faut prendre la mesure du paradoxe. **Plus un texte est factuel, contraint, vérifiable, moins il est traçable.** Un poème ou un roman est marqué en profondeur. Un communiqué de presse chiffré, une notice technique, un extrait de code : à peine. La technologie est la plus faible précisément là où l'enjeu de véracité est le plus fort.
+
+Ajoutez que le signal est statistique, donc qu'il lui faut du volume : sur un paragraphe court, il n'y a tout simplement pas assez de matière pour conclure quoi que ce soit.
+
+## Flou n° 3 : une absence de marque ne prouve rien
+
+Ce point-là devrait être écrit en gras sur chaque interface de détection.
+
+Le test est asymétrique. Une marque détectée est une information. Une marque non détectée n'en est pas une.
+
+Un texte qui ressort « non marqué » peut avoir été écrit par un humain. Il peut aussi avoir été produit par un modèle qui ne marque pas, par un modèle ouvert tournant sur une machine personnelle, par une version antérieure au déploiement du marquage. Il peut avoir été traduit, reformulé, ou simplement être trop court. Il peut venir d'un fournisseur dont vous n'avez pas interrogé l'API.
+
+Et là où des règles existent, elles ne visent souvent pas la même chose. La Chine impose depuis septembre 2025 le régime d'étiquetage le plus strict au monde : mention visible pour l'utilisateur, plus un identifiant implicite dans les métadonnées. Sauf qu'une métadonnée ne survit pas à un copier-coller dans un champ de saisie. Le watermarking statistique, lui, survit. Deux approches, deux failles, aucune qui couvre l'autre.
+
+<Warning>
+  « Aucun watermark détecté » ne signifie pas « écrit par un humain ». Cela
+  signifie « je n'ai rien trouvé ». Ce sont deux phrases très différentes, et je
+  parie que la seconde sera systématiquement lue comme la première.
+</Warning>
+
+## Flou n° 4 : même présente, la marque ne dit pas ce qu'on croit
+
+C'est Anthropic qui le formule le plus clairement, et la phrase mérite d'être citée précisément : la marque établit que le modèle a **probablement été impliqué** dans la génération ou le traitement du contenu. Elle n'établit pas la paternité du texte.
+
+Elle ne distingue pas « ce modèle a rédigé l'ensemble de ce texte » de « ce modèle a relu et corrigé le texte de quelqu'un ». Les deux laissent une trace. Ce sont pourtant deux situations moralement et professionnellement sans commune mesure.
+
+Or c'est très exactement cette distinction dont un jury d'examen, un recruteur, un rédacteur en chef ou un service juridique vont avoir besoin. La seule chose qu'ils veulent savoir est la seule chose que la marque ne dit pas, et ne dira probablement jamais.
+
+## Flou n° 5 : la marque s'efface sous les usages normaux
+
+Traduire. Reformuler. Découper en sections. Fusionner avec d'autres sources. Reformater pour un autre support.
+
+Ce ne sont pas des attaques : c'est la vie ordinaire d'un document professionnel. Google indique que les scores de confiance « peuvent être fortement réduits » quand un texte est profondément réécrit ou traduit. Anthropic note qu'un texte relu et retravaillé porte peu de marque, puisque la plupart des mots sont désormais ceux de la personne.
+
+Soyons justes : le procédé résiste à des transformations légères, comme couper un passage, changer quelques mots, paraphraser modérément. Ce n'est pas fragile au point d'être inutile.
+
+Mais l'effet de bord mérite réflexion. Le texte le plus retravaillé, celui où l'humain a le plus investi, est aussi celui où la marque s'efface le mieux. Le système est donc le plus sévère avec les usages les plus paresseux, et le plus indulgent avec les plus élaborés. On peut trouver cela justifiable. Encore faut-il le dire, plutôt que de laisser croire à une mesure neutre.
+
+Et si on retournait la chose ? On entrerait alors dans une sorte de cercle vertueux, où l'on relirait et corrigerait d'autant plus en profondeur ce qui aura été mécaniquement généré. Est-ce vraiment un mal ?
+
+## Le vrai angle mort : les textes ne sont pas binaires
+
+Tout l'édifice repose sur une hypothèse qui ne tient pas dans le travail réel : qu'un texte serait soit humain, soit artificiel.
+
+La plupart des documents professionnels que je vois passer ne sont ni l'un ni l'autre. Ce sont des assemblages. Un plan dicté par une personne, une section générée puis réécrite, un paragraphe repris d'un document interne de 2023, une conclusion rédigée à quatre mains un vendredi soir. Quel pourcentage annonce-t-on pour ça ? Et surtout : à quelle question répond ce pourcentage ?
+
+## Ce qu'il faut en faire
+
+Le watermarking n'est pas inutile. Il est juste très mal cadré. À l'échelle d'une plateforme qui trie des millions de contenus, un signal probabiliste imparfait a une vraie valeur statistique. Les auteurs de SynthID-Text l'écrivent d'ailleurs eux-mêmes : leur méthode « n'offre pas une solution complète à la détection de texte artificiel ».
+
+Le danger n'est pas la technologie. C'est la décision binaire prise sur une sortie probabiliste, par une organisation qui ne maîtrise ni la clé, ni le seuil, ni la marge d'erreur, ni même finalement le pourquoi. Une note annulée, une candidature écartée, un article dépublié, un contrat rompu… sur des statistiques qui ne sont même pas complètement fiables.
+
+Quelques exigences minimales me paraissent raisonnables avant d'accepter ce genre de preuve :
+
+- que le détecteur rende un **intervalle de confiance**, et surtout pas un verdict ;
+- que le **seuil de décision soit public** et justifié ;
+- qu'un **résultat négatif soit explicitement affiché comme non concluant**, et non comme la preuve d'une écriture humaine ;
+- qu'**aucune décision individuelle ne repose sur cette seule preuve**.
+
+Le watermarking répond correctement à une question. Ce n'est simplement pas celle qu'on est en train de lui poser.
+
+## Sources
+
+- Anthropic — [How Claude's text watermarking works](https://www.anthropic.com/news/claude-text-watermark)
+- Dathathri et al., « Scalable watermarking for identifying large language model outputs », [_Nature_ (2024)](https://www.nature.com/articles/s41586-024-08025-4)
+- Google — [SynthID for text](https://ai.google.dev/responsible/docs/safeguards/synthid), documentation développeur
+- Mesures chinoises d'étiquetage des contenus générés par IA, en vigueur au 1er septembre 2025
