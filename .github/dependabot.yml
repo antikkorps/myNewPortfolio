@@ -50,3 +50,11 @@ updates:
       # raises its upper bound, then migrate via the `typescript` group above.
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+
+      # lucide-react v1 dropped the brand icons from the main package, so
+      # `Github` and `Linkedin` (contact.tsx, projets.tsx) no longer exist:
+      # the bump fails typecheck and takes the Vercel preview build with it.
+      # Those two have to be replaced by in-house SVGs first. Drop this entry
+      # once that substitution is done, then migrate to the major.
+      - dependency-name: "lucide-react"
+        update-types: ["version-update:semver-major"]

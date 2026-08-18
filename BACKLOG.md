@@ -62,7 +62,7 @@ priorité.
 
 ## 🚧 À faire — par priorité
 
-_Aucune tâche prioritaire en cours._
+- **Remplacer `Github` et `Linkedin` par des SVG maison** (`app/routes/contact.tsx`, `app/routes/projets.tsx`) pour débloquer lucide-react v1 : la v1 a sorti les icônes de marque du paquet principal. En attendant, le majeur est gelé dans `.github/dependabot.yml` et la PR #68 a été fermée.
 
 ---
 
