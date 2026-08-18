@@ -27,6 +27,18 @@ updates:
           - "typescript"
           - "@typescript-eslint/*"
 
+      # react-dom pins an exact peer on react (react-dom@19 requires react@^19)
+      # and @types/react-dom peers on a matching @types/react. Dependabot
+      # grouped react-dom with @types/react-dom alone once and produced a
+      # lockfile that fails `npm ci` with ERESOLVE (PR #75), so the runtime
+      # packages and their types have to move together.
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+
     # NOTE: ignore rules also apply to Dependabot security updates, so a CVE
     # that could only be fixed by a major bump would not be proposed here.
     ignore:
