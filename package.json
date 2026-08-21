@@ -47,7 +47,7 @@
     "remark-frontmatter": "^5.0.0",
     "remark-mdx-frontmatter": "^5.2.0",
     "resend": "^6.12.3",
-    "satori": "^0.26.0",
+    "satori": "^0.29.0",
     "shiki": "^4.4.3"
   },
   "devDependencies": {
