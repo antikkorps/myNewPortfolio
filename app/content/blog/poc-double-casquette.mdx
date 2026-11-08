@@ -152,10 +152,16 @@ automatisés qui tournent sans qu'on y pense. Une exigence non fonctionnelle qu'
 mesure pas finit toujours par se dégrader en silence ; une exigence qui bloque le push,
 non.
 
-Le mode hors ligne mérite une mention à part. Dans un environnement où le réseau peut
-tomber, un logiciel métier qui s'arrête net n'est pas un logiciel convaincant, quelle que
-soit la qualité de ses écrans. C'est typiquement une exigence qui pèse sur l'architecture
-dès le premier jour : on ne l'ajoute pas à la fin.
+### Un mode hors ligne pensé dès le départ
+
+Dans un environnement où le réseau peut tomber, un logiciel métier qui s'arrête net n'est
+pas un logiciel convaincant, quelle que soit la qualité de ses écrans. Côté navigateur,
+les données sont donc conservées dans **IndexedDB** : en cas de coupure, l'application
+continue de fonctionner sur ces données locales, et elle se **resynchronise avec le
+serveur au retour du réseau**.
+
+C'est typiquement une exigence qui pèse sur l'architecture dès le premier jour : on ne
+l'ajoute pas à la fin.
 
 ## Ce que la double casquette m'apprend
 
