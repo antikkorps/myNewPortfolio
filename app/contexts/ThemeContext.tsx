@@ -11,20 +11,15 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // themeScript already resolved cookie → system preference and applied the
+  // class before hydration; reading it back keeps that logic in one place.
   const [theme, setTheme] = useState<Theme>(() => {
-    // Ne vérifie le localStorage que côté client
-    if (typeof window !== "undefined") {
-      const storedTheme = document.cookie.match(/theme=(light|dark)/)?.[1] as Theme
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light"
-      return storedTheme || systemTheme
-    }
-    return "dark" // Valeur par défaut
+    if (typeof document === "undefined") return "dark"
+    return document.documentElement.classList.contains("dark") ? "dark" : "light"
   })
 
   useEffect(() => {
-    // Mettre à jour le cookie et la classe HTML
+    // Persist the choice and keep <html> in sync with it.
     document.cookie = `theme=${theme};path=/;max-age=31536000`
     document.documentElement.classList.toggle("dark", theme === "dark")
   }, [theme])
@@ -40,7 +35,8 @@ export function useTheme() {
   return context
 }
 
-// Script pour éviter le flash
+// Runs inline in <head> before first paint to avoid a theme flash; the
+// single source of truth for the initial theme.
 export const themeScript = `
   let theme;
   const cookie = document.cookie.match(/theme=(light|dark)/);

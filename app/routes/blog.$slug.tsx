@@ -3,10 +3,12 @@ import { Link, useLoaderData } from "react-router"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { Suspense } from "react"
 import { BlogAvatar } from "~/components/BlogAvatar"
+import { PostMeta } from "~/components/blog/PostMeta"
 import { TableOfContents } from "~/components/TableOfContents"
 import { formatDate } from "~/lib/format"
 import { componentForSlug, isComponentReady, preloadComponentForSlug } from "~/lib/posts"
 import { getNeighborsMeta, getPostMeta } from "~/lib/posts-meta.server"
+import { breadcrumbJsonLd } from "~/lib/seo"
 import { AUTHOR, ogImageForSlug, SITE_NAME, SITE_URL } from "~/lib/site"
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -76,30 +78,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     timeRequired: `PT${data.readingTime}M`,
   }
 
-  const breadcrumbs = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Accueil",
-        item: SITE_URL,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Blog",
-        item: `${SITE_URL}/blog`,
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: data.title,
-        item: url,
-      },
-    ],
-  }
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: "Accueil", url: SITE_URL },
+    { name: "Blog", url: `${SITE_URL}/blog` },
+    { name: data.title, url },
+  ])
 
   return [
     { title },
@@ -135,7 +118,7 @@ export default function BlogPost() {
   if (!Component) return null
 
   return (
-    <main className="blog-surface min-h-screen pt-24 sm:pt-28 pb-24">
+    <main className="blog-surface blog-shell">
       <TableOfContents />
       <div className="mx-auto max-w-2xl px-6">
         <Link
@@ -147,16 +130,7 @@ export default function BlogPost() {
         </Link>
 
         <header className="mt-10 mb-12">
-          <div className="blog-ui flex items-baseline gap-3 text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-500">
-            <time dateTime={data.date}>{formatDate(data.date)}</time>
-            <span aria-hidden>·</span>
-            <span>{data.readingTime} min de lecture</span>
-            {data.draft ? (
-              <span className="rounded-xs bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
-                Brouillon
-              </span>
-            ) : null}
-          </div>
+          <PostMeta date={data.date} readingTime={data.readingTime} draft={data.draft} />
           <h1 className="blog-ui mt-3 text-3xl sm:text-4xl font-semibold tracking-tight text-[#0a0a0a] dark:text-[#fafafa]">
             {data.title}
           </h1>

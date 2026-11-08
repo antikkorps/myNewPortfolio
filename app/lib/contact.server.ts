@@ -23,15 +23,6 @@ export function isValidEmail(email: string) {
   return EMAIL_REGEX.test(email)
 }
 
-export function sanitizeInput(input: string) {
-  return input
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;")
-}
-
 export function validateMessage(message: string) {
   if (message.length < 10 || message.length > 1000) return false
   if (message.includes("http") || message.includes("www.")) return false

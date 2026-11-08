@@ -245,7 +245,7 @@ export default function TechStack() {
   const [selected, setSelected] = useState<Tech | null>(null)
 
   return (
-    <main className="min-h-screen bg-gray-50 pt-24 sm:pt-28 pb-24 dark:bg-neutral-900">
+    <main className="page-shell pt-24 sm:pt-28">
       <div className="mx-auto max-w-4xl px-6">
         <header className="mb-16">
           <p className="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-500">

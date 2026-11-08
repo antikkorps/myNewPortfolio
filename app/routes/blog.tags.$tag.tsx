@@ -1,8 +1,9 @@
 import type { LoaderFunctionArgs, MetaFunction } from "react-router"
 import { Link, useLoaderData } from "react-router"
 import { ArrowLeft } from "lucide-react"
-import { formatDate } from "~/lib/format"
+import { ArticleCard } from "~/components/blog/ArticleCard"
 import { postsMeta } from "~/lib/posts-meta.server"
+import { breadcrumbJsonLd } from "~/lib/seo"
 import { SITE_NAME, SITE_URL } from "~/lib/site"
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -18,6 +19,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
       description: p.description,
       date: p.date,
       readingTime: p.readingTime,
+      draft: p.draft,
     }))
 
   if (items.length === 0) {
@@ -33,15 +35,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const description = `Articles tagués ${data.tag} sur le blog de Franck Vienot.`
   const url = `${SITE_URL}/blog/tags/${encodeURIComponent(data.tag)}`
 
-  const breadcrumbs = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
-      { "@type": "ListItem", position: 3, name: `#${data.tag}`, item: url },
-    ],
-  }
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: "Accueil", url: SITE_URL },
+    { name: "Blog", url: `${SITE_URL}/blog` },
+    { name: `#${data.tag}`, url },
+  ])
 
   return [
     { title: `${title} — ${SITE_NAME}` },
@@ -59,7 +57,7 @@ export default function TagPage() {
   const { tag, items } = useLoaderData<typeof loader>()
 
   return (
-    <main className="blog-surface min-h-screen pt-24 sm:pt-28 pb-24">
+    <main className="blog-surface blog-shell">
       <div className="mx-auto max-w-2xl px-6">
         <Link
           to="/blog"
@@ -82,21 +80,7 @@ export default function TagPage() {
         <ul className="space-y-10">
           {items.map((post) => (
             <li key={post.slug}>
-              <article>
-                <Link to={`/blog/${post.slug}`} className="group block" prefetch="intent">
-                  <div className="blog-ui flex items-baseline gap-3 text-xs uppercase tracking-wider text-neutral-500">
-                    <time dateTime={post.date}>{formatDate(post.date)}</time>
-                    <span aria-hidden>·</span>
-                    <span>{post.readingTime} min de lecture</span>
-                  </div>
-                  <h2 className="blog-ui mt-2 text-xl font-semibold text-[#0a0a0a] transition-colors group-hover:text-[#2563eb] dark:text-[#fafafa] dark:group-hover:text-[#60a5fa]">
-                    {post.title}
-                  </h2>
-                  <p className="mt-2 leading-relaxed text-neutral-700 dark:text-neutral-300">
-                    {post.description}
-                  </p>
-                </Link>
-              </article>
+              <ArticleCard post={post} />
             </li>
           ))}
         </ul>

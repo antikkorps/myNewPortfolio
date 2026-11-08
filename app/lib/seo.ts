@@ -26,3 +26,21 @@ export function pageMeta({ title, description, path, image }: PageMetaInput) {
     { name: "twitter:image", content: ogImage },
   ]
 }
+
+interface Crumb {
+  name: string
+  url: string
+}
+
+export function breadcrumbJsonLd(crumbs: Crumb[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((crumb, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: crumb.name,
+      item: crumb.url,
+    })),
+  }
+}

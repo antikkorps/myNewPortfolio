@@ -1,6 +1,7 @@
 import type { MetaFunction } from "react-router"
 import { Link, useLoaderData } from "react-router"
 import { ArrowRight } from "lucide-react"
+import { QuickLinks, type QuickLink } from "~/components/QuickLinks"
 import { formatDate } from "~/lib/format"
 import { postsMeta } from "~/lib/posts-meta.server"
 import { pageMeta } from "~/lib/seo"
@@ -38,11 +39,17 @@ const technologies = [
   "PostgreSQL",
 ]
 
+const HOME_LINKS: QuickLink[] = [
+  { to: "/projets", label: "Voir", title: "Mes projets" },
+  { to: "/tech-stacks", label: "Stack", title: "Mes outils" },
+  { to: "/contact", label: "Discuter", title: "Me contacter" },
+]
+
 export default function Index() {
   const { latestArticles } = useLoaderData<typeof loader>()
 
   return (
-    <main className="min-h-screen bg-gray-50 pt-24 sm:pt-32 pb-24 dark:bg-neutral-900">
+    <main className="page-shell pt-24 sm:pt-32">
       <div className="mx-auto max-w-2xl px-6">
         <header className="mb-10">
           <p className="text-xs uppercase tracking-wider text-neutral-500">Franck Vienot</p>
@@ -54,19 +61,11 @@ export default function Index() {
 
         <p className="text-[17px] leading-relaxed text-neutral-700 dark:text-neutral-300">
           En pro :{" "}
-          <Link
-            to="/a-propos"
-            prefetch="intent"
-            className="border-b border-current text-[#2563eb] transition-colors hover:text-[#1d4ed8] dark:text-[#60a5fa] dark:hover:text-[#93c5fd]"
-          >
+          <Link to="/a-propos" prefetch="intent" className="link-accent">
             LogiBOP
           </Link>
           , logiciel santé en milieu hospitalier. En perso :{" "}
-          <Link
-            to="/blog/gotk-proxy-cli-llm"
-            prefetch="intent"
-            className="border-b border-current text-[#2563eb] transition-colors hover:text-[#1d4ed8] dark:text-[#60a5fa] dark:hover:text-[#93c5fd]"
-          >
+          <Link to="/blog/gotk-proxy-cli-llm" prefetch="intent" className="link-accent">
             GoTK
           </Link>{" "}
           (CLI Go pour agents LLM), un DAW en Rust, et une infra self-hébergée (forge, photos,
@@ -118,59 +117,7 @@ export default function Index() {
           </ul>
         </section>
 
-        <nav className="mt-20 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Liens rapides">
-          <Link
-            to="/projets"
-            prefetch="intent"
-            className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">Voir</p>
-              <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                Mes projets
-              </p>
-            </div>
-            <ArrowRight
-              size={16}
-              className="text-neutral-400 transition-colors group-hover:text-[#2563eb] dark:group-hover:text-[#60a5fa]"
-              aria-hidden
-            />
-          </Link>
-          <Link
-            to="/tech-stacks"
-            prefetch="intent"
-            className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">Stack</p>
-              <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                Mes outils
-              </p>
-            </div>
-            <ArrowRight
-              size={16}
-              className="text-neutral-400 transition-colors group-hover:text-[#2563eb] dark:group-hover:text-[#60a5fa]"
-              aria-hidden
-            />
-          </Link>
-          <Link
-            to="/contact"
-            prefetch="intent"
-            className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">Discuter</p>
-              <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                Me contacter
-              </p>
-            </div>
-            <ArrowRight
-              size={16}
-              className="text-neutral-400 transition-colors group-hover:text-[#2563eb] dark:group-hover:text-[#60a5fa]"
-              aria-hidden
-            />
-          </Link>
-        </nav>
+        <QuickLinks className="mt-20" links={HOME_LINKS} />
       </div>
     </main>
   )

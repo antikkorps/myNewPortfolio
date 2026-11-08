@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { pageMeta } from "./seo"
+import { breadcrumbJsonLd, pageMeta } from "./seo"
 import { OG_IMAGE, SITE_NAME, SITE_URL } from "./site"
 
 describe("pageMeta", () => {
@@ -59,5 +59,23 @@ describe("pageMeta", () => {
       | { content: string }
       | undefined
     expect(ogImage?.content).toBe(`${SITE_URL}/og-custom.png`)
+  })
+})
+
+describe("breadcrumbJsonLd", () => {
+  it("numbers the items from 1 in the given order", () => {
+    expect(
+      breadcrumbJsonLd([
+        { name: "Accueil", url: "https://x.dev" },
+        { name: "Blog", url: "https://x.dev/blog" },
+      ])
+    ).toEqual({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Accueil", item: "https://x.dev" },
+        { "@type": "ListItem", position: 2, name: "Blog", item: "https://x.dev/blog" },
+      ],
+    })
   })
 })

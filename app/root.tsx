@@ -176,7 +176,7 @@ export function ErrorBoundary() {
   // the status code is already authoritative for SEO purposes.
 
   return (
-    <main className="min-h-screen pt-32 pb-24 bg-gray-50 dark:bg-neutral-900">
+    <main className="page-shell pt-32">
       <div className="mx-auto max-w-xl px-6 text-center">
         <p className="text-xs uppercase tracking-wider text-neutral-500">Erreur {status}</p>
         <h1 className="mt-2 text-4xl sm:text-5xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">

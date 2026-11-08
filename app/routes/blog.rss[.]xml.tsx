@@ -1,27 +1,19 @@
+import { escapeHtml } from "~/lib/html"
 import { postsMeta as posts } from "~/lib/posts-meta.server"
 import { AUTHOR, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "~/lib/site"
-
-function escape(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;")
-}
 
 export async function loader() {
   const items = posts
     .map((p) => {
       const url = `${SITE_URL}/blog/${p.slug}`
       const pubDate = new Date(p.date).toUTCString()
-      const categories = (p.tags ?? []).map((t) => `<category>${escape(t)}</category>`).join("")
+      const categories = (p.tags ?? []).map((t) => `<category>${escapeHtml(t)}</category>`).join("")
       return `<item>
-  <title>${escape(p.title)}</title>
+  <title>${escapeHtml(p.title)}</title>
   <link>${url}</link>
   <guid isPermaLink="true">${url}</guid>
   <pubDate>${pubDate}</pubDate>
-  <description>${escape(p.description)}</description>
+  <description>${escapeHtml(p.description)}</description>
   ${categories}
 </item>`
     })
@@ -30,12 +22,12 @@ export async function loader() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-<title>${escape(SITE_NAME)}</title>
+<title>${escapeHtml(SITE_NAME)}</title>
 <link>${SITE_URL}/blog</link>
 <atom:link href="${SITE_URL}/blog/rss.xml" rel="self" type="application/rss+xml" />
-<description>${escape(SITE_DESCRIPTION)}</description>
+<description>${escapeHtml(SITE_DESCRIPTION)}</description>
 <language>fr-FR</language>
-<copyright>${escape(AUTHOR.name)}</copyright>
+<copyright>${escapeHtml(AUTHOR.name)}</copyright>
 <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${items}
 </channel>
