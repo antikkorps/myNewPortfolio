@@ -155,7 +155,7 @@ export default function Contact() {
   }, [actionData?.success])
 
   return (
-    <main className="min-h-screen bg-gray-50 pt-24 pb-24 sm:pt-32 dark:bg-neutral-900">
+    <main className="page-shell pt-24 sm:pt-32">
       <div className="mx-auto max-w-2xl px-6">
         <header className="mb-10">
           <p className="text-xs uppercase tracking-wider text-neutral-500">Contact</p>

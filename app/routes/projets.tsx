@@ -317,7 +317,7 @@ export default function ProjetsPage() {
   const archived = projects.filter((p) => p.status === "archived")
 
   return (
-    <main className="min-h-screen bg-gray-50 pt-24 sm:pt-28 pb-24 dark:bg-neutral-900">
+    <main className="page-shell pt-24 sm:pt-28">
       <VideoDialog
         url={activeVideo?.videoUrl ?? null}
         title={activeVideo?.title ?? ""}

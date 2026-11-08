@@ -49,7 +49,7 @@ export default function Index() {
   const { latestArticles } = useLoaderData<typeof loader>()
 
   return (
-    <main className="min-h-screen bg-gray-50 pt-24 sm:pt-32 pb-24 dark:bg-neutral-900">
+    <main className="page-shell pt-24 sm:pt-32">
       <div className="mx-auto max-w-2xl px-6">
         <header className="mb-10">
           <p className="text-xs uppercase tracking-wider text-neutral-500">Franck Vienot</p>
@@ -61,19 +61,11 @@ export default function Index() {
 
         <p className="text-[17px] leading-relaxed text-neutral-700 dark:text-neutral-300">
           En pro :{" "}
-          <Link
-            to="/a-propos"
-            prefetch="intent"
-            className="border-b border-current text-[#2563eb] transition-colors hover:text-[#1d4ed8] dark:text-[#60a5fa] dark:hover:text-[#93c5fd]"
-          >
+          <Link to="/a-propos" prefetch="intent" className="link-accent">
             LogiBOP
           </Link>
           , logiciel santé en milieu hospitalier. En perso :{" "}
-          <Link
-            to="/blog/gotk-proxy-cli-llm"
-            prefetch="intent"
-            className="border-b border-current text-[#2563eb] transition-colors hover:text-[#1d4ed8] dark:text-[#60a5fa] dark:hover:text-[#93c5fd]"
-          >
+          <Link to="/blog/gotk-proxy-cli-llm" prefetch="intent" className="link-accent">
             GoTK
           </Link>{" "}
           (CLI Go pour agents LLM), un DAW en Rust, et une infra self-hébergée (forge, photos,
