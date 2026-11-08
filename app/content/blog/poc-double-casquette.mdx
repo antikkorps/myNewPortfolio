@@ -78,12 +78,13 @@ qui est demandé : on peut le vérifier ligne par ligne.
 
 Côté technique, je n'ai pas choisi la stack par goût mais à partir de cinq contraintes :
 
-- **Trois semaines** : des outils que je maîtrise déjà, pas de découverte en cours de route.
-- **Développement assisté par l'IA** : un code que je peux relire et corriger vite.
-- **Un périmètre qui bouge** : de la souplesse pour ajuster sans tout refaire.
-- **Des données cloisonnées par unité** : une isolation garantie par la base, pas
-  seulement par le code.
-- **Des coupures réseau possibles** : un mode hors ligne pris au sérieux dès le départ.
+| Contrainte | Ce qu'elle impose |
+| --- | --- |
+| Trois semaines | Des outils que je maîtrise déjà, pas de découverte en cours de route |
+| Développement assisté par l'IA | Un code que je peux **relire et corriger vite** |
+| Un périmètre qui bouge | De la souplesse pour ajuster sans tout refaire |
+| Des données cloisonnées par unité | Une **isolation garantie par la base**, pas seulement par le code |
+| Des coupures réseau possibles | Un **mode hors ligne** pris au sérieux dès le départ |
 
 Le résultat : un **monorepo** avec un front en **Vue**, une API en **Fastify** et une base
 **PostgreSQL**. Le monorepo garde le front et l'API côte à côte, ce qui rend chaque
