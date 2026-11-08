@@ -118,7 +118,7 @@ export default function BlogPost() {
   if (!Component) return null
 
   return (
-    <main className="blog-surface min-h-screen pt-24 sm:pt-28 pb-24">
+    <main className="blog-surface blog-shell">
       <TableOfContents />
       <div className="mx-auto max-w-2xl px-6">
         <Link

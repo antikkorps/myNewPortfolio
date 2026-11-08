@@ -57,7 +57,7 @@ export default function TagPage() {
   const { tag, items } = useLoaderData<typeof loader>()
 
   return (
-    <main className="blog-surface min-h-screen pt-24 sm:pt-28 pb-24">
+    <main className="blog-surface blog-shell">
       <div className="mx-auto max-w-2xl px-6">
         <Link
           to="/blog"

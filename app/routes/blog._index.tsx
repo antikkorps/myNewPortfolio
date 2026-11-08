@@ -107,7 +107,7 @@ export default function BlogIndex() {
   }, [q])
 
   return (
-    <main className="blog-surface min-h-screen pt-24 sm:pt-28 pb-24">
+    <main className="blog-surface blog-shell">
       <div className="mx-auto max-w-2xl px-6">
         <header className="mb-10">
           <h1 className="blog-ui text-3xl sm:text-4xl font-semibold tracking-tight text-[#0a0a0a] dark:text-[#fafafa]">

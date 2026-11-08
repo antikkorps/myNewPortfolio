@@ -16,6 +16,11 @@
   @apply min-h-screen bg-gray-50 pb-24 dark:bg-neutral-900;
 }
 
+/* Blog pages: same frame, but colours and fonts come from .blog-surface. */
+@utility blog-shell {
+  @apply min-h-screen pt-24 pb-24 sm:pt-28;
+}
+
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still

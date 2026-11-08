@@ -25,9 +25,9 @@ describe("themeScript", () => {
   })
 
   it("falls back to the system preference without a cookie", () => {
-    stubSystemDark(false)
+    stubSystemDark(true)
     new Function(themeScript)()
-    expect(document.documentElement).not.toHaveClass("dark")
+    expect(document.documentElement).toHaveClass("dark")
   })
 })
 
