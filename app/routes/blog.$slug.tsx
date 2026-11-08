@@ -3,6 +3,7 @@ import { Link, useLoaderData } from "react-router"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { Suspense } from "react"
 import { BlogAvatar } from "~/components/BlogAvatar"
+import { PostMeta } from "~/components/blog/PostMeta"
 import { TableOfContents } from "~/components/TableOfContents"
 import { formatDate } from "~/lib/format"
 import { componentForSlug, isComponentReady, preloadComponentForSlug } from "~/lib/posts"
@@ -129,16 +130,7 @@ export default function BlogPost() {
         </Link>
 
         <header className="mt-10 mb-12">
-          <div className="blog-ui flex items-baseline gap-3 text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-500">
-            <time dateTime={data.date}>{formatDate(data.date)}</time>
-            <span aria-hidden>·</span>
-            <span>{data.readingTime} min de lecture</span>
-            {data.draft ? (
-              <span className="rounded-xs bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
-                Brouillon
-              </span>
-            ) : null}
-          </div>
+          <PostMeta date={data.date} readingTime={data.readingTime} draft={data.draft} />
           <h1 className="blog-ui mt-3 text-3xl sm:text-4xl font-semibold tracking-tight text-[#0a0a0a] dark:text-[#fafafa]">
             {data.title}
           </h1>

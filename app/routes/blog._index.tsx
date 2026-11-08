@@ -1,8 +1,8 @@
 import type { LoaderFunctionArgs, MetaFunction } from "react-router"
 import { Form, Link, useLoaderData, useNavigation, useSearchParams, useSubmit } from "react-router"
 import { Search } from "lucide-react"
-import { Fragment, useEffect, useRef } from "react"
-import { formatDate } from "~/lib/format"
+import { useEffect, useRef } from "react"
+import { ArticleCard } from "~/components/blog/ArticleCard"
 import { postsMeta } from "~/lib/posts-meta.server"
 import { breadcrumbJsonLd } from "~/lib/seo"
 import { SITE_NAME, SITE_URL } from "~/lib/site"
@@ -80,26 +80,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     { "script:ld+json": itemList },
     { "script:ld+json": breadcrumbs },
   ]
-}
-
-function highlight(text: string, q: string) {
-  if (!q) return text
-  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-  const regex = new RegExp(`(${escaped})`, "gi")
-  const parts = text.split(regex)
-  const lower = q.toLowerCase()
-  return parts.map((part, i) =>
-    part.toLowerCase() === lower ? (
-      <mark
-        key={i}
-        className="rounded-xs bg-[#2563eb]/10 px-0.5 text-[#2563eb] dark:bg-[#60a5fa]/15 dark:text-[#60a5fa]"
-      >
-        {part}
-      </mark>
-    ) : (
-      <Fragment key={i}>{part}</Fragment>
-    )
-  )
 }
 
 function buildPageHref(searchParams: URLSearchParams, page: number): string {
@@ -194,26 +174,7 @@ export default function BlogIndex() {
         >
           {items.map((post) => (
             <li key={post.slug}>
-              <article>
-                <Link to={`/blog/${post.slug}`} className="group block" prefetch="intent">
-                  <div className="blog-ui flex items-baseline gap-3 text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-500">
-                    <time dateTime={post.date}>{formatDate(post.date)}</time>
-                    <span aria-hidden>·</span>
-                    <span>{post.readingTime} min de lecture</span>
-                    {post.draft ? (
-                      <span className="rounded-xs bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
-                        Brouillon
-                      </span>
-                    ) : null}
-                  </div>
-                  <h2 className="blog-ui mt-2 text-xl font-semibold text-[#0a0a0a] transition-colors group-hover:text-[#2563eb] dark:text-[#fafafa] dark:group-hover:text-[#60a5fa]">
-                    {highlight(post.title, q)}
-                  </h2>
-                  <p className="mt-2 leading-relaxed text-neutral-700 dark:text-neutral-300">
-                    {highlight(post.description, q)}
-                  </p>
-                </Link>
-              </article>
+              <ArticleCard post={post} highlightQuery={q} />
             </li>
           ))}
         </ul>
