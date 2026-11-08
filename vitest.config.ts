@@ -1,5 +1,6 @@
 import mdx from "@mdx-js/rollup"
 import remarkFrontmatter from "remark-frontmatter"
+import remarkGfm from "remark-gfm"
 import remarkMdxFrontmatter from "remark-mdx-frontmatter"
 import { defineConfig } from "vitest/config"
 
@@ -9,7 +10,13 @@ import { defineConfig } from "vitest/config"
 export default defineConfig({
   plugins: [
     mdx({
-      remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: "frontmatter" }]],
+      remarkPlugins: [
+        remarkFrontmatter,
+        [remarkMdxFrontmatter, { name: "frontmatter" }],
+        // Tables, autolinks, footnotes. singleTilde off: Linux articles are
+        // full of `~/` paths, and a lone `~` must never strike text through.
+        [remarkGfm, { singleTilde: false }],
+      ],
     }),
   ],
   resolve: { tsconfigPaths: true },
