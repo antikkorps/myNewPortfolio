@@ -48,8 +48,8 @@ updates:
     # NOTE: ignore rules also apply to Dependabot security updates, so a CVE
     # that could only be fixed by a major bump would not be proposed here.
     ignore:
-      # react-router v8 requires react >=19.2.7 (we are on 18.3.1) and
-      # @react-router/dev@8 requires vite ^7 || ^8 (we are on ^6.4.2).
+      # react-router v8 requires react >=19.2.7 and @react-router/dev@8
+      # requires vite ^7 || ^8; both are met now (react 19, vite 8).
       # The hard blocker is @vercel/react-router: its latest release (1.3.2)
       # still peers on @react-router/dev@7 and @react-router/node@7, and
       # react-router.config.ts applies vercelPreset() for Vercel builds — so
