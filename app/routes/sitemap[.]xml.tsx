@@ -1,3 +1,4 @@
+import { escapeHtml } from "~/lib/html"
 import { postsMeta } from "~/lib/posts-meta.server"
 import { ogImageForSlug, SITE_URL } from "~/lib/site"
 
@@ -48,7 +49,7 @@ export async function loader() {
   <priority>0.7</priority>
   <image:image>
     <image:loc>${ogImage}</image:loc>
-    <image:title>${p.title.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</image:title>
+    <image:title>${escapeHtml(p.title)}</image:title>
   </image:image>
 </url>`
     })

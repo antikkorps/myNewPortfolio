@@ -2,13 +2,8 @@ import type { ActionFunction, MetaFunction } from "react-router"
 import { Form, useActionData, useNavigation } from "react-router"
 import { Github, Linkedin, Mail, Phone, Send } from "lucide-react"
 import { useEffect, useRef } from "react"
-import {
-  checkRateLimit,
-  getClientIp,
-  isValidEmail,
-  sanitizeInput,
-  validateMessage,
-} from "~/lib/contact.server"
+import { checkRateLimit, getClientIp, isValidEmail, validateMessage } from "~/lib/contact.server"
+import { escapeHtml } from "~/lib/html"
 import { MailError, sendMail } from "~/lib/mailer.server"
 import { pageMeta } from "~/lib/seo"
 import { AUTHOR } from "~/lib/site"
@@ -36,10 +31,10 @@ export const action: ActionFunction = async ({ request }): Promise<ActionData> =
   const honeypot = formData.get("honeypot")?.toString()
   const website = formData.get("website")?.toString()
   const timestamp = formData.get("timestamp")?.toString()
-  const name = sanitizeInput(formData.get("name")?.toString() || "")
+  const name = escapeHtml(formData.get("name")?.toString() || "")
   const email = formData.get("email")?.toString()
-  const subject = sanitizeInput(formData.get("subject")?.toString() || "")
-  const message = sanitizeInput(formData.get("message")?.toString() || "")
+  const subject = escapeHtml(formData.get("subject")?.toString() || "")
+  const message = escapeHtml(formData.get("message")?.toString() || "")
 
   if (honeypot || website || !timestamp || Date.now() - Number(timestamp) < 5000) {
     return { error: "Une erreur est survenue" }
