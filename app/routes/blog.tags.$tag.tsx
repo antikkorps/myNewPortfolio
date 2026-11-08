@@ -3,6 +3,7 @@ import { Link, useLoaderData } from "react-router"
 import { ArrowLeft } from "lucide-react"
 import { formatDate } from "~/lib/format"
 import { postsMeta } from "~/lib/posts-meta.server"
+import { breadcrumbJsonLd } from "~/lib/seo"
 import { SITE_NAME, SITE_URL } from "~/lib/site"
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -33,15 +34,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const description = `Articles tagués ${data.tag} sur le blog de Franck Vienot.`
   const url = `${SITE_URL}/blog/tags/${encodeURIComponent(data.tag)}`
 
-  const breadcrumbs = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
-      { "@type": "ListItem", position: 3, name: `#${data.tag}`, item: url },
-    ],
-  }
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: "Accueil", url: SITE_URL },
+    { name: "Blog", url: `${SITE_URL}/blog` },
+    { name: `#${data.tag}`, url },
+  ])
 
   return [
     { title: `${title} — ${SITE_NAME}` },

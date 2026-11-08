@@ -7,6 +7,7 @@ import { TableOfContents } from "~/components/TableOfContents"
 import { formatDate } from "~/lib/format"
 import { componentForSlug, isComponentReady, preloadComponentForSlug } from "~/lib/posts"
 import { getNeighborsMeta, getPostMeta } from "~/lib/posts-meta.server"
+import { breadcrumbJsonLd } from "~/lib/seo"
 import { AUTHOR, ogImageForSlug, SITE_NAME, SITE_URL } from "~/lib/site"
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -76,30 +77,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     timeRequired: `PT${data.readingTime}M`,
   }
 
-  const breadcrumbs = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Accueil",
-        item: SITE_URL,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Blog",
-        item: `${SITE_URL}/blog`,
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: data.title,
-        item: url,
-      },
-    ],
-  }
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: "Accueil", url: SITE_URL },
+    { name: "Blog", url: `${SITE_URL}/blog` },
+    { name: data.title, url },
+  ])
 
   return [
     { title },

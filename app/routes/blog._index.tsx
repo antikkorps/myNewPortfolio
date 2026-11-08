@@ -4,6 +4,7 @@ import { Search } from "lucide-react"
 import { Fragment, useEffect, useRef } from "react"
 import { formatDate } from "~/lib/format"
 import { postsMeta } from "~/lib/posts-meta.server"
+import { breadcrumbJsonLd } from "~/lib/seo"
 import { SITE_NAME, SITE_URL } from "~/lib/site"
 
 const PER_PAGE = 3
@@ -60,14 +61,10 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     })),
   }
 
-  const breadcrumbs = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Blog", item: url },
-    ],
-  }
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: "Accueil", url: SITE_URL },
+    { name: "Blog", url },
+  ])
 
   return [
     { title },
