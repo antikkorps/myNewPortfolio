@@ -3,7 +3,7 @@ import { Form, useActionData, useNavigation } from "react-router"
 import { Github, Linkedin, Mail, Phone, Send } from "lucide-react"
 import { useEffect, useRef } from "react"
 import { checkRateLimit, getClientIp, isValidEmail, validateMessage } from "~/lib/contact.server"
-import { escapeHtml } from "~/lib/html"
+import { buildContactMails } from "~/lib/contact-mail"
 import { MailError, sendMail } from "~/lib/mailer.server"
 import { pageMeta } from "~/lib/seo"
 import { AUTHOR } from "~/lib/site"
@@ -31,10 +31,10 @@ export const action: ActionFunction = async ({ request }): Promise<ActionData> =
   const honeypot = formData.get("honeypot")?.toString()
   const website = formData.get("website")?.toString()
   const timestamp = formData.get("timestamp")?.toString()
-  const name = escapeHtml(formData.get("name")?.toString() || "")
+  const name = formData.get("name")?.toString() || ""
   const email = formData.get("email")?.toString()
-  const subject = escapeHtml(formData.get("subject")?.toString() || "")
-  const message = escapeHtml(formData.get("message")?.toString() || "")
+  const subject = formData.get("subject")?.toString() || ""
+  const message = formData.get("message")?.toString() || ""
 
   if (honeypot || website || !timestamp || Date.now() - Number(timestamp) < 5000) {
     return { error: "Une erreur est survenue" }
@@ -53,28 +53,7 @@ export const action: ActionFunction = async ({ request }): Promise<ActionData> =
     return { error: "Erreur de configuration du serveur" }
   }
 
-  const adminHtml = `
-    <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e5e5; border-radius: 8px;">
-      <h2 style="color: #0a0a0a; margin: 0 0 16px 0; font-size: 18px;">Nouveau message de contact</h2>
-      <p style="margin: 0 0 8px 0; color: #525252; font-size: 13px;">De</p>
-      <p style="margin: 0 0 16px 0; color: #0a0a0a;">${name} &lt;${email}&gt;</p>
-      <p style="margin: 0 0 8px 0; color: #525252; font-size: 13px;">Sujet</p>
-      <p style="margin: 0 0 16px 0; color: #0a0a0a;">${subject}</p>
-      <p style="margin: 0 0 8px 0; color: #525252; font-size: 13px;">Message</p>
-      <p style="margin: 0; color: #0a0a0a; white-space: pre-line; line-height: 1.6;">${message}</p>
-    </div>
-  `
-
-  const userHtml = `
-    <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e5e5; border-radius: 8px; line-height: 1.6;">
-      <p>Bonjour ${name},</p>
-      <p>J'ai bien reçu votre message concernant « ${subject} » et reviendrai vers vous rapidement.</p>
-      <p>Cordialement,<br />Franck</p>
-      <p style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #737373;">
-        Ceci est un message automatique, merci de ne pas y répondre.
-      </p>
-    </div>
-  `
+  const mails = buildContactMails({ name, email, subject, message })
 
   try {
     await sendMail({
@@ -82,15 +61,13 @@ export const action: ActionFunction = async ({ request }): Promise<ActionData> =
       to: recipient,
       bcc: process.env.EMAIL_BCC,
       replyTo: email,
-      subject: `${subject} - Message de ${name}`,
-      html: adminHtml,
+      ...mails.admin,
     })
     await sendMail({
       from,
       to: email,
       replyTo: recipient,
-      subject: "Merci pour votre message",
-      html: userHtml,
+      ...mails.user,
     })
     return { success: true }
   } catch (error) {
