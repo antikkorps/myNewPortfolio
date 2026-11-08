@@ -3,7 +3,7 @@ title: "Un POC en trois semaines, deux casquettes : chef de projet et dev sur le
 description: "Un cahier des charges de 40 pages, trois semaines, l'IA en appui et une formation de chef de projet SI que je bêta-teste. Retour à chaud sur un POC où je cadre et je code en même temps."
 date: "2026-11-08"
 tags: ["gestion-de-projet", "poc", "vue", "fastify", "postgresql", "security", "ia", "retour-experience"]
-readingTime: 7
+readingTime: 8
 draft: true
 ---
 
@@ -47,13 +47,25 @@ transformer un document exhaustif en un scénario démontrable. Le _Won't have_ 
 catégorie la plus utile. Elle rend explicite ce qu'on ne fera pas, au lieu de le laisser
 dans un flou qui finit toujours par revenir sous forme de « et ça, c'était prévu ? ».
 
-### Un RACI, même pour une petite équipe
+Le classement n'est pas figé, et c'est tant mieux. En cours de route, on a fait passer
+une fonctionnalité de _Could_ à _Won't_ : une fois chiffrée, en temps comme en effort de
+développement, elle était trop haute pour tenir dans les trois semaines. Avec MoSCoW, ce
+genre de décision ne se prend pas en silence au fond d'un sprint : elle est posée,
+justifiée et visible de tous.
 
-Le **RACI** répartit pour chaque activité qui Réalise, qui est Responsable de la
-validation, qui doit être Consulté et qui doit être Informé. On pourrait croire que c'est
-superflu quand on est peu nombreux. C'est l'inverse : quand une seule personne porte deux
-rôles, la matrice oblige à dire qui valide quoi, et à ne pas valider soi-même ce qu'on a
-produit.
+### Un RACI requalifié en cours de route
+
+Le **RACI** répartit pour chaque activité quatre rôles : **R**esponsible, celui qui
+réalise ; **A**ccountable, celui qui valide et rend des comptes ; **C**onsulted, celui
+qu'on consulte ; **I**nformed, celui qu'on tient informé. Sur le papier, c'est un tableau
+qu'on remplit au lancement. Sur ce POC, il a surtout servi à résoudre un vrai blocage.
+
+Le visuel s'est retrouvé jugé au même titre que le fonctionnel. Or un POC n'a pas vocation
+à être le produit fini, ni visuellement ni fonctionnellement : il doit prouver que la
+solution répond à l'usage. Il a fallu négocier, puis **requalifier le RACI** pour que la
+personne en lien permanent avec le projet ne soit ni _Responsible_ ni _Accountable_. Être
+au plus près du projet au quotidien et le valider sont deux rôles différents, et les
+séparer a permis de recentrer l'évaluation sur ce que le POC doit démontrer.
 
 ### Un backlog qui relie le cahier des charges au code
 
@@ -121,18 +133,24 @@ mieux connaître avant de s'y mettre :
   (`SET LOCAL` ou `set_config(..., true)`), sinon une connexion réutilisée peut garder
   l'unité de la requête précédente.
 
-### Des temps de réponse vérifiés à chaque push
+### Des exigences vérifiées à chaque push
 
-Un logiciel métier convaincant, c'est aussi un logiciel qui ne fait jamais attendre.
-Les temps de réponse du serveur doivent être ultra rapides, et c'est une exigence trop
-importante pour la vérifier « de temps en temps ». On s'est donc imposé des timings, et
-**chaque pre-push vérifie qu'on reste dans ce cadre**. Une modification qui le fait
-dépasser ne part pas, au même titre qu'un test qui échoue.
+Certaines exigences sont trop importantes pour être vérifiées « de temps en temps ». Sur
+ce POC, deux d'entre elles sont contrôlées à **chaque pre-push** : une modification qui
+les enfreint ne part pas, au même titre qu'un test qui échoue.
 
-C'est l'endroit où les deux casquettes se rejoignent le mieux. Côté chef de projet, la
-performance est une exigence du cahier des charges. Côté dev, elle devient un test
-automatisé qui tourne sans qu'on y pense. Une exigence non fonctionnelle qu'on ne mesure
-pas finit toujours par se dégrader en silence ; une exigence qui bloque le push, non.
+- **Les temps de réponse du serveur.** Un logiciel métier convaincant ne fait jamais
+  attendre : les réponses doivent être ultra rapides. On s'est imposé des timings, et le
+  pre-push vérifie qu'on reste dans ce cadre.
+- **Une taille minimum pour les éléments de l'interface.** L'application est prévue pour
+  des écrans tactiles. Le pre-push s'assure que ce qui part en production respecte une
+  taille minimum, ce qui garantit aussi la cohérence visuelle d'un écran à l'autre.
+
+C'est l'endroit où les deux casquettes se rejoignent le mieux. Côté chef de projet, ce
+sont des exigences du cahier des charges. Côté dev, elles deviennent des contrôles
+automatisés qui tournent sans qu'on y pense. Une exigence non fonctionnelle qu'on ne
+mesure pas finit toujours par se dégrader en silence ; une exigence qui bloque le push,
+non.
 
 Le mode hors ligne mérite une mention à part. Dans un environnement où le réseau peut
 tomber, un logiciel métier qui s'arrête net n'est pas un logiciel convaincant, quelle que
