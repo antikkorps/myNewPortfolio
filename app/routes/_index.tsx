@@ -1,6 +1,7 @@
 import type { MetaFunction } from "react-router"
 import { Link, useLoaderData } from "react-router"
 import { ArrowRight } from "lucide-react"
+import { QuickLinks, type QuickLink } from "~/components/QuickLinks"
 import { formatDate } from "~/lib/format"
 import { postsMeta } from "~/lib/posts-meta.server"
 import { pageMeta } from "~/lib/seo"
@@ -36,6 +37,12 @@ const technologies = [
   "Python",
   "Tailwind",
   "PostgreSQL",
+]
+
+const HOME_LINKS: QuickLink[] = [
+  { to: "/projets", label: "Voir", title: "Mes projets" },
+  { to: "/tech-stacks", label: "Stack", title: "Mes outils" },
+  { to: "/contact", label: "Discuter", title: "Me contacter" },
 ]
 
 export default function Index() {
@@ -118,59 +125,7 @@ export default function Index() {
           </ul>
         </section>
 
-        <nav className="mt-20 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Liens rapides">
-          <Link
-            to="/projets"
-            prefetch="intent"
-            className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">Voir</p>
-              <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                Mes projets
-              </p>
-            </div>
-            <ArrowRight
-              size={16}
-              className="text-neutral-400 transition-colors group-hover:text-[#2563eb] dark:group-hover:text-[#60a5fa]"
-              aria-hidden
-            />
-          </Link>
-          <Link
-            to="/tech-stacks"
-            prefetch="intent"
-            className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">Stack</p>
-              <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                Mes outils
-              </p>
-            </div>
-            <ArrowRight
-              size={16}
-              className="text-neutral-400 transition-colors group-hover:text-[#2563eb] dark:group-hover:text-[#60a5fa]"
-              aria-hidden
-            />
-          </Link>
-          <Link
-            to="/contact"
-            prefetch="intent"
-            className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">Discuter</p>
-              <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                Me contacter
-              </p>
-            </div>
-            <ArrowRight
-              size={16}
-              className="text-neutral-400 transition-colors group-hover:text-[#2563eb] dark:group-hover:text-[#60a5fa]"
-              aria-hidden
-            />
-          </Link>
-        </nav>
+        <QuickLinks className="mt-20" links={HOME_LINKS} />
       </div>
     </main>
   )

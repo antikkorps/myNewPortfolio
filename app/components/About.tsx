@@ -1,5 +1,11 @@
-import { ArrowRight } from "lucide-react"
 import { Link } from "react-router"
+import { QuickLinks, type QuickLink } from "./QuickLinks"
+
+const ABOUT_LINKS: QuickLink[] = [
+  { to: "/contact", label: "Discuter", title: "Me contacter" },
+  { to: "/blog", label: "Lire", title: "Articles & notes" },
+  { to: "/projets", label: "Voir", title: "Mes projets" },
+]
 
 export default function About() {
   return (
@@ -133,61 +139,7 @@ export default function About() {
           </p>
         </div>
 
-        <nav className="mt-16 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Liens rapides">
-          <Link
-            to="/contact"
-            prefetch="intent"
-            className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">Discuter</p>
-              <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                Me contacter
-              </p>
-            </div>
-            <ArrowRight
-              size={16}
-              className="text-neutral-400 transition-colors group-hover:text-[#2563eb] dark:group-hover:text-[#60a5fa]"
-              aria-hidden
-            />
-          </Link>
-
-          <Link
-            to="/blog"
-            prefetch="intent"
-            className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">Lire</p>
-              <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                Articles & notes
-              </p>
-            </div>
-            <ArrowRight
-              size={16}
-              className="text-neutral-400 transition-colors group-hover:text-[#2563eb] dark:group-hover:text-[#60a5fa]"
-              aria-hidden
-            />
-          </Link>
-
-          <Link
-            to="/projets"
-            prefetch="intent"
-            className="group flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-[#2563eb] dark:border-neutral-800 dark:hover:border-[#60a5fa]"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-500">Voir</p>
-              <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                Mes projets
-              </p>
-            </div>
-            <ArrowRight
-              size={16}
-              className="text-neutral-400 transition-colors group-hover:text-[#2563eb] dark:group-hover:text-[#60a5fa]"
-              aria-hidden
-            />
-          </Link>
-        </nav>
+        <QuickLinks className="mt-16" links={ABOUT_LINKS} />
       </div>
     </main>
   )
