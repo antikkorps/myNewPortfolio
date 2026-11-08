@@ -1,0 +1,104 @@
+---
+title: "Un POC en trois semaines, deux casquettes : chef de projet et dev sur le même logiciel métier"
+description: "Un cahier des charges de 40 pages, trois semaines, l'IA en appui et une formation de chef de projet SI que je bêta-teste. Retour à chaud sur un POC où je cadre et je code en même temps."
+date: "2026-11-08"
+tags: ["gestion-de-projet", "poc", "vue", "fastify", "postgresql", "ia", "retour-experience"]
+readingTime: 5
+draft: true
+---
+
+import { Note } from "../../components/mdx/Note"
+
+On m'a demandé de réaliser un POC. L'objectif tient en une phrase : **prouver qu'on peut
+mettre en place un logiciel métier convaincant, qui réponde vraiment à l'usage qu'on en
+aura**. Le point de départ, c'est un cahier des charges de 40 pages, qui a aussi été soumis
+à des entreprises extérieures. Le délai : trois semaines.
+
+Ce projet tombe au bon moment. Je suis bêta-testeur de la nouvelle
+[formation de chef de projet SI de Studi](https://www.studi.com/fr/reconversion/chef-projet-informatique) :
+je la suis avant son ouverture au public, et je fais remonter mes retours sur le contenu.
+Ce POC est devenu mon terrain d'application grandeur nature, et c'est sans doute le
+meilleur test que je pouvais faire subir à la formation. Avec une particularité qui change
+tout : sur ce projet, je suis à la fois celui qui cadre et celui qui code.
+
+## Le contexte : un logiciel complémentaire à LogiBOP
+
+Si tu as lu [mon parcours](/blog/mon-parcours), tu sais que je travaille sur **LogiBOP**,
+une application de préparation des interventions chirurgicales utilisée en milieu
+hospitalier. Le logiciel du POC n'est pas un module de LogiBOP : c'est un outil métier à
+part entière. Le lien entre les deux passera surtout par une **interface sur un certain
+nombre de sujets**, chacun gardant son périmètre.
+
+Le fait que le cahier des charges ait aussi été envoyé à des prestataires extérieurs donne
+le ton. Le POC n'est pas un exercice de style : il doit montrer, sur un scénario concret,
+qu'une solution construite en interne tient la route face à l'usage réel.
+
+## La casquette chef de projet : trois outils, appliqués pour de vrai
+
+Quarante pages de cahier des charges, trois semaines : impossible de tout faire, et ce
+n'est pas l'objet d'un POC. Il faut choisir, et pouvoir justifier ses choix. Trois outils
+vus en formation m'ont servi directement.
+
+### MoSCoW pour trancher le périmètre
+
+La méthode **MoSCoW** classe chaque exigence en _Must have_, _Should have_, _Could have_
+et _Won't have (this time)_. Sur un POC, c'est elle qui fait le travail le plus important :
+transformer un document exhaustif en un scénario démontrable. Le _Won't have_ est la
+catégorie la plus utile. Elle rend explicite ce qu'on ne fera pas, au lieu de le laisser
+dans un flou qui finit toujours par revenir sous forme de « et ça, c'était prévu ? ».
+
+### Un RACI, même pour une petite équipe
+
+Le **RACI** répartit pour chaque activité qui Réalise, qui est Responsable de la
+validation, qui doit être Consulté et qui doit être Informé. On pourrait croire que c'est
+superflu quand on est peu nombreux. C'est l'inverse : quand une seule personne porte deux
+rôles, la matrice oblige à dire qui valide quoi, et à ne pas valider soi-même ce qu'on a
+produit.
+
+### Un backlog qui relie le cahier des charges au code
+
+Le **backlog de projet** fait le pont entre les deux mondes. Chaque exigence retenue
+devient un élément priorisé, et chaque élément se retrouve dans le code. C'est ce fil qui
+permet aujourd'hui de dire que, sur le scénario du POC, le fonctionnel est conforme à ce
+qui est demandé : on peut le vérifier ligne par ligne.
+
+## La casquette dev : des choix techniques dictés par les contraintes
+
+Côté technique, je n'ai pas choisi la stack par goût mais à partir de quatre contraintes :
+
+- **Trois semaines** : des outils que je maîtrise déjà, pas de découverte en cours de route.
+- **Développement assisté par l'IA** : un code que je peux relire et corriger vite.
+- **Un périmètre qui bouge** : de la souplesse pour ajuster sans tout refaire.
+- **Des coupures réseau possibles** : un mode hors ligne pris au sérieux dès le départ.
+
+Le résultat : un **monorepo** avec un front en **Vue**, une API en **Fastify** et une base
+**PostgreSQL**. Le monorepo garde le front et l'API côte à côte, ce qui rend chaque
+évolution lisible d'un bout à l'autre. Pour l'interface, [Nuxt UI](https://ui.nuxt.com/)
+me fait gagner un temps précieux : c'est sur le front que je travaille en ce moment.
+
+<Note>
+  L'IA accélère énormément l'écriture du code, mais elle déplace le goulot d'étranglement
+  vers la relecture. C'est pour ça que « pouvoir relire et corriger vite » est une
+  contrainte de premier rang dans le choix de la stack, au même titre que le délai.
+</Note>
+
+Le mode hors ligne mérite une mention à part. Dans un environnement où le réseau peut
+tomber, un logiciel métier qui s'arrête net n'est pas un logiciel convaincant, quelle que
+soit la qualité de ses écrans. C'est typiquement une exigence qui pèse sur l'architecture
+dès le premier jour : on ne l'ajoute pas à la fin.
+
+## Ce que la double casquette m'apprend
+
+Porter les deux rôles en même temps, c'est voir **la mise en pratique et les contraintes
+des deux côtés**. Quand je priorise avec MoSCoW, je sais ce que coûte chaque ligne en
+développement. Quand je code, je sais pourquoi telle exigence est un _Must_ et telle autre
+peut attendre. Les outils de gestion de projet cessent d'être des livrables théoriques :
+ils deviennent ce qui me permet de tenir le délai sans perdre de vue l'objectif.
+
+Ce que je referais autrement ? Honnêtement, je ne sais pas encore. Je suis en plein dans
+le flux de l'action, et le recul viendra une fois le POC livré. J'y reviendrai dans un
+prochain article, avec le bilan.
+
+Si tu mènes ce genre de projet, ou si tu hésites à te lancer dans une formation de chef de
+projet en étant déjà dev, [écris-moi](/contact) : je suis preneur d'autres retours
+d'expérience.
