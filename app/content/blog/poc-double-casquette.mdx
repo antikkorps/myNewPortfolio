@@ -1,0 +1,180 @@
+---
+title: "Un POC en trois semaines, deux casquettes : chef de projet et dev sur le même logiciel métier"
+description: "Un cahier des charges de 40 pages, trois semaines, l'IA en appui et une formation de chef de projet SI que je bêta-teste. Retour à chaud sur un POC où je cadre et je code en même temps."
+date: "2026-11-08"
+tags: ["gestion-de-projet", "poc", "vue", "fastify", "postgresql", "security", "ia", "retour-experience"]
+readingTime: 8
+draft: true
+---
+
+import { Note } from "../../components/mdx/Note"
+
+On m'a demandé de réaliser un POC. L'objectif tient en une phrase : **prouver qu'on peut
+mettre en place un logiciel métier convaincant, qui réponde vraiment à l'usage qu'on en
+aura**. Le point de départ, c'est un cahier des charges de 40 pages, qui a aussi été soumis
+à des entreprises extérieures. Le délai : trois semaines.
+
+Ce projet tombe au bon moment. Je suis bêta-testeur de la nouvelle
+[formation de chef de projet SI de Studi](https://www.studi.com/fr/reconversion/chef-projet-informatique) :
+je la suis avant son ouverture au public, et je fais remonter mes retours sur le contenu.
+Ce POC est devenu mon terrain d'application grandeur nature, et c'est sans doute le
+meilleur test que je pouvais faire subir à la formation. Avec une particularité qui change
+tout : sur ce projet, je suis à la fois celui qui cadre et celui qui code.
+
+## Le contexte : un logiciel complémentaire à LogiBOP
+
+Si tu as lu [mon parcours](/blog/mon-parcours), tu sais que je travaille sur **LogiBOP**,
+une application de préparation des interventions chirurgicales utilisée en milieu
+hospitalier. Le logiciel du POC n'est pas un module de LogiBOP : c'est un outil métier à
+part entière. Le lien entre les deux passera surtout par une **interface sur un certain
+nombre de sujets**, chacun gardant son périmètre.
+
+Le fait que le cahier des charges ait aussi été envoyé à des prestataires extérieurs donne
+le ton. Le POC n'est pas un exercice de style : il doit montrer, sur un scénario concret,
+qu'une solution construite en interne tient la route face à l'usage réel.
+
+## La casquette chef de projet : trois outils, appliqués pour de vrai
+
+Quarante pages de cahier des charges, trois semaines : impossible de tout faire, et ce
+n'est pas l'objet d'un POC. Il faut choisir, et pouvoir justifier ses choix. Trois outils
+vus en formation m'ont servi directement.
+
+### MoSCoW pour trancher le périmètre
+
+La méthode **MoSCoW** classe chaque exigence en _Must have_, _Should have_, _Could have_
+et _Won't have (this time)_. Sur un POC, c'est elle qui fait le travail le plus important :
+transformer un document exhaustif en un scénario démontrable. Le _Won't have_ est la
+catégorie la plus utile. Elle rend explicite ce qu'on ne fera pas, au lieu de le laisser
+dans un flou qui finit toujours par revenir sous forme de « et ça, c'était prévu ? ».
+
+Le classement n'est pas figé, et c'est tant mieux. En cours de route, on a fait passer
+une fonctionnalité de _Could_ à _Won't_ : une fois chiffrée, en temps comme en effort de
+développement, elle était trop haute pour tenir dans les trois semaines. Avec MoSCoW, ce
+genre de décision ne se prend pas en silence au fond d'un sprint : elle est posée,
+justifiée et visible de tous.
+
+### Un RACI requalifié en cours de route
+
+Le **RACI** répartit pour chaque activité quatre rôles : **R**esponsible, celui qui
+réalise ; **A**ccountable, celui qui valide et rend des comptes ; **C**onsulted, celui
+qu'on consulte ; **I**nformed, celui qu'on tient informé. Sur le papier, c'est un tableau
+qu'on remplit au lancement. Sur ce POC, il a surtout servi à résoudre un vrai blocage.
+
+Le visuel s'est retrouvé jugé au même titre que le fonctionnel. Or un POC n'a pas vocation
+à être le produit fini, ni visuellement ni fonctionnellement : il doit prouver que la
+solution répond à l'usage. Il a fallu négocier, puis **requalifier le RACI** pour que la
+personne en lien permanent avec le projet ne soit ni _Responsible_ ni _Accountable_. Être
+au plus près du projet au quotidien et le valider sont deux rôles différents, et les
+séparer a permis de recentrer l'évaluation sur ce que le POC doit démontrer.
+
+### Un backlog qui relie le cahier des charges au code
+
+Le **backlog de projet** fait le pont entre les deux mondes. Chaque exigence retenue
+devient un élément priorisé, et chaque élément se retrouve dans le code. C'est ce fil qui
+permet aujourd'hui de dire que, sur le scénario du POC, le fonctionnel est conforme à ce
+qui est demandé : on peut le vérifier ligne par ligne.
+
+## La casquette dev : des choix techniques dictés par les contraintes
+
+Côté technique, je n'ai pas choisi la stack par goût mais à partir de cinq contraintes :
+
+- **Trois semaines** : des outils que je maîtrise déjà, pas de découverte en cours de route.
+- **Développement assisté par l'IA** : un code que je peux relire et corriger vite.
+- **Un périmètre qui bouge** : de la souplesse pour ajuster sans tout refaire.
+- **Des données cloisonnées par unité** : une isolation garantie par la base, pas
+  seulement par le code.
+- **Des coupures réseau possibles** : un mode hors ligne pris au sérieux dès le départ.
+
+Le résultat : un **monorepo** avec un front en **Vue**, une API en **Fastify** et une base
+**PostgreSQL**. Le monorepo garde le front et l'API côte à côte, ce qui rend chaque
+évolution lisible d'un bout à l'autre. Pour l'interface, [Nuxt UI](https://ui.nuxt.com/)
+me fait gagner un temps précieux : c'est sur le front que je travaille en ce moment.
+
+<Note>
+  L'IA accélère énormément l'écriture du code, mais elle déplace le goulot d'étranglement
+  vers la relecture. C'est pour ça que « pouvoir relire et corriger vite » est une
+  contrainte de premier rang dans le choix de la stack, au même titre que le délai.
+</Note>
+
+### PostgreSQL, pour isoler les unités dans la base plutôt que dans le code
+
+Chaque unité ne doit voir que ses propres données. La façon classique de le garantir,
+c'est le code : chaque requête porte son filtre `WHERE unite_id = …`. Ça marche, tant que
+personne n'oublie le filtre. Et sur un projet écrit vite, avec l'IA en appui, « tant que
+personne n'oublie » n'est pas une garantie que j'ai envie de présenter.
+
+C'est pour ça que j'ai choisi **PostgreSQL** et sa **Row Level Security (RLS)**. Avec le
+RLS, la règle d'isolation est déclarée une fois, sur la table, et c'est la base qui
+l'applique à chaque lecture et à chaque écriture. Schématiquement, avec des noms
+génériques :
+
+```sql
+ALTER TABLE fiches ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY isolation_par_unite ON fiches
+  USING (unite_id = current_setting('app.unite_id')::uuid)
+  WITH CHECK (unite_id = current_setting('app.unite_id')::uuid);
+```
+
+L'API indique à la base l'unité de l'utilisateur au début de chaque transaction, et une
+requête qui oublie son filtre ne renvoie tout simplement rien de l'unité voisine. Le
+cloisonnement ne dépend plus de la rigueur de chaque ligne de code : c'est une propriété
+du modèle de données. Ça rejoint une conviction que je défends déjà sur mon infra perso,
+la [défense en profondeur](/blog/defense-en-profondeur-self-host) : ne jamais faire
+reposer la sécurité sur une seule couche.
+
+Deux pièges que j'ai rencontrés tous les deux sur le POC, et résolus, mais qu'il vaut
+mieux connaître avant de s'y mettre :
+
+- **Le propriétaire de la table contourne le RLS** par défaut. L'application doit se
+  connecter avec un rôle dédié qui n'est pas propriétaire, ou la table doit être en
+  `FORCE ROW LEVEL SECURITY`.
+- **Avec un pool de connexions**, le contexte doit être posé par transaction
+  (`SET LOCAL` ou `set_config(..., true)`), sinon une connexion réutilisée peut garder
+  l'unité de la requête précédente.
+
+### Des exigences vérifiées à chaque push
+
+Certaines exigences sont trop importantes pour être vérifiées « de temps en temps ». Sur
+ce POC, deux d'entre elles sont contrôlées à **chaque pre-push** : une modification qui
+les enfreint ne part pas, au même titre qu'un test qui échoue.
+
+- **Les temps de réponse du serveur.** Un logiciel métier convaincant ne fait jamais
+  attendre : les réponses doivent être ultra rapides. On s'est imposé des timings, et le
+  pre-push vérifie qu'on reste dans ce cadre.
+- **Une taille minimum pour les éléments de l'interface.** L'application est prévue pour
+  des écrans tactiles. Le pre-push s'assure que ce qui part en production respecte une
+  taille minimum, ce qui garantit aussi la cohérence visuelle d'un écran à l'autre.
+
+C'est l'endroit où les deux casquettes se rejoignent le mieux. Côté chef de projet, ce
+sont des exigences du cahier des charges. Côté dev, elles deviennent des contrôles
+automatisés qui tournent sans qu'on y pense. Une exigence non fonctionnelle qu'on ne
+mesure pas finit toujours par se dégrader en silence ; une exigence qui bloque le push,
+non.
+
+### Un mode hors ligne pensé dès le départ
+
+Dans un environnement où le réseau peut tomber, un logiciel métier qui s'arrête net n'est
+pas un logiciel convaincant, quelle que soit la qualité de ses écrans. L'approche retenue
+pour le POC : côté navigateur, les données sont conservées dans **IndexedDB**. En cas de
+coupure, l'application continue de fonctionner sur ces données locales, et elle se
+**resynchronise avec le serveur au retour du réseau**.
+
+C'est typiquement une exigence qui pèse sur l'architecture dès le premier jour : on ne
+l'ajoute pas à la fin.
+
+## Ce que la double casquette m'apprend
+
+Porter les deux rôles en même temps, c'est voir **la mise en pratique et les contraintes
+des deux côtés**. Quand je priorise avec MoSCoW, je sais ce que coûte chaque ligne en
+développement. Quand je code, je sais pourquoi telle exigence est un _Must_ et telle autre
+peut attendre. Les outils de gestion de projet cessent d'être des livrables théoriques :
+ils deviennent ce qui me permet de tenir le délai sans perdre de vue l'objectif.
+
+Ce que je referais autrement ? Honnêtement, je ne sais pas encore. Je suis en plein dans
+le flux de l'action, et le recul viendra une fois le POC livré. J'y reviendrai dans un
+prochain article, avec le bilan.
+
+Si tu mènes ce genre de projet, ou si tu hésites à te lancer dans une formation de chef de
+projet en étant déjà dev, [écris-moi](/contact) : je suis preneur d'autres retours
+d'expérience.
