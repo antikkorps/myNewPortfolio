@@ -1,15 +1,20 @@
 import { reactRouter } from "@react-router/dev/vite"
 import mdx from "@mdx-js/rollup"
+import tailwindcss from "@tailwindcss/vite"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import { rehypePrettyCode } from "rehype-pretty-code"
 import rehypeSlug from "rehype-slug"
 import remarkFrontmatter from "remark-frontmatter"
 import remarkMdxFrontmatter from "remark-mdx-frontmatter"
 import { defineConfig } from "vite"
-import tsconfigPaths from "vite-tsconfig-paths"
 
 export default defineConfig({
+  // Vite 8 resolves tsconfig `paths` natively, no plugin needed.
+  resolve: { tsconfigPaths: true },
   plugins: [
+    // Vite plugin instead of @tailwindcss/postcss: Vite 8's internal
+    // postcss-import resolves `@import "tailwindcss"` as a relative file.
+    tailwindcss(),
     mdx({
       remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: "frontmatter" }]],
       rehypePlugins: [
@@ -35,6 +40,5 @@ export default defineConfig({
       ],
     }),
     reactRouter(),
-    tsconfigPaths(),
   ],
 })
