@@ -28,11 +28,19 @@ interface Project {
 
 const projects: Project[] = [
   {
+    title: "SCS Firearms",
+    description:
+      "Site e-commerce d'un armurier, secteur ultra réglementé. Nuxt / Fastify, PostgreSQL, paiements Stripe, médias sur bucket Scaleway, authentification TOTP et magic links. Tout est sur mesure, back-office d'administration compris.",
+    technologies: ["Nuxt", "Fastify", "PostgreSQL", "Stripe", "Scaleway", "pnpm"],
+    status: "wip",
+    year: "2026",
+  },
+  {
     title: "L'Encre Humaine",
     description:
       "Site vitrine et boutique d'une consultante RH (conseil & serious games). Nuxt 4 / Nitro, CMS Directus, paiements Stripe Checkout, newsletter en double opt-in. Entièrement dockerisé et auto-hébergé : Caddy (TLS), PostgreSQL, sauvegardes chiffrées vers R2, CI Forgejo.",
     technologies: ["Nuxt", "Nitro", "Directus", "PostgreSQL", "Stripe", "Docker"],
-    status: "wip",
+    status: "live",
     liveUrl: "https://encrehumaine.fr",
     githubUrl: "https://github.com/antikkorps/encre_humaine",
     year: "2026",
