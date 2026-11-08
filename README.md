@@ -77,7 +77,7 @@ test/                 # setup Vitest + scan de sécurité
 
 ## Variables d'environnement
 
-Pour le formulaire de contact (`/contact`), définir dans `.env` ou via Vercel :
+Pour le formulaire de contact (`/contact`), copier `.env.example` vers `.env` en local, ou les définir dans le projet Vercel :
 
 ```
 RESEND_API_KEY=…       # API key Resend (scope "Send only")
