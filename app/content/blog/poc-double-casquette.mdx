@@ -3,7 +3,7 @@ title: "Un POC en trois semaines, deux casquettes : chef de projet et dev sur le
 description: "Un cahier des charges de 40 pages, trois semaines, l'IA en appui et une formation de chef de projet SI que je bêta-teste. Retour à chaud sur un POC où je cadre et je code en même temps."
 date: "2026-11-08"
 tags: ["gestion-de-projet", "poc", "vue", "fastify", "postgresql", "security", "ia", "retour-experience"]
-readingTime: 6
+readingTime: 7
 draft: true
 ---
 
@@ -111,7 +111,8 @@ du modèle de données. Ça rejoint une conviction que je défends déjà sur mo
 la [défense en profondeur](/blog/defense-en-profondeur-self-host) : ne jamais faire
 reposer la sécurité sur une seule couche.
 
-Deux pièges à connaître si tu t'y mets :
+Deux pièges que j'ai rencontrés tous les deux sur le POC, et résolus, mais qu'il vaut
+mieux connaître avant de s'y mettre :
 
 - **Le propriétaire de la table contourne le RLS** par défaut. L'application doit se
   connecter avec un rôle dédié qui n'est pas propriétaire, ou la table doit être en
@@ -119,6 +120,19 @@ Deux pièges à connaître si tu t'y mets :
 - **Avec un pool de connexions**, le contexte doit être posé par transaction
   (`SET LOCAL` ou `set_config(..., true)`), sinon une connexion réutilisée peut garder
   l'unité de la requête précédente.
+
+### Des temps de réponse vérifiés à chaque push
+
+Un logiciel métier convaincant, c'est aussi un logiciel qui ne fait jamais attendre.
+Les temps de réponse du serveur doivent être ultra rapides, et c'est une exigence trop
+importante pour la vérifier « de temps en temps ». On s'est donc imposé des timings, et
+**chaque pre-push vérifie qu'on reste dans ce cadre**. Une modification qui le fait
+dépasser ne part pas, au même titre qu'un test qui échoue.
+
+C'est l'endroit où les deux casquettes se rejoignent le mieux. Côté chef de projet, la
+performance est une exigence du cahier des charges. Côté dev, elle devient un test
+automatisé qui tourne sans qu'on y pense. Une exigence non fonctionnelle qu'on ne mesure
+pas finit toujours par se dégrader en silence ; une exigence qui bloque le push, non.
 
 Le mode hors ligne mérite une mention à part. Dans un environnement où le réseau peut
 tomber, un logiciel métier qui s'arrête net n'est pas un logiciel convaincant, quelle que
