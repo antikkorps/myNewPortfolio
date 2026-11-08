@@ -155,10 +155,10 @@ non.
 ### Un mode hors ligne pensé dès le départ
 
 Dans un environnement où le réseau peut tomber, un logiciel métier qui s'arrête net n'est
-pas un logiciel convaincant, quelle que soit la qualité de ses écrans. Côté navigateur,
-les données sont donc conservées dans **IndexedDB** : en cas de coupure, l'application
-continue de fonctionner sur ces données locales, et elle se **resynchronise avec le
-serveur au retour du réseau**.
+pas un logiciel convaincant, quelle que soit la qualité de ses écrans. L'approche retenue
+pour le POC : côté navigateur, les données sont conservées dans **IndexedDB**. En cas de
+coupure, l'application continue de fonctionner sur ces données locales, et elle se
+**resynchronise avec le serveur au retour du réseau**.
 
 C'est typiquement une exigence qui pèse sur l'architecture dès le premier jour : on ne
 l'ajoute pas à la fin.
