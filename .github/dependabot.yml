@@ -39,6 +39,12 @@ updates:
           - "@types/react"
           - "@types/react-dom"
 
+      # Every @dicebear style package peers on a matching @dicebear/core
+      # major, so bumping core alone fails `npm ci` with ERESOLVE (PR #85).
+      dicebear:
+        patterns:
+          - "@dicebear/*"
+
     # NOTE: ignore rules also apply to Dependabot security updates, so a CVE
     # that could only be fixed by a major bump would not be proposed here.
     ignore:
@@ -69,4 +75,11 @@ updates:
       # Those two have to be replaced by in-house SVGs first. Drop this entry
       # once that substitution is done, then migrate to the major.
       - dependency-name: "lucide-react"
+        update-types: ["version-update:semver-major"]
+
+      # @dicebear/core 10 is out but no style package has followed: the
+      # latest @dicebear/collection and @dicebear/thumbs (9.4.x) still peer on
+      # core ^9, and BlogAvatar / favicon.png need `thumbs`. Drop this entry
+      # once a v10 thumbs style ships, then migrate via the `dicebear` group.
+      - dependency-name: "@dicebear/*"
         update-types: ["version-update:semver-major"]
