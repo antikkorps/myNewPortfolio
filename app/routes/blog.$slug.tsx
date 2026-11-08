@@ -172,7 +172,11 @@ export default function BlogPost() {
               loader and entry.client resolve the module first. The boundary is
               for client-side navigation, where the next article's chunk is
               still in flight. */}
+          {/* react-hooks/static-components can't see that componentForSlug
+              returns module-cached references: the same slug always yields
+              the same component, so nothing is recreated across renders. */}
           {isComponentReady(data.slug) ? (
+            // eslint-disable-next-line react-hooks/static-components
             <Component />
           ) : (
             <Suspense
@@ -182,6 +186,7 @@ export default function BlogPost() {
                 </p>
               }
             >
+              {/* eslint-disable-next-line react-hooks/static-components */}
               <Component />
             </Suspense>
           )}
