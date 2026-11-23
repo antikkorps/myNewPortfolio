@@ -63,7 +63,7 @@
     "@types/react-dom": "^19.3.0",
     "@typescript-eslint/eslint-plugin": "^8.73.0",
     "@typescript-eslint/parser": "^8.59.2",
-    "@vitest/ui": "^4.1.11",
+    "@vitest/ui": "^5.1.1",
     "eslint": "^8.38.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",
@@ -78,7 +78,7 @@
     "tsx": "^4.21.0",
     "typescript": "^5.1.6",
     "vite": "^8.3.6",
-    "vitest": "^4.1.11"
+    "vitest": "^5.1.1"
   },
   "engines": {
     "node": ">=22.0.0"
