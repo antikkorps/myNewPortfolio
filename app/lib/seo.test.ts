@@ -25,16 +25,14 @@ describe("pageMeta", () => {
 
   it("emits a canonical link with absolute URL", () => {
     const canonical = findMeta((m) => m.tagName === "link" && m.rel === "canonical") as
-      | { href: string }
-      | undefined
+      { href: string } | undefined
     expect(canonical?.href).toBe(`${SITE_URL}/test`)
   })
 
   it("emits og:title, og:description, og:url, og:image", () => {
     const ogTitle = findMeta((m) => m.property === "og:title") as { content: string } | undefined
     const ogDesc = findMeta((m) => m.property === "og:description") as
-      | { content: string }
-      | undefined
+      { content: string } | undefined
     const ogUrl = findMeta((m) => m.property === "og:url") as { content: string } | undefined
     const ogImage = findMeta((m) => m.property === "og:image") as { content: string } | undefined
     expect(ogTitle?.content).toBe(`Test — ${SITE_NAME}`)
@@ -56,8 +54,7 @@ describe("pageMeta", () => {
       image: "/og-custom.png",
     })
     const ogImage = r.find((m) => (m as Record<string, unknown>).property === "og:image") as
-      | { content: string }
-      | undefined
+      { content: string } | undefined
     expect(ogImage?.content).toBe(`${SITE_URL}/og-custom.png`)
   })
 })
