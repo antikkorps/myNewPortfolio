@@ -45,6 +45,15 @@ updates:
         patterns:
           - "@dicebear/*"
 
+      # Every @vitest/* package pins an exact peer on vitest (@vitest/ui@5.1.1
+      # requires vitest@5.1.1). Dependabot bumped @vitest/ui alone (PR #125)
+      # and the lockfile failed `npm ci` with ERESOLVE, taking the Vercel
+      # preview down with it, so the runner and its plugins move together.
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+
     # NOTE: ignore rules also apply to Dependabot security updates, so a CVE
     # that could only be fixed by a major bump would not be proposed here.
     ignore:
